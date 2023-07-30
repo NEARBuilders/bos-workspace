@@ -1,0 +1,1 @@
+return <Widget src="nui.sking.near/widget/Data.Balances" props={{ accountId: "nf-payments.near" }} />;

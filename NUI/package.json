@@ -1,0 +1,11 @@
+{
+  "name": "nui",
+  "version": "1.0.0",
+  "description": "A collection of good looking BOS UI widgets for NDC",
+  "scripts": {
+    "dev": "bos-loader nui.sking.near --path src",
+    "deploy": "bos components deploy nui.sking.near"
+  },
+  "keywords": [],
+  "author": "nui.sking.near"
+}

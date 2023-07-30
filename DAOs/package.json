@@ -1,0 +1,12 @@
+{
+  "name": "DAO BOS Widget",
+  "version": "1.0.0",
+  "description": "",
+  "scripts": {
+    "dev": "bos-loader sking.near --path src",
+    "deploy": "bos components deploy sking.near"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}

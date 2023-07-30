@@ -1,0 +1,73 @@
+diff --git a/src/data/widgets.js b/src/data/widgets.js
+index 2e67177..ba2ecb9 100644
+--- a/src/data/widgets.js
++++ b/src/data/widgets.js
+@@ -1,6 +1,6 @@
+ const TestnetDomains = {
+   "test.near.social": true,
+-  "127.0.0.1": true,
++  // "127.0.0.1": true,
+ };
+ 
+ export const NetworkId =
+diff --git a/src/pages/ViewPage.js b/src/pages/ViewPage.js
+index ad5c6e0..fdd9749 100644
+--- a/src/pages/ViewPage.js
++++ b/src/pages/ViewPage.js
+@@ -10,6 +10,7 @@ export default function ViewPage(props) {
+   const { widgetSrc } = useParams();
+   const query = useQuery();
+   const [widgetProps, setWidgetProps] = useState({});
++  const [redirectMap, setRedirectMap] = useState({});
+ 
+   const src = widgetSrc || props.widgets.default;
+   const setWidgetSrc = props.setWidgetSrc;
+@@ -35,6 +36,28 @@ export default function ViewPage(props) {
+     }, 1);
+   }, [src, query, setWidgetSrc, viewSourceWidget]);
+ 
++  useEffect(() => {
++    const fetchData = () => {
++      fetch("http://127.0.0.1:4040/")
++        .then((res) => res.json())
++        .then((data) => {
++          setRedirectMap(data["components"]);
++        });
++    };
++
++    fetchData();
++
++    const socket = new WebSocket("ws://127.0.0.1:4040");
++
++    socket.onmessage = (event) => {
++      if (event.data === "refresh") {
++        fetchData();
++      }
++    };
++
++    return () => socket.close();
++  }, []);
++
+   return (
+     <div className="container-xl">
+       <div className="row">
+@@ -45,7 +68,18 @@ export default function ViewPage(props) {
+             paddingTop: "var(--body-top-padding)",
+           }}
+         >
+-          <Widget key={src} src={src} props={widgetProps} />{" "}
++          <Widget
++            key={src}
++            src={src}
++            props={widgetProps}
++            config={
++              redirectMap
++                ? {
++                    redirectMap: redirectMap,
++                  }
++                : undefined
++            }
++          />
+         </div>
+       </div>
+     </div>

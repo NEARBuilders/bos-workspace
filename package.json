@@ -1,0 +1,18 @@
+{
+  "name": "bos-workspace",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "scripts": {
+    "dev": "node index.js",
+    "start": "[ -d .viewer ] || git clone https://github.com/NearSocial/viewer.git .viewer; cd .viewer; git apply  --ignore-whitespace --ignore-space-change ../viewer.patch ; yarn; yarn start & cd ..; yarn dev"
+  },
+  "devDependencies": {
+    "chalk": "^4",
+    "chokidar": "^3.5.3",
+    "express": "^4.18.2",
+    "ignore": "^5.2.4",
+    "socket.io": "^4.7.1",
+    "ws": "^8.13.0"
+  }
+}
