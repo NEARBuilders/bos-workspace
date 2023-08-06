@@ -253,40 +253,6 @@ function serveDevJson() {
   });
 }
 
-function deployCLI() {
-  const appFolders = fs.readdirSync("./apps");
-
-  // Check if appFolder is provided as a command line argument
-  const specifiedAppFolder = process.argv[2];
-
-  if (specifiedAppFolder && appFolders.includes(specifiedAppFolder)) {
-    deployApp(specifiedAppFolder);
-    return;
-  }
-
-  const rl = readline.createInterface({
-    input: process.stdin,
-    output: process.stdout,
-  });
-
-  console.log("Please select an app to deploy:");
-  appFolders.forEach((folder, index) => {
-    console.log(`${index + 1}. ${folder}`);
-  });
-
-  rl.question("Enter the number of the app you want to deploy: ", (answer) => {
-    const appIndex = parseInt(answer, 10) - 1;
-    if (appIndex >= 0 && appIndex < appFolders.length) {
-      const appFolder = appFolders[appIndex];
-      deployApp(appFolder);
-      rl.close();
-    } else {
-      console.error("Invalid selection. Exiting.");
-      rl.close();
-    }
-  });
-}
-
 // TODO: need tests
 function deployApp(appFolder) {
   const config = readBosConfig(appFolder);
@@ -310,6 +276,84 @@ function deployApp(appFolder) {
   } catch (error) {
     console.error(`Error deploying ${appFolder} widgets:\n${error.message}`);
   }
+}
+
+function uploadData(appFolder) {
+  const config = readBosConfig(appFolder);
+  const appAccount = config.appAccount;
+
+  if (!appAccount) {
+    console.error(
+      `App account is not defined for ${appFolder}. Skipping data upload.`
+    );
+    return;
+  }
+
+  const dataJSON = fs.readFileSync(
+    path.join(distFolder, appFolder, "data.json"),
+    "utf8"
+  );
+  const args = {
+    data: {
+      [appAccount]: JSON.parse(dataJSON),
+    },
+  };
+
+  const argsBase64 = Buffer.from(JSON.stringify(args)).toString("base64");
+
+  const command = `near contract call-function as-transaction social.near set base64-args '${argsBase64}' prepaid-gas '300.000 TeraGas' attached-deposit '0.1 NEAR' sign-as ${appAccount} network-config mainnet`;
+
+  try {
+    execSync(command, {
+      cwd: path.join(distFolder, appFolder),
+      stdio: "inherit",
+    }).toString();
+    console.log(`Uploaded data for ${appFolder}`);
+  } catch (error) {
+    console.error(`Error uploading data for ${appFolder}:\n${error.message}`);
+  }
+}
+
+function appSelectorCLI(callback) {
+  const appFolders = fs.readdirSync("./apps");
+
+  // Check if appFolder is provided as a command line argument
+  const specifiedAppFolder = process.argv[2];
+
+  if (specifiedAppFolder && appFolders.includes(specifiedAppFolder)) {
+    callback(specifiedAppFolder);
+    return;
+  }
+
+  const rl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout,
+  });
+
+  console.log("Please select an app:");
+  appFolders.forEach((folder, index) => {
+    console.log(`${index + 1}. ${folder}`);
+  });
+
+  rl.question("Enter the number of the app you want to use: ", (answer) => {
+    const appIndex = parseInt(answer, 10) - 1;
+    if (appIndex >= 0 && appIndex < appFolders.length) {
+      const appFolder = appFolders[appIndex];
+      callback(appFolder);
+      rl.close();
+    } else {
+      console.error("Invalid selection. Exiting.");
+      rl.close();
+    }
+  });
+}
+
+function deployCLI() {
+  appSelectorCLI(deployApp);
+}
+
+function uploadDataCLI() {
+  appSelectorCLI(uploadData);
 }
 
 // Main function to orchestrate the dev script
@@ -358,4 +402,6 @@ module.exports = {
   dev,
   deployCLI,
   deployApp,
+  uploadDataCLI,
+  uploadData,
 };

@@ -166,7 +166,7 @@ yarn test:tools
 
 ## Future Improvements (TODO)
 
-- Implemnt deployment of `data.json` to SocialDB.
+- Improve the deployment of `data.json` to SocialDB.
 - The build script should initially try to fetch the `data.json` structure file from SocialDB and will then only generate a `data.json` file containing the new changes, bypassing the remaining files.
 - Testing framework for the bOS widgets, with the ability to mock the SocialDB, near and fetch.
 - Make this README.md more clear, it's a mess right now.
