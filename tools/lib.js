@@ -112,6 +112,20 @@ function ignoreFiles(fileContent) {
   return ignorePattern.test(fileContent);
 }
 
+// no stringify json files
+// TODO: need tests
+function noStringifyJsonFiles(fileContent) {
+  let noStringifyPattern = /\/\*__@noStringify__\*\//;
+  return noStringifyPattern.test(fileContent);
+}
+
+// TODO: need tests
+function removeComments(fileContent) {
+  return fileContent
+    .replace(/\/\*[\s\S]*?\*\/|(?<=[^:])\/\/.*|^\/\/.*/g, "")
+    .trim();
+}
+
 // generate data.json file
 function generateDataJson(appFolder) {
   const data = {};
@@ -120,15 +134,28 @@ function generateDataJson(appFolder) {
   files.forEach((file) => {
     let fileContent = fs.readFileSync(file, "utf8");
     if (ignoreFiles(fileContent)) return;
-    const keys = file.replace(`./apps/${appFolder}/`, "").split("/");
-    // if jsonc file, remove comments and spaces
     if (file.endsWith(".jsonc")) {
-      fileContent = fileContent.replace(/\/\/.*/g, "").replace(/\s/g, "");
+      // If it's a JSONC file and has the noStringify marker, parse the content
+      // Otherwise, just remove comments and spaces as before
+      if (noStringifyJsonFiles(fileContent)) {
+        fileContent = JSON.parse(removeComments(fileContent));
+      } else {
+        fileContent = removeComments(fileContent).replace(/\s/g, ""); // remove comments and spaces
+      }
     }
-    keys[keys.length - 1] = keys[keys.length - 1].split(".")[0]; // remove file extension
+    const keys = file.replace(`./apps/${appFolder}/`, "").split("/");
+    // remove file extension
+    keys[keys.length - 1] = keys[keys.length - 1]
+      .split(".")
+      .slice(0, -1)
+      .join(".");
     keys.reduce((obj, key, i) => {
       if (i === keys.length - 1) {
-        obj[key] = fileContent; // assign the file content to the final key
+        if (typeof fileContent === "object") {
+          obj[key] = { ...obj[key], ...fileContent }; // merge if object
+        } else {
+          obj[key] = fileContent;
+        }
       } else {
         if (!obj[key]) obj[key] = {}; // if the key doesn't exist yet, create an object
       }
@@ -264,11 +291,11 @@ function deployApp(appFolder) {
   const command = `bos components deploy "${appAccount}" sign-as "${appAccount}" network-config mainnet`;
 
   try {
-    const output = execSync(command, {
+    execSync(command, {
       cwd: path.join(distFolder, appFolder),
       stdio: "inherit",
     }).toString();
-    console.log(`Deployed ${appFolder} widgets:\n${output}`);
+    console.log(`Deployed ${appFolder}`);
   } catch (error) {
     console.error(`Error deploying ${appFolder} widgets:\n${error.message}`);
   }

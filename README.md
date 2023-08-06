@@ -109,6 +109,12 @@ The `data.json` file will appear as follows:
 
 The `@ignore` comment can be leveraged to omit a file from the `data.json` file. To execute this, add the following comment at the beginning of the file: `/*__@ignore__*/`.
 
+### jsonc Files
+
+The jsonc files will be passed through JSON.stringify and stored in the `data.json` file, the build script will also remove all the comments and spaces from the jsonc files.
+If you want to skip the JSON.stringify operation, add the following comment at the beginning of the file:
+`/*__@noStringify__*/`
+
 ## Development
 
 bOS-workspace allows you to run a local server similar to `bos-loader` that can supply the widget's code to the bOS gateways for development purposes. To do so, run the following command:

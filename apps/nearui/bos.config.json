@@ -1,3 +1,6 @@
 {
-  "appAccount": "nearnui.near"
+  "appAccount": "nearui.near",
+  "aliases": {
+    "accountProfileLink": "#/mob.near/widget/ProfilePage?accountId="
+  }
 }
