@@ -48,7 +48,7 @@ if (direction === "out") {
         "Content-Type": "application/json",
         "x-api-key": "36f2b87a-7ee6-40d8-80b9-5e68e587a5b5",
       },
-    }
+    },
   );
 
   proposalId =
@@ -78,7 +78,7 @@ const Container = styled.div`
   align-items: center;
 `;
 
-cons
+cons;
 
 return (
   <Container>

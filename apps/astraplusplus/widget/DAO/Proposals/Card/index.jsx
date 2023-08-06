@@ -4,12 +4,12 @@ const accountId = context.accountId;
 
 const proposal = proposalString ? JSON.parse(proposalString) : null;
 
-
 let roles = Near.view(daoId, "get_policy");
 
 if (roles === null)
-return <Widget src="/*__@appAccount__*//widget/DAO.Proposals.Card.skeleton" />;
-
+  return (
+    <Widget src="/*__@appAccount__*//widget/DAO.Proposals.Card.skeleton" />
+  );
 
 let new_proposal = null;
 if (!proposalString && proposalId && daoId) {
@@ -17,7 +17,9 @@ if (!proposalString && proposalId && daoId) {
     id: Number(proposalId),
   });
   if (new_proposal === null) {
-    return <Widget src="/*__@appAccount__*//widget/DAO.Proposals.Card.skeleton" />;
+    return (
+      <Widget src="/*__@appAccount__*//widget/DAO.Proposals.Card.skeleton" />
+    );
   } else if (!new_proposal) {
     return "Proposal not found, check console for details.";
   }
@@ -121,7 +123,9 @@ const expensiveWork = () => {
 if (!state || state.proposal.id !== proposal.id) {
   // Only execute expensive work once
   expensiveWork();
-  return <Widget src="/*__@appAccount__*//widget/DAO.Proposals.Card.skeleton" />;
+  return (
+    <Widget src="/*__@appAccount__*//widget/DAO.Proposals.Card.skeleton" />
+  );
 }
 
 return (

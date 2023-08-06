@@ -123,7 +123,7 @@ if (daos && !state.isTyping) {
   });
   paginatedDAOs = filteredDAOs.slice(
     (state.currentPage - 1) * resPerPage,
-    state.currentPage * resPerPage
+    state.currentPage * resPerPage,
   );
 }
 

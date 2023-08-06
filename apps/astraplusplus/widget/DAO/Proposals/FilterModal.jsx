@@ -162,7 +162,7 @@ return (
                         proposal_types: checked
                           ? [...state.filters.proposal_types, item.value]
                           : state.filters.proposal_types.filter(
-                              (x) => x !== item.value
+                              (x) => x !== item.value,
                             ),
                       });
                     },

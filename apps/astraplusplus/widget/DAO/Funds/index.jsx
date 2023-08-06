@@ -24,7 +24,7 @@ const fether = {
   balances: (accounts) => {
     return fetch(
       constructURL(`${baseApi}/account/balances`, { accounts }),
-      fetchApiConfig
+      fetchApiConfig,
     );
   },
   near_transfers: (account, limit, offset, minamount) => {
@@ -34,7 +34,7 @@ const fether = {
         limit,
         minamount,
       }),
-      fetchApiConfig
+      fetchApiConfig,
     );
   },
   ft_transfers: (account, limit, offset) => {
@@ -43,13 +43,13 @@ const fether = {
         offset,
         limit,
       }),
-      fetchApiConfig
+      fetchApiConfig,
     );
   },
   outgoing_near: (account) => {
     return fetch(
       constructURL(`${baseApi}/account/outgoing-near/${account}`),
-      fetchApiConfig
+      fetchApiConfig,
     );
   },
 };

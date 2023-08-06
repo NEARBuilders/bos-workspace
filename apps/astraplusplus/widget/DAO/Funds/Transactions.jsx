@@ -18,7 +18,7 @@ const transfers = fetcher[
   daoId,
   config.limitPerPage,
   currentOffset,
-  state.type == "ft" ? undefined : config.minNearAmount
+  state.type == "ft" ? undefined : config.minNearAmount,
 );
 
 if (!transfers.body) {
@@ -27,7 +27,6 @@ if (!transfers.body) {
 }
 
 console.log("transfers", transfers.body);
-
 
 const Table = styled.div`
   & > div {
@@ -55,7 +54,6 @@ const Table = styled.div`
     }
   }
 `;
-
 
 return (
   <div className="ndc-card p-4">

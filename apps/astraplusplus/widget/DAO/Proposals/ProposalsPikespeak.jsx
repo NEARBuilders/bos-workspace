@@ -8,7 +8,7 @@ const resPerPage = 10;
 const defaultMultiSelectMode = Storage.privateGet("multiSelectMode");
 
 if (defaultMultiSelectMode === null) return "";
-console.log(defaultMultiSelectMode)
+console.log(defaultMultiSelectMode);
 
 State.init({
   daoId,
@@ -23,7 +23,6 @@ State.init({
   filtersOpen: false,
   multiSelectMode: defaultMultiSelectMode ?? false,
 });
-
 
 const forgeUrl = (apiUrl, params) =>
   apiUrl +
@@ -47,7 +46,7 @@ const res = fetch(
       "x-api-key": publicApiKey,
       "no-cache": true,
     },
-  }
+  },
 );
 
 return (

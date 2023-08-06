@@ -131,16 +131,16 @@ if (proposal_type === "FunctionCall") {
                     JSON.stringify(
                       JSON.parse(Buffer.from(args, "base64").toString("utf8")),
                       null,
-                      2
+                      2,
                     ) +
                     "\n```"
                   }
                 />
               </div>
-            </div>
+            </div>,
           );
         },
-        []
+        [],
       )}
     </>
   );
@@ -265,7 +265,7 @@ if (proposal_type === "ChangePolicy") {
               currentCode: JSON.stringify(
                 deepSortObject(kind.ChangePolicy.policy),
                 null,
-                2
+                2,
               ),
             }}
           />

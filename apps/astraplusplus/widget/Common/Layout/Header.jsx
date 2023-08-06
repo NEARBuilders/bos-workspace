@@ -8,7 +8,7 @@ Example:
 
 return (
   <div className="row">
-    <Widget src="/*__@appAccount__*//widget/Common.Layout.Header" />
+    <Widget src="account.near/widget/Common.Layout.Header" />
     <div className="col">home</div>
   </div>
 );

@@ -36,7 +36,7 @@ const policy = useCache(
   () =>
     Near.asyncView(daoId, "get_policy").then((policy) => processPolicy(policy)),
   daoId + "-policy",
-  { subscribe: false }
+  { subscribe: false },
 );
 
 if (policy === null) return "";
@@ -149,7 +149,7 @@ const renderUserRow = (user, roles, i) => {
           {isUserAllowedTo(
             context.accountId,
             "remove_member_from_role",
-            "AddProposal"
+            "AddProposal",
           ) && (
             <Widget
               src="nearui.near/widget/Layout.Modal"
@@ -292,7 +292,7 @@ const renderPermissions = (role) => {
   });
 
   const filteredPermissions = new Map(
-    [...permissions].filter(([action, kindsSet]) => kindsSet.size > 0)
+    [...permissions].filter(([action, kindsSet]) => kindsSet.size > 0),
   );
 
   const sortedPermissions = Array.from(filteredPermissions.entries()).sort(
@@ -304,7 +304,7 @@ const renderPermissions = (role) => {
         return 1;
       }
       return 0;
-    }
+    },
   );
 
   return sortedPermissions.map(([action, kindsSet], i) => (
@@ -325,7 +325,7 @@ const renderPermissions = (role) => {
 const users = !state.filterByRole
   ? Object.keys(policy.users)
   : Object.keys(policy.users).filter((user) =>
-      policy.users[user].includes(state.filterByRole)
+      policy.users[user].includes(state.filterByRole),
     );
 
 return (

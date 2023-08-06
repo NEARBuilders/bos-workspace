@@ -20,7 +20,6 @@ if (Object.keys(STORAGE[daoId] || {}).length < 1) {
 
 const proposal_ids = Object.keys(STORAGE[daoId]).map((id) => parseInt(id));
 
-
 const handleSubmit = () => {
   const calls = [];
   Object.keys(STORAGE[daoId]).forEach((id) => {

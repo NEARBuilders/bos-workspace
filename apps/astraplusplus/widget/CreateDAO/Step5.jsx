@@ -83,10 +83,10 @@ const proposalActions = {
 };
 
 const allActionArray = Object.keys(proposalActions).map(
-  (key) => proposalActions[key].key
+  (key) => proposalActions[key].key,
 );
 const allProposalKindArray = Object.keys(proposalKinds).map(
-  (key) => proposalKinds[key].key
+  (key) => proposalKinds[key].key,
 );
 
 const hasPermission = (role, proposalKind, permissionType) => {
@@ -99,7 +99,7 @@ const hasPermission = (role, proposalKind, permissionType) => {
         p === permission ||
         p === "*:*" ||
         p === `${proposalKind}:*` ||
-        p === `*:${permissionType}`
+        p === `*:${permissionType}`,
     );
   } else {
     return false;
@@ -114,7 +114,7 @@ const cleanPermissions = (permissions) => {
   allActionArray.forEach((action) => {
     if (permissions.some((p) => p === `*:${action}`)) {
       permissions = permissions.filter(
-        (p) => !p.endsWith(`:${action}`) || p === `*:${action}`
+        (p) => !p.endsWith(`:${action}`) || p === `*:${action}`,
       );
     }
   });
@@ -123,7 +123,7 @@ const cleanPermissions = (permissions) => {
   allProposalKindArray.forEach((kind) => {
     if (permissions.some((p) => p === `${kind}:*`)) {
       permissions = permissions.filter(
-        (p) => !p.startsWith(`${kind}:`) || p === `${kind}:*`
+        (p) => !p.startsWith(`${kind}:`) || p === `${kind}:*`,
       );
     }
   });
@@ -132,11 +132,11 @@ const cleanPermissions = (permissions) => {
   allProposalKindArray.forEach((kind) => {
     if (
       allActionArray.every((action) =>
-        permissions.includes(`${kind}:${action}`)
+        permissions.includes(`${kind}:${action}`),
       )
     ) {
       permissions = permissions.filter(
-        (p) => !p.startsWith(`${kind}:`) || p === `${kind}:*`
+        (p) => !p.startsWith(`${kind}:`) || p === `${kind}:*`,
       );
       permissions.push(`${kind}:*`);
     }
@@ -146,11 +146,11 @@ const cleanPermissions = (permissions) => {
   allActionArray.forEach((action) => {
     if (
       allProposalKindArray.every((kind) =>
-        permissions.includes(`${kind}:${action}`)
+        permissions.includes(`${kind}:${action}`),
       )
     ) {
       permissions = permissions.filter(
-        (p) => !p.endsWith(`:${action}`) || p === `*:${action}`
+        (p) => !p.endsWith(`:${action}`) || p === `*:${action}`,
       );
       permissions.push(`*:${action}`);
     }
@@ -173,7 +173,7 @@ const popActionWildCard = (permissions) => {
     const [proposalKind, action] = permission.split(":");
     if (action === "*") {
       expandedPermissions.push(
-        ...allActionArray.map((a) => `${proposalKind}:${a}`)
+        ...allActionArray.map((a) => `${proposalKind}:${a}`),
       );
     } else {
       expandedPermissions.push(permission);
@@ -188,7 +188,7 @@ const popProposalKindWildCard = (permissions) => {
     const [proposalKind, action] = permission.split(":");
     if (proposalKind === "*") {
       expandedPermissions.push(
-        ...allProposalKindArray.map((k) => `${k}:${action}`)
+        ...allProposalKindArray.map((k) => `${k}:${action}`),
       );
     } else {
       expandedPermissions.push(permission);
@@ -241,7 +241,7 @@ const setCreatePermission = (roleName, proposalKind, value) => {
   const newRole = setPermission(role, proposalKind, "AddProposal", value);
 
   const newRoles = state.answers.policy.roles.map((r) =>
-    r.name === roleName ? newRole : r
+    r.name === roleName ? newRole : r,
   );
 
   State.update({
@@ -263,7 +263,7 @@ const setVotePermission = (roleName, proposalKind, value) => {
   newRole = setPermission(newRole, proposalKind, "VoteRemove", value);
 
   const newRoles = state.answers.policy.roles.map((r) =>
-    r.name === roleName ? newRole : r
+    r.name === roleName ? newRole : r,
   );
 
   State.update({

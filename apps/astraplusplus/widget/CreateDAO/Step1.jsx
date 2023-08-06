@@ -52,7 +52,7 @@ return (
               `${v
                 .toLowerCase()
                 .replace(/\s/g, "-")
-                .replace(/[^a-zA-Z0-9-]/g, "")}.sputnik-dao.near`
+                .replace(/[^a-zA-Z0-9-]/g, "")}.sputnik-dao.near`,
             );
           },
           inputProps: {

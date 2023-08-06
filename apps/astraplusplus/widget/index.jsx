@@ -98,9 +98,22 @@ const tabContent = activeTab ? (
 );
 
 const Root = styled.div`
-  font-family: "Open Sans", "Manrope", system-ui, -apple-system, "Segoe UI",
-    Roboto, "Helvetica Neue", "Noto Sans", "Liberation Sans", Arial, sans-serif,
-    "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  font-family:
+    "Open Sans",
+    "Manrope",
+    system-ui,
+    -apple-system,
+    "Segoe UI",
+    Roboto,
+    "Helvetica Neue",
+    "Noto Sans",
+    "Liberation Sans",
+    Arial,
+    sans-serif,
+    "Apple Color Emoji",
+    "Segoe UI Emoji",
+    "Segoe UI Symbol",
+    "Noto Color Emoji";
   font-size: 16px;
   line-height: 1.5;
   color: #000;
@@ -116,7 +129,9 @@ const Root = styled.div`
 
   .ndc-card {
     border-radius: 16px;
-    box-shadow: rgba(0, 0, 0, 0.1) 0 1px 3px, rgba(0, 0, 0, 0.05) 0 1px 20px;
+    box-shadow:
+      rgba(0, 0, 0, 0.1) 0 1px 3px,
+      rgba(0, 0, 0, 0.05) 0 1px 20px;
     background-color: #fff;
   }
 `;
@@ -130,6 +145,8 @@ return (
         items: tabs,
       }}
     />
-    <div className="col ms-sm-4 ps-lg-5 py-3 py-md-5 overflow-hidden">{tabContent}</div>
+    <div className="col ms-sm-4 ps-lg-5 py-3 py-md-5 overflow-hidden">
+      {tabContent}
+    </div>
   </Root>
 );

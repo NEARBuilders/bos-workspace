@@ -28,14 +28,14 @@ const fether = {
   balances: (accounts) => {
     return fetch(
       constructURL(`${baseApi}/account/balances`, { accounts }),
-      fetchApiConfig
-      );
-    },
-    proposalsStatus: (daoId) => {
-      return fetch(
-        constructURL(`${baseApi}/daos/proposals/status/${daoId}`),
-        fetchApiConfig
-        );
+      fetchApiConfig,
+    );
+  },
+  proposalsStatus: (daoId) => {
+    return fetch(
+      constructURL(`${baseApi}/daos/proposals/status/${daoId}`),
+      fetchApiConfig,
+    );
   },
 };
 const balances = fether.balances([daoId]);
@@ -44,10 +44,10 @@ let activeProposalsCount;
 let totalProposalsCount;
 
 proposalsStatus &&
-proposalsStatus.body?.forEach((p) => {
-  activeProposalsCount += p["InProgress"] ? parseInt(p["InProgress"]) : 0;
-  totalProposalsCount += p["Total"] ? parseInt(p["Total"]) : 0;
-});
+  proposalsStatus.body?.forEach((p) => {
+    activeProposalsCount += p["InProgress"] ? parseInt(p["InProgress"]) : 0;
+    totalProposalsCount += p["Total"] ? parseInt(p["Total"]) : 0;
+  });
 // --
 
 // -- Social DB
@@ -57,11 +57,12 @@ const profile = Social.get(`${daoId}/profile/**`, "final");
 // -- Smart Contract
 const policy = Near.view(daoId, "get_policy");
 let members = [];
-policy && policy.roles.forEach((role) => {
-  if (typeof role.kind.Group === "object") {
-    members = members.concat(role.kind.Group);
-  }
-});
+policy &&
+  policy.roles.forEach((role) => {
+    if (typeof role.kind.Group === "object") {
+      members = members.concat(role.kind.Group);
+    }
+  });
 members = [...new Set(members)];
 // --
 
@@ -81,7 +82,9 @@ const shortenNumber = (n) => {
 };
 
 const daoLink = ({ daoId, tab }) => {
-  return `/#//*__@appAccount__*//widget/DAO?daoId=${daoId}${tab && `&tab=${tab}`}`;
+  return `/#//*__@appAccount__*//widget/DAO?daoId=${daoId}${
+    tab && `&tab=${tab}`
+  }`;
 };
 
 const Wrapper = styled.div`

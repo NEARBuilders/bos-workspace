@@ -19,7 +19,7 @@ const handleStepComplete = (value) => {
   const stepValid = true;
   Object.keys(value).forEach((key) => {
     const properties = types["/*__@appAccount__*//type/dao"].properties.find(
-      (p) => p.name === key
+      (p) => p.name === key,
     );
     const validation = validateType(properties.type, value[key], properties);
     if (validation) {
@@ -73,7 +73,7 @@ function handleFormComplete(value) {
       bond: "100000000000000000000000",
       vote_period: "604800000000000",
       grace_period: Big(
-        typeof value.gracePeriod === "number" ? parseInt(value.gracePeriod) : 1
+        typeof value.gracePeriod === "number" ? parseInt(value.gracePeriod) : 1,
       ).times(86400000000000),
       policy: {
         roles: value.policy.roles,
@@ -124,10 +124,10 @@ function handleFormComplete(value) {
         config: {
           ...sputnikFactoryArgs.args.config,
           metadata: Buffer.from(
-            JSON.stringify(sputnikFactoryArgs.args.config.metadata)
+            JSON.stringify(sputnikFactoryArgs.args.config.metadata),
           ).toString("base64"),
         },
-      })
+      }),
     ).toString("base64"),
   };
 
@@ -137,10 +137,6 @@ function handleFormComplete(value) {
       methodName: "create",
       args: finalSputnikFactoryArgs,
       deposit: "6000000000000000000000000", // 6N
-    },
-    {
-      contractName: "social.near",
-      methodName: "set",
     },
   ]);
 }

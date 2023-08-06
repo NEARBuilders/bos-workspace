@@ -78,7 +78,7 @@ const onRemoveMember = (index) => {
     answers: {
       ...state.answers,
       members: state.answers.members.map((member, i) =>
-        i === index ? null : member
+        i === index ? null : member,
       ),
     },
   });
@@ -89,7 +89,7 @@ const onSetMemberName = (index, name) => {
     answers: {
       ...state.answers,
       members: state.answers.members.map((member, i) =>
-        i === index ? { ...member, name } : member
+        i === index ? { ...member, name } : member,
       ),
     },
   });
@@ -100,7 +100,7 @@ const onSetMemberRole = (index, role) => {
     answers: {
       ...state.answers,
       members: state.answers.members.map((member, i) =>
-        i === index ? { ...member, role } : member
+        i === index ? { ...member, role } : member,
       ),
     },
   });
@@ -247,14 +247,14 @@ return (
           const trueRoleIndex =
             member !== null &&
             finalState.policy.roles.findIndex(
-              (role) => role.name === member.role
+              (role) => role.name === member.role,
             );
           const trueMemberIndex =
             member !== null &&
             trueRoleIndex !== -1 &&
             typeof finalState.policy.roles[trueRoleIndex].kind === "object"
               ? finalState.policy.roles[trueRoleIndex].kind.Group.findIndex(
-                  (m) => m === member.name
+                  (m) => m === member.name,
                 )
               : null;
 

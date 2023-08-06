@@ -4,7 +4,7 @@ const widgetOwner = "/*__@appAccount__*/";
 const Experiment = styled.div`
   opacity: 0;
   animation: fade-in 0.5s ease-in-out forwards;
-  animation-delay: .5s;
+  animation-delay: 0.5s;
 
   @keyframes fade-in {
     0% {
