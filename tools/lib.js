@@ -22,7 +22,7 @@ function readBosConfig(appFolder) {
   const config = JSON.parse(configRaw);
   if (!config.appAccount) {
     console.warn(
-      `WARNING: appAccount not found in ${appFolder}/bos.config.json, build script may work but dev requires it`,
+      `WARNING: appAccount not found in ${appFolder}/bos.config.json, build script may work but dev requires it`
     );
   }
   return config;
@@ -31,14 +31,18 @@ function readBosConfig(appFolder) {
 // process comment commands and replace content in files
 function processCommentCommands(fileContent, aliases, appAccount) {
   // Process the aliases
-  for (let alias in aliases) {
-    let replacePattern = new RegExp(`/\\*__@replace:${alias}__\\*/`, "g");
-    fileContent = fileContent.replace(replacePattern, aliases[alias]);
+  if (aliases) {
+    for (let alias in aliases) {
+      let replacePattern = new RegExp(`/\\*__@replace:${alias}__\\*/`, "g");
+      fileContent = fileContent.replace(replacePattern, aliases[alias]);
+    }
   }
 
   // Replace the appAccount
-  let accountPattern = /\/\*__@appAccount__\*\//g;
-  fileContent = fileContent.replace(accountPattern, appAccount);
+  if (appAccount) {
+    let accountPattern = /\/\*__@appAccount__\*\//g;
+    fileContent = fileContent.replace(accountPattern, appAccount);
+  }
 
   return fileContent;
 }
@@ -78,7 +82,7 @@ function processFile(filePath, aliases, appAccount) {
 // walk through each app folder
 function processDistFolder(appFolder) {
   const files = glob.sync(
-    `./${distFolder}/${appFolder}/**/*.{js,jsx,ts,tsx,jsonc}`,
+    `./${distFolder}/${appFolder}/**/*.{js,jsx,ts,tsx,json}`
   );
 
   const config = readBosConfig(appFolder);
@@ -130,6 +134,7 @@ function removeComments(fileContent) {
 function generateDataJson(appFolder) {
   const data = {};
   const files = glob.sync(`./apps/${appFolder}/**/*.{jsonc,txt}`);
+  const config = readBosConfig(appFolder);
 
   files.forEach((file) => {
     let fileContent = fs.readFileSync(file, "utf8");
@@ -137,6 +142,12 @@ function generateDataJson(appFolder) {
     if (file.endsWith(".jsonc")) {
       // If it's a JSONC file and has the noStringify marker, parse the content
       // Otherwise, just remove comments and spaces as before
+      // first process comment commands
+      fileContent = processCommentCommands(
+        fileContent,
+        config.aliases,
+        config.appAccount
+      );
       if (noStringifyJsonFiles(fileContent)) {
         fileContent = JSON.parse(removeComments(fileContent));
       } else {
@@ -178,7 +189,7 @@ function generateDevJson(appFolder) {
     return devJson;
   }
   const widgetFiles = glob.sync(
-    `./${distFolder}/${appFolder}/src/**/*.{js,jsx,ts,tsx}`,
+    `./${distFolder}/${appFolder}/src/**/*.{js,jsx,ts,tsx}`
   );
 
   widgetFiles.forEach((file) => {
@@ -213,7 +224,7 @@ function serveDevJson() {
     res.header("Access-Control-Allow-Methods", "GET,PUT,POST,DELETE,OPTIONS");
     res.header(
       "Access-Control-Allow-Headers",
-      "Content-Type, Authorization, Content-Length, X-Requested-With",
+      "Content-Type, Authorization, Content-Length, X-Requested-With"
     );
 
     next();
@@ -237,7 +248,7 @@ function serveDevJson() {
       "Server running at " + "http://127.0.0.1:4040/" + "\n|\n|",
       "To use the local widgets, go to " + "https://near.org/flags" + "\n|",
       "and paste the server link above.\n|",
-      "--------------------------------------------\\\n",
+      "--------------------------------------------\\\n"
     );
   });
 }
@@ -283,7 +294,7 @@ function deployApp(appFolder) {
 
   if (!appAccount) {
     console.error(
-      `App account is not defined for ${appFolder}. Skipping deployment.`,
+      `App account is not defined for ${appFolder}. Skipping deployment.`
     );
     return;
   }
