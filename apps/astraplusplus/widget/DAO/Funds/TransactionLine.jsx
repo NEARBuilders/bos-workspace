@@ -46,7 +46,7 @@ if (direction === "out") {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
-        "x-api-key": "36f2b87a-7ee6-40d8-80b9-5e68e587a5b5",
+        "x-api-key": "/*__@replace:pikespeakApiKey__*/",
       },
     },
   );

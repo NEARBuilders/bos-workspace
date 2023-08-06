@@ -121,7 +121,7 @@ bOS-workspace allows you to run a local server similar to `bos-loader` that can 
 
 ```bash
 # Install dependencies
-yarn start
+yarn install
 # Run the server
 yarn dev
 ```
@@ -137,7 +137,7 @@ To build the widgets for deployment, run the following command:
 
 ```bash
 # Install dependencies
-yarn start
+yarn install
 # Build the widgets
 yarn build
 ```

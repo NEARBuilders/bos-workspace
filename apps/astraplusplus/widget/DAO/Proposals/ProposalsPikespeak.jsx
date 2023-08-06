@@ -2,7 +2,7 @@ const daoId = props.daoId;
 const proposalsPerPage = props.proposalsPerPage ?? 10; // Number of proposals to fetch at a time
 
 const apiUrl = `https://api.pikespeak.ai/daos/proposals`;
-const publicApiKey = "36f2b87a-7ee6-40d8-80b9-5e68e587a5b5";
+const publicApiKey = "/*__@replace:pikespeakApiKey__*/";
 const resPerPage = 10;
 
 const defaultMultiSelectMode = Storage.privateGet("multiSelectMode");

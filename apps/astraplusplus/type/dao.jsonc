@@ -76,7 +76,7 @@
       }
     },
     {
-      "name": "coolDownPeriod",
+      "name": "gracePeriod",
       "type": "number",
       "required": true,
       "number": {
@@ -94,11 +94,11 @@
     {
       "name": "profileImage",
       "required": false,
-      "type": "/*__@appAccount__*//type/image"
+      "type": "string"
     },
     {
       "name": "coverImage",
-      "type": "/*__@appAccount__*//type/image",
+      "type": "string",
       "required": false
     }
   ],

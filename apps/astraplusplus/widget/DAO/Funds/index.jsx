@@ -2,7 +2,7 @@ const widgetOwner = props.widgetOwner || "/*__@appAccount__*/";
 const daoId = props.daoId;
 
 const baseApi = "https://api.pikespeak.ai";
-const publicApiKey = "36f2b87a-7ee6-40d8-80b9-5e68e587a5b5";
+const publicApiKey = "/*__@replace:pikespeakApiKey__*/";
 
 const fetchApiConfig = {
   mode: "cors",

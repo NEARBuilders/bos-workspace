@@ -301,7 +301,7 @@ function uploadData(appFolder) {
 
   const argsBase64 = Buffer.from(JSON.stringify(args)).toString("base64");
 
-  const command = `near contract call-function as-transaction social.near set base64-args '${argsBase64}' prepaid-gas '300.000 TeraGas' attached-deposit '0.01 NEAR' sign-as ${appAccount} network-config mainnet`;
+  const command = `near contract call-function as-transaction social.near set base64-args '${argsBase64}' prepaid-gas '300.000 TeraGas' attached-deposit '0.001 NEAR' sign-as ${appAccount} network-config mainnet`;
 
   try {
     execSync(command, {
