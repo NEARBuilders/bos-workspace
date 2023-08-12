@@ -197,16 +197,19 @@ describe("generateDevJson", () => {
     // first, build the app
     await generateDistFolder("testAppFolder");
     await processDistFolder("testAppFolder");
+    await generateDataJson("testAppFolder");
 
     const devJson = generateDevJson("testAppFolder");
 
     // verify the structure of the devJson
     expect(devJson).toHaveProperty("components");
+    expect(devJson).toHaveProperty("data");
 
     // verify the content of the component file
     expect(devJson.components["test/widget/Layout.Modal.index"].code).toEqual(
       'return console.log("testAlias");<Widget src="nui.near/widget/index" />',
     );
+    expect(devJson.data).toEqual({ hello: "Hello, World!", test: "{}" });
   });
 });
 
