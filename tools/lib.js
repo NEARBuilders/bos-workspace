@@ -98,15 +98,17 @@ function generateDistFolder(appFolder) {
   }
   fs.mkdirSync(distPath, { recursive: true });
 
-  const files = glob.sync(`./apps/${appFolder}/widget/**/*.{js,jsx,ts,tsx}`);
-  files.forEach((file) => {
-    const distFilePath = file
-      .replace(appFolder + "/widget", appFolder + "/src")
-      .replace("./apps", `./${distFolder}`);
-    if (!fs.existsSync(path.dirname(distFilePath))) {
-      fs.mkdirSync(path.dirname(distFilePath), { recursive: true });
-    }
-    fs.copyFileSync(file, distFilePath);
+  ["widget", "thing", "type"].forEach((type) => {
+    const files = glob.sync(`./apps/${appFolder}/${type}/**/*.{js,jsx,ts,tsx}`);
+    files.forEach((file) => {
+      const distFilePath = file
+        .replace(appFolder + `/${type}`, appFolder + "/src" + `/${type}`)
+        .replace("./apps", `./${distFolder}`);
+      if (!fs.existsSync(path.dirname(distFilePath))) {
+        fs.mkdirSync(path.dirname(distFilePath), { recursive: true });
+      }
+      fs.copyFileSync(file, distFilePath);
+    });
   });
 }
 
@@ -188,19 +190,21 @@ function generateDevJson(appFolder) {
   if (!appConfig.appAccount) {
     return devJson;
   }
-  const widgetFiles = glob.sync(
-    `./${distFolder}/${appFolder}/src/**/*.{js,jsx,ts,tsx}`,
-  );
 
-  widgetFiles.forEach((file) => {
-    let fileContent = fs.readFileSync(file, "utf8");
-    let widgetPath = file
-      .replace(`./${distFolder}/${appFolder}/src/`, "")
-      .replace(path.extname(file), "");
-    let widgetKey = `${appConfig.appAccount}/widget/${widgetPath
-      .split(path.sep)
-      .join(".")}`;
-    devJson.components[widgetKey] = { code: fileContent };
+  ["widget", "thing", "type"].forEach((it) => {
+    const files = glob.sync(
+      `./${distFolder}/${appFolder}/src/${type}/**/*.{js,jsx,ts,tsx}`,
+    );
+    files.forEach((file) => {
+      let fileContent = fs.readFileSync(file, "utf8");
+      let filePath = file
+        .replace(`./${distFolder}/${appFolder}/src/`, "")
+        .replace(path.extname(file), "");
+      let key = `${appConfig.appAccount}/${type}/${filePath
+        .split(filePath.sep)
+        .join(".")}`;
+      devJson.components[key] = { code: fileContent };
+    });
   });
 
   return devJson;
