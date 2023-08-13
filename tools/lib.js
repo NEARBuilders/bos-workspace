@@ -102,7 +102,7 @@ function generateDistFolder(appFolder) {
     const files = glob.sync(`./apps/${appFolder}/${type}/**/*.{js,jsx,ts,tsx}`);
     files.forEach((file) => {
       const distFilePath = file
-        .replace(appFolder + `/${type}`, appFolder + "/src")
+        .replace(appFolder + `/${type}`, appFolder + "/src" + `/${type}`)
         .replace("./apps", `./${distFolder}`);
       if (!fs.existsSync(path.dirname(distFilePath))) {
         fs.mkdirSync(path.dirname(distFilePath), { recursive: true });
@@ -191,17 +191,20 @@ function generateDevJson(appFolder) {
     return devJson;
   }
 
-  const files = glob.sync(
-    `./${distFolder}/${appFolder}/src/**/*.{js,jsx,ts,tsx}`,
-  );
-
-  files.forEach((file) => {
-    let fileContent = fs.readFileSync(file, "utf8");
-    let filePath = file
-      .replace(`./${distFolder}/${appFolder}/src/`, "")
-      .replace(path.extname(file), "");
-    let key = `${appConfig.appAccount}/$/${filePath.split(filePath.sep).join(".")}`;
-    devJson.components[key] = { code: fileContent };
+  ["widget", "thing", "type"].forEach((it) => {
+    const files = glob.sync(
+      `./${distFolder}/${appFolder}/src/${type}/**/*.{js,jsx,ts,tsx}`,
+    );
+    files.forEach((file) => {
+      let fileContent = fs.readFileSync(file, "utf8");
+      let filePath = file
+        .replace(`./${distFolder}/${appFolder}/src/`, "")
+        .replace(path.extname(file), "");
+      let key = `${appConfig.appAccount}/${type}/${filePath
+        .split(filePath.sep)
+        .join(".")}`;
+      devJson.components[key] = { code: fileContent };
+    });
   });
 
   return devJson;
@@ -406,4 +409,3 @@ module.exports = {
   uploadDataCLI,
   uploadData,
 };
-
