@@ -1,7 +1,5 @@
-const ss = Social.get("dummydata/dummy/dummy")
+const ss = Social.get("dummy.near/dummydata/dummy/dummy")
 
 console.log("ss", ss)
 
-return <>{ss}</>
-
-return /*__@replace:hello__*/;
+return <>/*__@replace:hello__*/ {ss}</>
