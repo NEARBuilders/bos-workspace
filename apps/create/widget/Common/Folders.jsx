@@ -1,4 +1,5 @@
 /*__@import:QoL/classNames__*/
+/*__@import:QoL/widget__*/
 
 const folders = [
   {
@@ -129,91 +130,115 @@ const onDelete = (id) => {
   });
 };
 
+const handler = (action, id) => {
+  switch (action) {
+    case "delete":
+      onDelete(id);
+      break;
+    case "rename":
+      console.log("clicked rename");
+      break;
+    case "move":
+      console.log("clicked move");
+      break;
+    default:
+      break;
+  }
+};
+
 const renderWithContextMenu = (id, renderTrigger) => {
   return (
     <ContextMenu.Root>
       <ContextMenu.Trigger asChild>{renderTrigger()}</ContextMenu.Trigger>
-      <ContextMenu.Content
-        className="p-3 bg-white shadow rounded z-3"
-        sideOffset={5}
-        align="end"
-      >
-        <ContextMenu.Item
-          onClick={() => {
-            onDelete(id);
-          }}
-        >
-          Delete
-        </ContextMenu.Item>
-        <ContextMenu.Item>Rename</ContextMenu.Item>
-        <ContextMenu.Item>Move</ContextMenu.Item>
+      <ContextMenu.Content sideOffset={5} align="end" asChild>
+        {widget("/*__@appAccount__*//widget/Common.FoldersMenu", {
+          id,
+          handler,
+        })}
       </ContextMenu.Content>
     </ContextMenu.Root>
   );
 };
 
-const renderFolder = (folder) => {
+const renderFolderHeader = (folder) => {
   const { name, icon, children, id } = folder;
+
+  return (
+    <div
+      className="folder__header"
+      data-active={folder.active}
+      role="button"
+      tabIndex="0"
+      title="Open folder"
+      onClick={(e) => {
+        if (e.target.id !== "create-file") onOpen(id);
+      }}
+    >
+      <i
+        className={classNames([
+          "bi",
+          "bi-" +
+            (icon ??
+              (children && !!children.length ? "folder" : "file-earmark")),
+        ])}
+      ></i>
+      <span>{name}</span>
+      <i
+        className="button bi bi-file-earmark-plus"
+        id="create-file"
+        onClick={() => {
+          onCreateFile(id, "New file");
+        }}
+        role="button"
+        tabIndex="0"
+        title="New file"
+      ></i>
+    </div>
+  );
+};
+
+const renderChildHeader = (child) => {
+  return (
+    <div
+      className="folder__child__header"
+      data-active={child.active}
+      role="button"
+      tabIndex="0"
+      title="Open file"
+      onClick={() => {
+        onOpen(child.id);
+      }}
+    >
+      <i
+        className={classNames(["bi", "bi-" + (child.icon || "file-earmark")])}
+      ></i>
+      <span>{child.name}</span>
+    </div>
+  );
+};
+
+const renderFolder = (folder) => {
+  const { children, id } = folder;
   return (
     <div className="folder" key={id}>
-      {renderWithContextMenu(id, () => (
-        <div
-          className="folder__header"
-          data-active={folder.active}
-          role="button"
-          tabIndex="0"
-          title="Open folder"
-          onClick={(e) => {
-            if (e.target.id !== "create-file") onOpen(id);
-          }}
-        >
-          <i
-            className={classNames([
-              "bi",
-              "bi-" +
-                (icon ??
-                  (children && !!children.length ? "folder" : "file-earmark")),
-            ])}
-          ></i>
-          <span>{name}</span>
-          <i
-            className="button bi bi-file-earmark-plus"
-            id="create-file"
-            onClick={() => {
-              onCreateFile(id, "New file");
-            }}
-            role="button"
-            tabIndex="0"
-            title="New file"
-          ></i>
-        </div>
-      ))}
+      {widget("/*__@appAccount__*//widget/Common.FoldersMenu", {
+        id,
+        handler,
+        renderTrigger: () => renderFolderHeader(folder),
+      })}
       {children && !!children.length && (
         <div className="folder__children">
-          {children.map((child) => (
-            <div className="folder__child" key={child.id}>
-              {renderWithContextMenu(child.id, () => (
-                <div
-                  className="folder__child__header"
-                  data-active={child.active}
-                  role="button"
-                  tabIndex="0"
-                  title="Open file"
-                  onClick={() => {
-                    onOpen(child.id);
-                  }}
-                >
-                  <i
-                    className={classNames([
-                      "bi",
-                      "bi-" + (child.icon || "file-earmark"),
-                    ])}
-                  ></i>
-                  <span>{child.name}</span>
-                </div>
-              ))}
-            </div>
-          ))}
+          {children.map((child) => {
+            return (
+              <div className="folder__child" key={child.id}>
+                {widget("/*__@appAccount__*//widget/Common.FoldersMenu", {
+                  id: child.id,
+                  handler,
+                  renderTrigger: () => renderChildHeader(child),
+                })}
+              </div>
+            );
+          })}
         </div>
       )}
     </div>
@@ -223,21 +248,23 @@ const renderFolder = (folder) => {
 const Folders = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 6px;
   padding: 1rem 0;
   overflow: auto;
 
   .folder {
     padding: 0.2rem 0;
   }
+  .folder__header {
+  }
   .folder__header,
   .folder__child__header {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
-    padding: 0.65rem 1.5rem 0.6rem;
+    gap: 6px;
+    padding: 6px 16px;
     min-width: calc(100% - 1.5rem);
-    font-size: 0.9rem;
+    font-size: 12px;
     font-weight: 600;
     line-height: 1;
     border-radius: 10px;
@@ -246,7 +273,7 @@ const Folders = styled.div`
     transition: background-color 0.2s ease-in-out;
 
     .bi {
-      font-size: 16px;
+      font-size: 13px;
       transform: translateX(-50%);
     }
 
@@ -259,7 +286,7 @@ const Folders = styled.div`
     }
 
     .button {
-      font-size: 1rem;
+      font-size: 14px;
       font-weight: 600;
       background-color: transparent;
       transition: all 0.2s ease-in-out;
@@ -276,10 +303,10 @@ const Folders = styled.div`
   .folder__children {
     display: flex;
     flex-direction: column;
-    gap: 1rem;
     position: relative;
-    padding-left: 1.5rem;
-    padding-top: 1rem;
+    padding-left: .9rem;
+    padding-top: 4px;
+    gap: 4px;
 
     &::before {
       content: "";
@@ -287,7 +314,7 @@ const Folders = styled.div`
       width: 2px;
       height: calc(100% - 1.5rem);
       background-color: #ccc;
-      margin-left: 1.5rem;
+      margin-left: .9rem;
       position: absolute;
       top: 0;
       left: 0;
@@ -297,24 +324,14 @@ const Folders = styled.div`
     display: flex;
     justify-content: flex-start;
     align-items: center;
-    gap: 0.5rem;
-    height: 2rem;
+    height: 24px;
+    margin-bottom: 2px;
 
     &::before {
       content: "";
       display: block;
-      //   border-width: 2px 0px 0 2px;
-      //   border-style: solid;
-      //   border-color: rgb(255 0 0) transparent transparent;
-      //   border-image: initial;
-      //   border-radius: 53px 0px 0 0;
-      //   width: 16px;
-      //   height: 11px;
-      //   transform: scaleY(-1);
-      //   margin-left: -3px;
-      //   margin-top: -3px;
-      width: 20px;
-      height: 20px;
+      width: 16px;
+      height: 16px;
       border-radius: 0 0 0 50%;
       margin-left: 2px;
       transform: translateY(-50%);
@@ -331,6 +348,8 @@ const Header = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
+  margin-bottom: 1rem;
+  padding: 0 9px;
 
   .header__left {
     font-size: 1.2rem;
@@ -355,7 +374,7 @@ const Header = styled.div`
 `;
 
 return (
-  <div className="p-4">
+  <div className="py-4 px-2">
     <Header>
       <div className="header__left">Folders</div>
       <div className="header__right">

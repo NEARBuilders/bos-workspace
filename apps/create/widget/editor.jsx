@@ -26,7 +26,6 @@ const code = `
 </head>
 <body>
     <div id="editorjs"></div>
-    <button onclick="save()">Save</button>
     <script>
         const editor = new EditorJS({
             holder: 'editorjs',

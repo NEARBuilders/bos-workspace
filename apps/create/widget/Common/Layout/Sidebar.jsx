@@ -9,6 +9,6 @@ const Sidebar = styled.div`
 
 return (
   <Sidebar>
-    {widget("/*__@appAccount__*//widget/Common.Layout.Sidebar.Folders")}
+    {widget("/*__@appAccount__*//widget/Common.Folders")}
   </Sidebar>
 );

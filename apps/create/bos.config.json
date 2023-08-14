@@ -1,8 +1,6 @@
 {
     "appAccount": "create.near",
     "aliases": {
-        "colors.primary": "#f5f5f5",
-        "colors.background": "#f8faf7",
-        "colors.text": "#000"
+        "nui": "nearui.near"
     }
 }
