@@ -22,7 +22,7 @@ function readBosConfig(appFolder) {
   const config = JSON.parse(configRaw);
   if (!config.appAccount) {
     console.warn(
-      `WARNING: appAccount not found in ${appFolder}/bos.config.json, build script may work but dev requires it`,
+      `WARNING: appAccount not found in ${appFolder}/bos.config.json, build script may work but dev requires it`
     );
   }
   return config;
@@ -82,7 +82,7 @@ function processFile(filePath, aliases, appAccount) {
 // walk through each app folder
 function processDistFolder(appFolder) {
   const files = glob.sync(
-    `./${distFolder}/${appFolder}/**/*.{js,jsx,ts,tsx,json}`,
+    `./${distFolder}/${appFolder}/**/*.{js,jsx,ts,tsx,json}`
   );
 
   const config = readBosConfig(appFolder);
@@ -146,7 +146,7 @@ function generateDataJson(appFolder) {
       fileContent = processCommentCommands(
         fileContent,
         config.aliases,
-        config.appAccount,
+        config.appAccount
       );
       if (noStringifyJsonFiles(fileContent)) {
         fileContent = JSON.parse(removeComments(fileContent));
@@ -183,14 +183,19 @@ function generateDataJson(appFolder) {
 
 // generate the development json from the apps widgets
 function generateDevJson(appFolder) {
-  let devJson = { components: {} };
+  let devJson = { components: {}, data: {} };
+
   const appConfig = readBosConfig(appFolder);
   if (!appConfig.appAccount) {
     return devJson;
   }
   const widgetFiles = glob.sync(
-    `./${distFolder}/${appFolder}/src/**/*.{js,jsx,ts,tsx}`,
+    `./${distFolder}/${appFolder}/src/**/*.{js,jsx,ts,tsx}`
   );
+  const dataJSON = JSON.parse(
+    fs.readFileSync(`./${distFolder}/${appFolder}/data.json`, "utf8")
+  );
+  devJson.data = { [appConfig.appAccount]: dataJSON };
 
   widgetFiles.forEach((file) => {
     let fileContent = fs.readFileSync(file, "utf8");
@@ -224,19 +229,20 @@ function serveDevJson() {
     res.header("Access-Control-Allow-Methods", "GET,PUT,POST,DELETE,OPTIONS");
     res.header(
       "Access-Control-Allow-Headers",
-      "Content-Type, Authorization, Content-Length, X-Requested-With",
+      "Content-Type, Authorization, Content-Length, X-Requested-With"
     );
 
     next();
   });
 
   app.get("/", (req, res) => {
-    let devJson = { components: {} };
+    let devJson = { components: {}, data: {} };
     const appFolders = fs.readdirSync("./apps");
 
     for (const appFolder of appFolders) {
       let appDevJson = generateDevJson(appFolder);
       devJson.components = { ...devJson.components, ...appDevJson.components };
+      devJson.data = { ...devJson.data, ...appDevJson.data };
     }
 
     res.json(devJson);
@@ -248,7 +254,7 @@ function serveDevJson() {
       "Server running at " + "http://127.0.0.1:4040/" + "\n|\n|",
       "To use the local widgets, go to " + "https://near.org/flags" + "\n|",
       "and paste the server link above.\n|",
-      "--------------------------------------------\\\n",
+      "--------------------------------------------\\\n"
     );
   });
 }
@@ -260,7 +266,7 @@ function deployApp(appFolder) {
 
   if (!appAccount) {
     console.error(
-      `App account is not defined for ${appFolder}. Skipping deployment.`,
+      `App account is not defined for ${appFolder}. Skipping deployment.`
     );
     return;
   }
@@ -284,14 +290,14 @@ function uploadData(appFolder) {
 
   if (!appAccount) {
     console.error(
-      `App account is not defined for ${appFolder}. Skipping data upload.`,
+      `App account is not defined for ${appFolder}. Skipping data upload.`
     );
     return;
   }
 
   const dataJSON = fs.readFileSync(
     path.join(distFolder, appFolder, "data.json"),
-    "utf8",
+    "utf8"
   );
   const args = {
     data: {

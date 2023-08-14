@@ -75,7 +75,7 @@ describe("processCommentCommands", () => {
       'console.log("/*__@replace:test__*/"); console.log("/*__@appAccount__*/");';
     const result = processCommentCommands(fileContent, aliases, appAccount);
     expect(result).toEqual(
-      'console.log("testAlias"); console.log("testAccount");',
+      'console.log("testAlias"); console.log("testAccount");'
     );
   });
 
@@ -117,11 +117,11 @@ describe("processFile", () => {
         test: "testAlias",
         nui: "nui.near",
       },
-      "testAccount",
+      "testAccount"
     );
     expect(spy).toHaveBeenCalledWith(
       "./apps/testAppFolder/widget/test.js",
-      'console.log("testAlias");<Widget src="nui.near/widget/index" />',
+      'console.log("testAlias");<Widget src="nui.near/widget/index" />'
     );
   });
 
@@ -133,7 +133,7 @@ describe("processFile", () => {
         test: "testAlias",
         nui: "nui.near",
       },
-      "testAccount",
+      "testAccount"
     );
     expect(spy).not.toHaveBeenCalled();
   });
@@ -146,7 +146,7 @@ describe("processDistFolder", () => {
     await processDistFolder("testAppFolder");
     expect(spy).toHaveBeenCalledWith(
       `./${DIST_FOLDER}/testAppFolder/src/test.js`,
-      'console.log("testAlias");<Widget src="nui.near/widget/index" />',
+      'console.log("testAlias");<Widget src="nui.near/widget/index" />'
     );
   });
 });
@@ -178,7 +178,7 @@ describe("generateDataJson", () => {
     generateDataJson("testAppFolder");
     expect(spy.mock.calls[0][0]).toBe(DIST_FOLDER + "/testAppFolder/data.json");
     expect(spy.mock.calls[0][1].replace(/\s+/g, "")).toBe(
-      '{"hello":"Hello,World!","test":"{}"}',
+      '{"hello":"Hello,World!","test":"{}"}'
     );
   });
 });
@@ -191,22 +191,30 @@ describe("generateDevJson", () => {
     });
     fs.writeFileSync(
       "./apps/testAppFolder/widget/Layout/Modal/index.jsx",
-      'return console.log("/*__@replace:test__*/");<Widget src="/*__@replace:nui__*//widget/index" />',
+      'return console.log("/*__@replace:test__*/");<Widget src="/*__@replace:nui__*//widget/index" />'
     );
 
     // first, build the app
     await generateDistFolder("testAppFolder");
     await processDistFolder("testAppFolder");
+    await generateDataJson("testAppFolder");
 
     const devJson = generateDevJson("testAppFolder");
 
     // verify the structure of the devJson
     expect(devJson).toHaveProperty("components");
+    expect(devJson).toHaveProperty("data");
 
     // verify the content of the component file
     expect(devJson.components["test/widget/Layout.Modal.index"].code).toEqual(
-      'return console.log("testAlias");<Widget src="nui.near/widget/index" />',
+      'return console.log("testAlias");<Widget src="nui.near/widget/index" />'
     );
+    expect(devJson.data).toEqual({
+      test: {
+        hello: "Hello, World!",
+        test: "{}",
+      },
+    });
   });
 });
 
@@ -232,17 +240,17 @@ describe("build", () => {
     });
     expect(spyc).toHaveBeenCalledWith(
       "./apps/testAppFolder/widget/test.js",
-      `./${DIST_FOLDER}/testAppFolder/src/test.js`,
+      `./${DIST_FOLDER}/testAppFolder/src/test.js`
     );
     expect(spyw).toHaveBeenCalledWith(
       `./${DIST_FOLDER}/testAppFolder/src/test.js`,
-      'console.log("testAlias");<Widget src="nui.near/widget/index" />',
+      'console.log("testAlias");<Widget src="nui.near/widget/index" />'
     );
     expect(spyw.mock.calls[spyw.mock.calls.length - 1][0]).toBe(
-      DIST_FOLDER + "/testAppFolder/data.json",
+      DIST_FOLDER + "/testAppFolder/data.json"
     );
     expect(
-      spyw.mock.calls[spyw.mock.calls.length - 1][1].replace(/\s+/g, ""),
+      spyw.mock.calls[spyw.mock.calls.length - 1][1].replace(/\s+/g, "")
     ).toBe('{"hello":"Hello,World!","test":"{}"}');
   });
 });
