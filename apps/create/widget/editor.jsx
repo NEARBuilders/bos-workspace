@@ -1,117 +1,89 @@
-const code = `
-<!doctype html>
-<html>
-<head>
-  <meta charset="utf-8"/>
-  <title>Marked in the browser</title>
-    <script src="https://unpkg.com/iframe-resizer@4.3.6/js/iframeResizer.contentWindow.min.js"></script>
+const path = props.path;
 
-    <script src="https://cdn.jsdelivr.net/npm/@editorjs/editorjs@latest"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@editorjs/header@latest"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@editorjs/image@latest"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@editorjs/nested-list@latest"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@editorjs/checklist@latest"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@editorjs/quote@latest"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@editorjs/code@latest"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@editorjs/embed@latest"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@editorjs/delimiter@latest"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@editorjs/warning@latest"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@editorjs/table@latest"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@editorjs/marker@latest"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@editorjs/raw@latest"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@editorjs/inline-code@latest"></script>   
-    <script src="https://cdn.jsdelivr.net/npm/@editorjs/paragraph@latest"></script>
-    <script src="https://cdn.jsdelivr.net/npm/editorjs-text-alignment-blocktune@latest"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@calumk/editorjs-codeflask@latest"></script>
-</head>
-<body>
-    <div id="editorjs"></div>
-    <script>
-        const editor = new EditorJS({
-            holder: 'editorjs',
-            autofocus: true,
-            placeholder: 'Start typing here..., or press TAB to open the toolbar!',
-            inlineToolbar: true,
-
-            tools: {
-                header: {
-                    class: Header,
-                    inlineToolbar: true,
-                    tunes: ['anyTuneName'],
-                },
-                paragraph: {
-                  class: Paragraph,
-                  inlineToolbar: true,
-                  tunes: ['anyTuneName'],
-                },
-                anyTuneName: {
-                  class: AlignmentBlockTune,
-                  config:{
-                    default: "left"
-                  },
-                },
-                checklist: {
-                    class: Checklist
-                },
-                list: {
-                    class: NestedList
-                },
-                quote: {
-                    class: Quote
-                },
-                embed: {
-                    class: Embed
-                    // TODO: implement embeding widgets
-                },
-                delimiter: Delimiter,
-                warning: Warning,
-                table: Table,
-                marker: Marker,
-                raw: RawTool,
-                image: {
-                    class: ImageTool,
-                    config: {
-                        uploader: {
-                            // TODO: implement social image upload to ipfs
-                            // https://github.com/editor-js/image
-                        }
-                    }
-                },
-                code : editorjsCodeflask,
-                inlineCode: {
-                  class: InlineCode,
-                },
+// Thing
+// Type
+// Any custom
+State.init({
+  docs: {
+    Doc1: {
+      content: "Content of Doc1",
+      children: {
+        "Doc1.1": {
+          content: "Content of Doc1.1",
+          children: {
+            "Doc1.1.1": {
+              content: "Content of Doc1.1.1",
+              children: {},
             },
-        });
+          },
+        },
+        "Doc1.2": {
+          content: "Content of Doc1.2",
+          children: {},
+        },
+      },
+    },
+    Doc2: {
+      content: "Content of Doc2",
+      children: {},
+    },
+  },
+});
 
-        
-        function save() {
-            editor.save().then((outputData) => {
-                console.log('Article data: ', outputData)
-            }).catch((error) => {
-                console.log('Saving failed: ', error)
-            });
-        }
+const updateNestedDoc = (docs, path, value) => {
+  if (path.length === 1) {
+    if (value !== null) {
+      const updatedDoc = {
+        ...docs[path[0]],
+        ...value,
+      };
+      return {
+        ...docs,
+        [path[0]]: updatedDoc,
+      };
+    } else {
+      // We're deleting a document
+      // We're deleting a document
+      const remainingDocs = JSON.parse(JSON.stringify(docs));
+      delete remainingDocs[path[0]];
+      return remainingDocs;
+    }
+  } else {
+    docs[path[0]].children = updateNestedDoc(
+      docs[path[0]].children,
+      path.slice(1),
+      value
+    );
+    return docs;
+  }
+};
 
-        const handleMessage = (m) => {
-        };
+const handleDocChange = (path, value) => {
+  const updatedDocs = updateNestedDoc({ ...state.docs }, path, value);
+  State.update({
+    docs: updatedDocs,
+  });
+};
 
-        window.iFrameResizer = {
-            onMessage: handleMessage
-        };
-    </script>
-</body>
-</html>
-`;
+const toggleExpand = () => {
+  State.update({ isExpanded: !state.isExpanded });
+};
+
+function isJSON(str) {
+  if (typeof str !== "string") {
+    return false;
+  }
+
+  str = str.trim();
+  return (
+    (str.startsWith("{") && str.endsWith("}")) ||
+    (str.startsWith("[") && str.endsWith("]"))
+  );
+}
 
 return (
-  <div
-    className="w-100"
-    style={{
-      minHeight: "300px",
-      minWidth: "300px",
-    }}
-  >
-    <iframe iframeResizer className="w-100" srcDoc={code} message={{}} />
-  </div>
+  <Widget
+    src="/*__@appAccount__*//widget/editor.index"
+    props={{ docs: state.docs, onChange: handleDocChange }}
+  />
 );

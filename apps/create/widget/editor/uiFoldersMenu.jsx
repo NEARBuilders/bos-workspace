@@ -1,5 +1,5 @@
 const handler = props.handler ?? (() => {});
-const id = props.id ?? "";
+const path = props.path ?? [];
 const renderTrigger = props.renderTrigger ?? (() => <></>);
 
 const Wrapper = styled.div`
@@ -47,14 +47,14 @@ return (
       <Wrapper>
         <ContextMenu.Item
           className="menu__item"
-          onSelect={() => handler("delete", id)}
+          onSelect={() => handler("delete", path)}
         >
           <i className="menu__item__icon bi bi-x-lg" />
           Delete u
         </ContextMenu.Item>
         <ContextMenu.Item
           className="menu__item"
-          onSelect={() => handler("rename", id)}
+          onSelect={() => handler("rename", path)}
         >
           <i className="menu__item__icon">
             <svg
@@ -72,7 +72,7 @@ return (
         </ContextMenu.Item>
         <ContextMenu.Item
           className="menu__item"
-          onSelect={() => handler("move", id)}
+          onSelect={() => handler("move", path)}
         >
           <i className="menu__item__icon">
             <svg
