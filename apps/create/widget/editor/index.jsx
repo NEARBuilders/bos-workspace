@@ -107,18 +107,22 @@ function handleTabChange(newTab) {
 
 /*__@import:QoL/widget__*/
 
-return widget("/*__@appAccount__*//widget/editor.ui", {
-  handleCreateDocument,
-  handleDeleteDocument,
-  handleDocumentClick,
-  handleContentChange,
-  handleTitleChange,
-  handleTabChange,
-  handlePublish,
-  handleRenameDocument,
-  handleMoveDocument,
-  docs,
-  content: state.content,
-  tab: state.tab,
-  title: state.selectedDoc[0],
-});
+return (
+  <div key={state.selectedDoc}>
+    {widget("/*__@appAccount__*//widget/editor.ui", {
+      handleCreateDocument,
+      handleDeleteDocument,
+      handleDocumentClick,
+      handleContentChange,
+      handleTitleChange,
+      handleTabChange,
+      handlePublish,
+      handleRenameDocument,
+      handleMoveDocument,
+      docs,
+      content: state.content,
+      tab: state.tab,
+      title: state.selectedDoc[0],
+    })}
+  </div>
+);

@@ -43,7 +43,6 @@ const updateNestedDoc = (docs, path, value) => {
       };
     } else {
       // We're deleting a document
-      // We're deleting a document
       const remainingDocs = JSON.parse(JSON.stringify(docs));
       delete remainingDocs[path[0]];
       return remainingDocs;
