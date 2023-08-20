@@ -51,7 +51,7 @@ const updateNestedDoc = (docs, path, value) => {
     docs[path[0]].children = updateNestedDoc(
       docs[path[0]].children,
       path.slice(1),
-      value
+      value,
     );
     return docs;
   }
@@ -81,8 +81,12 @@ function isJSON(str) {
 }
 
 return (
-  <Widget
-    src="/*__@appAccount__*//widget/editor.index"
-    props={{ docs: state.docs, onChange: handleDocChange }}
-  />
+  <>
+    <Widget src="/*__@appAccount__*//widget/ui.navbar" />
+
+    <Widget
+      src="/*__@appAccount__*//widget/editor.index"
+      props={{ docs: state.docs, onChange: handleDocChange }}
+    />
+  </>
 );

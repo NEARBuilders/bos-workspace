@@ -1,1 +1,3 @@
-return <Widget src="create.near/widget/editor" />;
+/*__@import:QoL/widget__*/
+
+return <>{widget("/*__@appAccount__*//widget/ui.navbar")}</>;
