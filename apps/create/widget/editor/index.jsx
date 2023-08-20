@@ -47,7 +47,6 @@ const handleDocumentClick = (path) => {
   Storage.privateSet("selectedDoc", path);
   // And check if there are any stored changes for it
   const doc = Storage.privateGet(path);
-  console.log("doc: " + doc);
   if (doc) {
     State.update({
       selectedDoc: path,
@@ -67,33 +66,40 @@ const handleDocumentClick = (path) => {
 
 let timeoutId;
 
-// TODO: make a generic function, I was struggling with this
-const debounceSaveToLocalStorage = (value) => {
-  const delay = 300;
+const debounce = (func, delay) => {
+  if (!delay) {
+    delay = 300;
+  }
   clearTimeout(timeoutId);
-  timeoutId = setTimeout(() => {
-    try {
-      Storage.privateSet(state.selectedDoc, value);
-    } catch (error) {
-      console.error("Error saving content: ", error);
-    }
-  }, delay);
+  timeoutId = setTimeout(func, delay);
 };
 
 const handleContentChange = (value) => {
-  console.log("handleContentChange", value);
-  onChange(state.selectedDoc, { content: value });
-  debounceSaveToLocalStorage({ title: state.title, content: value });
-  // NOTE, we are no longer updating State.update({ content }) because the SimpleMDE
-  // component does this already
+  debounce(() => {
+    try {
+      Storage.privateSet(state.selectedDoc, {
+        title: state.title,
+        content: value,
+      });
+      // onChange(state.selectedDoc, { content: value});
+    } catch (error) {
+      console.error("Error saving content: ", error);
+    }
+  });
 };
 
 const handleTitleChange = (value) => {
-  console.log("TODO: handleTitleChange", value);
-  onChange(state.selectedDoc, { title: value });
-  debounceSaveToLocalStorage({ title: value, content: state.content });
-  State.update({ title: value });
-  // This is painfully slow.
+  debounce(() => {
+    try {
+      Storage.privateSet(state.selectedDoc, {
+        title: value,
+        content: state.content,
+      });
+      // onChange(state.selectedDoc, { title: value});
+    } catch (error) {
+      console.error("Error saving title: ", error);
+    }
+  });
 };
 
 const handlePublish = () => {

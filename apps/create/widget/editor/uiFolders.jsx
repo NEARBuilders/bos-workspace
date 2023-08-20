@@ -59,7 +59,7 @@ const renderFolderHeader = (folder) => {
 
 const renderFolder = (folder) => {
   const { path, value, index } = folder;
-  const { children } = value;
+  const { children, title } = value;
 
   return (
     <div
@@ -71,7 +71,7 @@ const renderFolder = (folder) => {
         handler,
         renderTrigger: () =>
           renderFolderHeader({
-            title: [...path].slice(-1)[0],
+            title: Storage.privateGet(path).title ?? title, // do we like this privateGet here?
             path: path,
             isFile: !children || Object.keys(children).length === 0,
           }),

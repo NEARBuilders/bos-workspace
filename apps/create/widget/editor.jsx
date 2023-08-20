@@ -1,30 +1,29 @@
-const path = props.path;
 
 const data = props.data ?? {
   Doc1: {
-    title: "",
+    title: "Doc1",
     content: "Content of Doc1",
     children: {
       "Doc1.1": {
-        title: "",
+        title: "Doc1.1",
         content: "Content of Doc1.1",
         children: {
           "Doc1.1.1": {
-            title: "",
+            title: "Doc1.1.1",
             content: "Content of Doc1.1.1",
             children: {},
           },
         },
       },
       "Doc1.2": {
-        title: "",
+        title: "Doc1.2",
         content: "Content of Doc1.2",
         children: {},
       },
     },
   },
   Doc2: {
-    title: "",
+    title: "Doc2",
     content: "Content of Doc2",
     children: {},
   },
@@ -68,6 +67,7 @@ const handleDocChange = (path, value) => {
 
 return (
   <>
+    {/** <p>{JSON.stringify(state.docs)}</p> */}
     <Widget
       src="/*__@appAccount__*//widget/editor.index"
       props={{ docs: state.docs, onChange: handleDocChange }}
