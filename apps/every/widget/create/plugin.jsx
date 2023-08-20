@@ -3,6 +3,7 @@ const Container = styled.div`
   flex-direction: column;
   align-items: center;
   margin-top: 20px;
+  width: 100%;
 `;
 
 const Dropdown = styled.select`
@@ -11,33 +12,46 @@ const Dropdown = styled.select`
 `;
 
 const RenderSelectedType = ({ selectedType }) => {
-  return (
-    <>
-      <p>{selectedType}</p>
-      <Widget
-        src="efiz.near/widget/MonacoEditor"
-        props={{ code: {}, language: "javascript" }}
-      />
-    </>
-  );
+  const typeDef = JSON.parse(Social.get(selectedType) || "null");
+  if (typeDef) {
+    const params = typeDef.properties?.map((it) => it.name);
+
+    return (
+      <div style={{ width: "100%"}}>
+        <Widget
+          src="efiz.near/widget/MonacoEditor"
+          props={{
+            code: `function doSomething({ ${params.join(", ")} }) {\n // DO SOMETHING\n }\nreturn { doSomething };\n`,
+            language: "javascript",
+          }}
+        />
+      </div>
+    );
+  } else {
+    return <p>not a valid type</p>;
+  }
 };
 
 const handleSelectChange = (event) => {
   State.update({ selectedType: event.target.value });
 };
 
+const types = Social.get(`efiz.near/type/**`, "final");
+types = Object.keys(types)?.map((it) => `efiz.near/type/${it}`) || [];
+
 return (
   <Container>
     <Dropdown onChange={handleSelectChange} value={state.selectedType}>
-      <option value="" disabled>
-        Select a Type
-      </option>
-      <option value="Thing">Thing</option>
-      <option value="Type">Type</option>
-      <option value="Template">Template</option>
-      <option value="Plugin">Plugin</option>
+      <option value="">Select a type</option>
+      {types?.map((it) => (
+        <option value={it} key={it}>
+          {it}
+        </option>
+      ))}
     </Dropdown>
 
-    {state.selectedType && <RenderSelectedType selectedType={state.selectedType} />}
+    {state.selectedType && (
+      <RenderSelectedType selectedType={state.selectedType} />
+    )}
   </Container>
 );
