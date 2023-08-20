@@ -29,6 +29,7 @@ return (
       {widget(IB, {
         children: "Create Project",
         variant: "success",
+        onClick: () => handleCreateProject(state),
       })}
     </div>
   </div>
