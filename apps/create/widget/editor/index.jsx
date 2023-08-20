@@ -81,6 +81,7 @@ const handleContentChange = (value) => {
         title: state.title,
         content: value,
       });
+      State.update({ content: value });
       // onChange(state.selectedDoc, { content: value});
     } catch (error) {
       console.error("Error saving content: ", error);
@@ -95,6 +96,7 @@ const handleTitleChange = (value) => {
         title: value,
         content: state.content,
       });
+      State.update({ title: value });
       // onChange(state.selectedDoc, { title: value});
     } catch (error) {
       console.error("Error saving title: ", error);
