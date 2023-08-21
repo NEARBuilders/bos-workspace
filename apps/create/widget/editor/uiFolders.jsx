@@ -42,7 +42,11 @@ const renderFolderHeader = (folder) => {
           "bi-" + (icon ?? (!isFile ? "folder" : "file-earmark")),
         ])}
       ></i>
-      <span>{title}</span>
+      <span>
+        {title === undefined || title === null || title === ""
+          ? "Untitled"
+          : title}
+      </span>
       <i
         className="button bi bi-file-earmark-plus"
         id="create-file"
@@ -59,7 +63,7 @@ const renderFolderHeader = (folder) => {
 
 const renderFolder = (folder) => {
   const { path, value, index } = folder;
-  const { children } = value;
+  const { children, title } = value;
 
   return (
     <div
@@ -71,7 +75,7 @@ const renderFolder = (folder) => {
         handler,
         renderTrigger: () =>
           renderFolderHeader({
-            title: [...path].slice(-1)[0],
+            title: Storage.privateGet(path).title ?? title, // do we like this privateGet here?
             path: path,
             isFile: !children || Object.keys(children).length === 0,
           }),
@@ -192,7 +196,7 @@ const Header = styled.div`
   justify-content: space-between;
   align-items: center;
   margin-bottom: 1rem;
-  padding-right : 9px;
+  padding-right: 9px;
 
   .header__right {
     display: flex;
@@ -214,9 +218,7 @@ const Header = styled.div`
 return (
   <div className="py-4 ps-3 pe-1">
     <Header>
-      <h2 className="h5">
-        Documents
-      </h2>
+      <h2 className="h5">Documents</h2>
       <div className="header__right">
         <i
           className="bi bi-folder-plus"
