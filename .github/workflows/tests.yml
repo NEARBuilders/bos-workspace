@@ -20,7 +20,7 @@ jobs:
       - name: Use Node.js
         uses: actions/setup-node@v2
         with:
-          node-version: "14" # Adjust according to your needs
+          node-version: "16" # Adjust according to your needs
 
       - name: Install Dependencies
         run: yarn install
