@@ -1,4 +1,4 @@
-const { docs, onChange } = props;
+const { docs, onChange, project } = props;
 
 State.init({
   tab: "EDIT",
@@ -121,7 +121,6 @@ const handlePublish = () => {
 
 const handleCreateDocument = (parentPath) => {
   const newKey = `Doc${state.count}`;
-  console.log("handleCreateDocument", parentPath, newKey);
   let newPath; // This will store the path to the newly created document
 
   if (parentPath && parentPath.length) {
@@ -179,6 +178,7 @@ return (
       content: state.content,
       tab: state.tab,
       title: state.title,
+      project,
     })}
   </div>
 );

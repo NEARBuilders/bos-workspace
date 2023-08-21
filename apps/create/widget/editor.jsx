@@ -1,8 +1,19 @@
-const data = props.data ?? {
+const projectID = props.project;
+
+// TODO: get data from SocialDB using projectID
+const data = {
   Doc1: {
     title: "",
     content: "Hello, World!",
   },
+};
+
+// TODO: get project from SocialDB using projectID
+const project = {
+  id: projectID,
+  title: "Project 1",
+  logo: "https://ipfs.near.social/ipfs/bafkreifjxdfynw6icgtagcgyhsgq5ounl7u45i2pa2xadiax2bpg7kt3hu",
+  tags: ["tag", "docs"],
 };
 
 State.init({ docs: data });
@@ -28,7 +39,7 @@ const updateNestedDoc = (docs, path, value) => {
     docs[path[0]].children = updateNestedDoc(
       docs[path[0]].children,
       path.slice(1),
-      value,
+      value
     );
     return docs;
   }
@@ -46,7 +57,7 @@ return (
     {/** <p>{JSON.stringify(state.docs)}</p> */}
     <Widget
       src="/*__@appAccount__*//widget/editor.index"
-      props={{ docs: state.docs, onChange: handleDocChange }}
+      props={{ docs: state.docs, onChange: handleDocChange, project }}
     />
   </>
 );

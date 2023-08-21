@@ -5,6 +5,7 @@
 // TODO: should be able to hide/show children elements
 
 const folders = props.docs ?? {};
+const project = props.project;
 
 const handler = (action, path) => {
   switch (action) {
@@ -92,6 +93,39 @@ const renderFolder = (folder) => {
           })}
         </div>
       )}
+    </div>
+  );
+};
+
+const renderProject = (project) => {
+  const { title, logo, id } = project;
+
+  return (
+    <div>
+      <div className="mb-2">
+        <a
+          href={`/#//*__@appAccount__*//widget/home?page=projects`}
+          className="text-decoration-none"
+        >
+          <i className="bi bi-arrow-left"></i>
+          Back to projects
+        </a>
+      </div>
+      <a
+        href={`/#//*__@appAccount__*//widget/home?page=project&project=${id}`}
+        className="d-flex justify-content-center gap-3 align-items-center mb-auto w-100"
+        title="Open project settings"
+      >
+        {logo && <img src={logo} alt={title} height={55} width={55} />}
+        <h5
+          className="h6 m-0 flex-fill"
+          style={{
+            lineHeight: 1.5,
+          }}
+        >
+          {title}
+        </h5>
+      </a>
     </div>
   );
 };
@@ -195,7 +229,6 @@ const Header = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 1rem;
   padding-right: 9px;
 
   .header__right {
@@ -213,33 +246,50 @@ const Header = styled.div`
       color: #666;
     }
   }
+
+  .header__subtitle {
+    font-size: 0.9rem;
+    font-weight: 600;
+    line-height: 1;
+    color: #666;
+  }
+`;
+
+const Wrapper = styled.div`
+  display: grid;
+  grid-template-rows: 120px auto;
 `;
 
 return (
-  <div className="py-4 ps-3 pe-1">
-    <Header>
-      <h2 className="h5">Documents</h2>
-      <div className="header__right">
-        <i
-          className="bi bi-folder-plus"
-          role="button"
-          onClick={() => {
-            props.handleCreateDocument();
-          }}
-          title="Create new folder"
-          tabIndex="0"
-        ></i>
-      </div>
-    </Header>
-    <Folders>
-      {folders &&
-        Object.keys(folders).map((f, i) => {
-          return renderFolder({
-            path: [f],
-            value: folders[f],
-            index: i,
-          });
-        })}
-    </Folders>
-  </div>
+  <Wrapper className="py-4 ps-3 pe-1">
+    {renderProject(project)}
+
+    <div>
+      <Header>
+        <span className="header__subtitle">Documents</span>
+        <div className="header__right">
+          <i
+            className="bi bi-file-earmark-plus"
+            role="button"
+            onClick={() => {
+              props.handleCreateDocument();
+            }}
+            title="Create new folder"
+            tabIndex="0"
+            style={{ fontSize: "16px" }}
+          ></i>
+        </div>
+      </Header>
+      <Folders>
+        {folders &&
+          Object.keys(folders).map((f, i) => {
+            return renderFolder({
+              path: [f],
+              value: folders[f],
+              index: i,
+            });
+          })}
+      </Folders>
+    </div>
+  </Wrapper>
 );

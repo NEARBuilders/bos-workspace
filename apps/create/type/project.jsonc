@@ -1,0 +1,33 @@
+{
+  "properties": {
+    "id": {
+      "type": "UUID"
+    },
+    "title": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "logo": {
+      "type": "string"
+    },
+    "tags": {
+      "type": "array",
+      "itemTypes": [
+        {
+          "type": "string"
+        }
+      ]
+    },
+    "documents": {
+      // IDK about this one
+      "type": "array",
+      "itemTypes": [
+        {
+          "type": "UUID"
+        }
+      ]
+    }
+  }
+}
