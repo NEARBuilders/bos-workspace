@@ -1,6 +1,6 @@
 # bos-workspace (ALPHA)
 
-bos-workspace is a framework to help ease the development of bOS widgets. It works like a monorepo, allowing you to develop multiple bos apps in the same time. It also provides a build script to help with the development process.
+bos-workspace is a toolset to help ease the development of bOS widgets. It works like a monorepo, allowing you to develop multiple bos apps in the same time. It also provides a build script to help with the development process.
 
 ## Introduction
 
