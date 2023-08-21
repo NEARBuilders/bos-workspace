@@ -1,6 +1,6 @@
 {
-    "appAccount": "create.near",
-    "aliases": {
-        "nui": "nearui.near"
-    }
+  "appAccount": "create.near",
+  "aliases": {
+    "nui": "nearui.near"
+  }
 }

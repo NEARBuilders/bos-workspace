@@ -1,34 +1,11 @@
-const path = props.path;
-
-// Thing
-// Type
-// Any custom
-State.init({
-  docs: {
-    Doc1: {
-      content: "Content of Doc1",
-      children: {
-        "Doc1.1": {
-          content: "Content of Doc1.1",
-          children: {
-            "Doc1.1.1": {
-              content: "Content of Doc1.1.1",
-              children: {},
-            },
-          },
-        },
-        "Doc1.2": {
-          content: "Content of Doc1.2",
-          children: {},
-        },
-      },
-    },
-    Doc2: {
-      content: "Content of Doc2",
-      children: {},
-    },
+const data = props.data ?? {
+  Doc1: {
+    title: "",
+    content: "Hello, World!",
   },
-});
+};
+
+State.init({ docs: data });
 
 const updateNestedDoc = (docs, path, value) => {
   if (path.length === 1) {
@@ -51,7 +28,7 @@ const updateNestedDoc = (docs, path, value) => {
     docs[path[0]].children = updateNestedDoc(
       docs[path[0]].children,
       path.slice(1),
-      value
+      value,
     );
     return docs;
   }
@@ -64,25 +41,12 @@ const handleDocChange = (path, value) => {
   });
 };
 
-const toggleExpand = () => {
-  State.update({ isExpanded: !state.isExpanded });
-};
-
-function isJSON(str) {
-  if (typeof str !== "string") {
-    return false;
-  }
-
-  str = str.trim();
-  return (
-    (str.startsWith("{") && str.endsWith("}")) ||
-    (str.startsWith("[") && str.endsWith("]"))
-  );
-}
-
 return (
-  <Widget
-    src="/*__@appAccount__*//widget/editor.index"
-    props={{ docs: state.docs, onChange: handleDocChange }}
-  />
+  <>
+    {/** <p>{JSON.stringify(state.docs)}</p> */}
+    <Widget
+      src="/*__@appAccount__*//widget/editor.index"
+      props={{ docs: state.docs, onChange: handleDocChange }}
+    />
+  </>
 );

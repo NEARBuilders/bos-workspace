@@ -1,16 +1,20 @@
-const DocumentItem = ({ key, depth, handleDocumentClick, handleCreateDocument, handleDeleteDocument, children }) => {
-
+const DocumentItem = ({
+  key,
+  depth,
+  handleDocumentClick,
+  handleCreateDocument,
+  handleDeleteDocument,
+  children,
+}) => {
   const toggleExpand = () => {
-    State.update({ isExpanded: !state.isExpanded});
+    State.update({ isExpanded: !state.isExpanded });
   };
 
   return (
     <div key={key}>
       <StyledDocumentItem depth={depth}>
         {children && (
-          <Button onClick={toggleExpand}>
-            {state.isExpanded ? "-" : "+"}
-          </Button>
+          <Button onClick={toggleExpand}>{state.isExpanded ? "-" : "+"}</Button>
         )}
         <div onClick={handleDocumentClick}>{key}</div>
         <div>
@@ -39,7 +43,6 @@ const StyledDocumentItem = styled.div`
   }
 `;
 
-const Button = styled.button`
-`;
+const Button = styled.button``;
 
 return DocumentItem(props);

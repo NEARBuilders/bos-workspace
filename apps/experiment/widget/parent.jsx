@@ -12,7 +12,7 @@ const path = props.path;
 // Any custom
 State.init({
   docs: {
-    "Doc1": {
+    Doc1: {
       content: "Content of Doc1",
       children: {
         "Doc1.1": {
@@ -20,34 +20,33 @@ State.init({
           children: {
             "Doc1.1.1": {
               content: "Content of Doc1.1.1",
-              children: {}
-            }
-          }
+              children: {},
+            },
+          },
         },
         "Doc1.2": {
           content: "Content of Doc1.2",
-          children: {}
-        }
-      }
+          children: {},
+        },
+      },
     },
-    "Doc2": {
+    Doc2: {
       content: "Content of Doc2",
-      children: {}
-    }
-  }
+      children: {},
+    },
+  },
 });
-
 
 const updateNestedDoc = (docs, path, value) => {
   if (path.length === 1) {
     if (value !== null) {
       const updatedDoc = {
         ...docs[path[0]],
-        ...value
+        ...value,
       };
       return {
         ...docs,
-        [path[0]]: updatedDoc
+        [path[0]]: updatedDoc,
       };
     } else {
       // We're deleting a document
@@ -57,7 +56,11 @@ const updateNestedDoc = (docs, path, value) => {
       return remainingDocs;
     }
   } else {
-    docs[path[0]].children = updateNestedDoc(docs[path[0]].children, path.slice(1), value);
+    docs[path[0]].children = updateNestedDoc(
+      docs[path[0]].children,
+      path.slice(1),
+      value,
+    );
     return docs;
   }
 };
@@ -86,7 +89,6 @@ function isJSON(str) {
     (str.startsWith("[") && str.endsWith("]"))
   );
 }
-
 
 return (
   <ParentContainer>
