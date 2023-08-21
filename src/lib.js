@@ -271,7 +271,19 @@ function deployApp(appFolder) {
     return;
   }
 
-  const command = `bos components deploy "${appAccount}" sign-as "${appAccount}" network-config mainnet`;
+  const packageRoot = path.resolve(__dirname, "..");
+  const bosBinaryPath = path.join(packageRoot, "node_modules", ".bin", "bos");
+
+  const command = [
+    bosBinaryPath,
+    "components",
+    "deploy",
+    `'${appAccount}'`,
+    "sign-as",
+    `'${appAccount}'`,
+    "network-config",
+    "mainnet",
+  ].join(" ");
 
   try {
     execSync(command, {
@@ -307,7 +319,27 @@ function uploadData(appFolder) {
 
   const argsBase64 = Buffer.from(JSON.stringify(args)).toString("base64");
 
-  const command = `near contract call-function as-transaction social.near set base64-args '${argsBase64}' prepaid-gas '300.000 TeraGas' attached-deposit '0.001 NEAR' sign-as ${appAccount} network-config mainnet`;
+  const packageRoot = path.resolve(__dirname, "..");
+  const nearBinaryPath = path.join(packageRoot, "node_modules", ".bin", "near");
+
+  const command = [
+    nearBinaryPath,
+    "contract",
+    "call-function",
+    "as-transaction",
+    "social.near",
+    "set",
+    "base64-args",
+    `'${argsBase64}'`,
+    "prepaid-gas",
+    "'300.000 TeraGas'",
+    "attached-deposit",
+    "'0.001 NEAR'",
+    "sign-as",
+    appAccount,
+    "network-config",
+    "mainnet",
+  ].join(" ");
 
   try {
     execSync(command, {
