@@ -26,4 +26,4 @@ jobs:
         run: yarn install
 
       - name: Execute Test Tools
-        run: yarn test:tools
+        run: yarn test

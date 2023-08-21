@@ -48,6 +48,10 @@ Commands:
   upload          Upload data to SocialDB
 ```
 
+> If the gateway can't fetch local components, try disabling brave shields or your adblock.
+
+> If the commands don't work, try again using Node >=16
+
 ## Key Features
 
 ### 1. **App Configuration**
