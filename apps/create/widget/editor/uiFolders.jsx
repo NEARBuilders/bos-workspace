@@ -42,7 +42,11 @@ const renderFolderHeader = (folder) => {
           "bi-" + (icon ?? (!isFile ? "folder" : "file-earmark")),
         ])}
       ></i>
-      <span>{title}</span>
+      <span>
+        {title === undefined || title === null || title === ""
+          ? "Untitled"
+          : title}
+      </span>
       <i
         className="button bi bi-file-earmark-plus"
         id="create-file"

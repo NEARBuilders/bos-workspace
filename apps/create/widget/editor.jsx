@@ -1,30 +1,7 @@
 const data = props.data ?? {
   Doc1: {
-    title: "Doc1",
-    content: "Content of Doc1",
-    children: {
-      "Doc1.1": {
-        title: "Doc1.1",
-        content: "Content of Doc1.1",
-        children: {
-          "Doc1.1.1": {
-            title: "Doc1.1.1",
-            content: "Content of Doc1.1.1",
-            children: {},
-          },
-        },
-      },
-      "Doc1.2": {
-        title: "Doc1.2",
-        content: "Content of Doc1.2",
-        children: {},
-      },
-    },
-  },
-  Doc2: {
-    title: "Doc2",
-    content: "Content of Doc2",
-    children: {},
+    title: "",
+    content: "Hello, World!",
   },
 };
 
