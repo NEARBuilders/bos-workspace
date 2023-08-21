@@ -67,7 +67,7 @@ return (
             (v || "")
               .split(",")
               .filter((v) => v !== "")
-              .map((v) => v.trim())
+              .map((v) => v.trim()),
           ),
       })}
       <h6 className="mb-0">Logo</h6>

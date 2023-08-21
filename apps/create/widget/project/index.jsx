@@ -4,9 +4,7 @@ if (!projectID) {
   return <div>Please specify a project ID</div>;
 }
 
-const handleUpdateProject = (new_project) => {
-  
-}
+const handleUpdateProject = (new_project) => {};
 
 // TODO: get project from SocialDB using projectID
 const project = {
