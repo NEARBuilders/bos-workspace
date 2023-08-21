@@ -54,7 +54,7 @@ function renderNavbar({ open, setOpen, pages, onPageChange }) {
               return (
                 <li className="nav-item">
                   <a
-                    className="nav-link text-capitilize"
+                    className="nav-link text-capitalize"
                     href={"#//*__@appAccount__*//widget/home?page=" + p}
                     onClick={() => onPageChange(p)}
                   >
