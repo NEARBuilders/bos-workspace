@@ -1,17 +1,21 @@
+/*__@import:QoL/widget__*/
+
 State.init({
-  view: "EDITOR",
+  page: props.page ?? "PROJECTS",
 });
 
 return (
   <div>
-    <div>
-      <button onClick={() => State.update({ view: "LIST" })}>list</button>
-      <button onClick={() => State.update({ view: "EDITOR" })}>editor</button>
-    </div>
-    {state.view === "LIST" ? (
+    {widget("/*__@appAccount__*//widget/ui.navbar", {
+      onPageChange: (v) => State.update({ page: v }),
+      pages: ["EDITOR", "PROJECTS"],
+    })}
+    {state.page === "PROJECTS" ? (
       <Widget src="create.near/widget/list.index" />
-    ) : (
+    ) : state.page === "EDITOR" ? (
       <Widget src="create.near/widget/editor" />
+    ) : (
+      "404"
     )}
   </div>
 );
