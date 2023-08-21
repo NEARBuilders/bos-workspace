@@ -1,42 +1,10 @@
-const { handleCreateProject } = props;
-const projects = props.projects ?? [
-  {
-    title: "Project 1",
-    tags: ["tag", "docs"],
-    logo: "https://ipfs.near.social/ipfs/bafkreifjxdfynw6icgtagcgyhsgq5ounl7u45i2pa2xadiax2bpg7kt3hu",
-  },
-  {
-    title: "Project 2 NEAR BOS NDC EVERYTHING",
-    tags: ["near", "bos"],
-    logo: "https://near.org/_next/static/media/logo-black.2e682d59.svg",
-  },
-  {
-    title: "Project 2 NEAR BOS NDC EVERYTHING",
-    tags: ["near", "bos"],
-    logo: "https://near.org/_next/static/media/logo-black.2e682d59.svg",
-  },
-  {
-    title: "Project 2 NEAR BOS NDC EVERYTHING",
-    tags: ["near", "bos"],
-    logo: "https://near.org/_next/static/media/logo-black.2e682d59.svg",
-  },
-  {
-    title: "Project 2 NEAR BOS NDC EVERYTHING",
-    tags: ["near", "bos"],
-    logo: "https://near.org/_next/static/media/logo-black.2e682d59.svg",
-  },
-  {
-    title: "Project 2 NEAR BOS NDC EVERYTHING",
-    tags: ["near", "bos"],
-    logo: "https://near.org/_next/static/media/logo-black.2e682d59.svg",
-  },
-];
+const { handleCreateProject, projects } = props;
 
 function renderProject({ title, tags, logo, id }) {
   return (
     <a
-      className="rounded-2 overflow-hidden"
-      href={"#//*__@appAccount__*//widget/editor?project=" + id}
+      className="rounded-2 overflow-hidden w-100"
+      href={"/#//*__@appAccount__*//widget/home?page=editor&project=" + id}
       style={{
         width: "calc( 20% - 20px )",
         maxWidth: "100%",
@@ -73,7 +41,7 @@ function renderHeader({ handleCreateProject }) {
           size: "lg",
           children: "New project",
         }),
-        content: widget("/*__@appAccount__*//widget/manager.form", {
+        content: widget("/*__@appAccount__*//widget/project.form", {
           handleCreateProject,
         }),
       })}
@@ -83,16 +51,21 @@ function renderHeader({ handleCreateProject }) {
 
 /*__@import:QoL/widget__*/
 
+const Projects = styled.div`
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+  list-style: none;
+  grid-gap: 36px;
+  margin-bottom: 36px;
+`;
+
 return (
   <>
-    {widget("/*__@appAccount__*//widget/ui.navbar")}
     {renderHeader({
       handleCreateProject,
     })}
     {!!projects && !!projects.length && (
-      <div className="d-flex gap-4 flex-wrap">
-        {projects.map(renderProject)}
-      </div>
+      <Projects>{projects.map(renderProject)}</Projects>
     )}
     {(!projects || !projects.length) && (
       <div className="text-center">You don't have any projects yet</div>

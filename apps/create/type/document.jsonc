@@ -1,0 +1,25 @@
+{
+  "properties": {
+    "title": {
+      "type": "string"
+    },
+    "content": {
+      "type": "md",
+      "defaultValue": ""
+    },
+    "description": {
+      "type": "string"
+    },
+    "coverImage": {
+      "type": "string"
+    },
+    "tags": {
+      "type": "array",
+      "itemTypes": [
+        {
+          "type": "string"
+        }
+      ]
+    }
+  }
+}
