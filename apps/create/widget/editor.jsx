@@ -81,12 +81,8 @@ function isJSON(str) {
 }
 
 return (
-  <>
-    <Widget src="/*__@appAccount__*//widget/ui.navbar" />
-
-    <Widget
-      src="/*__@appAccount__*//widget/editor.index"
-      props={{ docs: state.docs, onChange: handleDocChange }}
-    />
-  </>
+  <Widget
+    src="/*__@appAccount__*//widget/editor.index"
+    props={{ docs: state.docs, onChange: handleDocChange }}
+  />
 );

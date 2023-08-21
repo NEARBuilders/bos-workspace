@@ -1,7 +1,9 @@
 /*__@import:QoL/widget__*/
 /*__@import:QoL/classNames__*/
 
-function renderNavbar({ open, setOpen }) {
+const { pages, onPageChange } = props;
+
+function renderNavbar({ open, setOpen, pages, onPageChange }) {
   return (
     <div
       className="navbar mb-3 navbar-expand-lg px-4 rounded-pill"
@@ -47,16 +49,20 @@ function renderNavbar({ open, setOpen }) {
         id="navbarNav"
       >
         <ul className="navbar-nav">
-          <li className="nav-item">
-            <a className="nav-link" href="#//*__@appAccount__*//widget/manager">
-              Projects
-            </a>
-          </li>
-          <li className="nav-item">
-            <a className="nav-link" href="#//*__@appAccount__*//widget/editor">
-              Editor
-            </a>
-          </li>
+          {Array.isArray(pages) &&
+            pages.map((p) => {
+              return (
+                <li className="nav-item">
+                  <a
+                    className="nav-link text-capitilize"
+                    href={"#//*__@appAccount__*//widget/home?page=" + p}
+                    onClick={() => onPageChange(p)}
+                  >
+                    {p}
+                  </a>
+                </li>
+              );
+            })}
         </ul>
       </div>
     </div>
@@ -74,6 +80,8 @@ return (
     {renderNavbar({
       open: state.mobileNavbarOpen,
       setOpen: (v) => update("mobileNavbarOpen", v),
+      pages,
+      onPageChange,
     })}
   </>
 );
