@@ -192,7 +192,7 @@ const Header = styled.div`
   justify-content: space-between;
   align-items: center;
   margin-bottom: 1rem;
-  padding-right : 9px;
+  padding-right: 9px;
 
   .header__right {
     display: flex;
@@ -214,9 +214,7 @@ const Header = styled.div`
 return (
   <div className="py-4 ps-3 pe-1">
     <Header>
-      <h2 className="h5">
-        Documents
-      </h2>
+      <h2 className="h5">Documents</h2>
       <div className="header__right">
         <i
           className="bi bi-folder-plus"

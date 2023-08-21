@@ -24,18 +24,18 @@ const handleButtonClick = (type) => {
 const RenderSelectedType = ({ selectedType }) => {
   switch (selectedType) {
     case "Thing": {
-      return <Widget src="every.near/widget/create.thing" />
+      return <Widget src="every.near/widget/create.thing" />;
     }
     case "Type": {
-      return <Widget src="every.near/widget/create.type" />
+      return <Widget src="every.near/widget/create.type" />;
       break;
     }
     case "Plugin": {
-      return <Widget src="every.near/widget/create.plugin" />
+      return <Widget src="every.near/widget/create.plugin" />;
       break;
     }
     case "Template": {
-      return <Widget src="every.near/widget/create.template" />
+      return <Widget src="every.near/widget/create.template" />;
       break;
     }
   }

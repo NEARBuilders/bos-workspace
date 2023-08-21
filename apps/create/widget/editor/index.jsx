@@ -42,7 +42,6 @@ const getDocFromPath = (docs, path) => {
 };
 
 const handleDocumentClick = (path) => {
-  console.log("handleDocumentClick", path);
   // Set selected document in local storage
   Storage.privateSet("selectedDoc", path);
   // And check if there are any stored changes for it
@@ -120,22 +119,6 @@ const handlePublish = () => {
   });
 };
 
-const handleRenameDocument = (path, value) => {
-  console.log("TODO: handleRenameDocument", path, value);
-
-  // TODO: need to be implemented
-
-  // I'm hesitant to implement this, because if names change, then links to it may break
-  // (Social.get("efiz.near/thing/docs/Doc1"))
-  // This is why I gravitate towards random ids and letting user change title/content
-};
-
-const handleMoveDocument = (from, to) => {
-  console.log("TODO: handleMoveDocument", from, to);
-
-  // TODO: need to be implemented
-};
-
 const handleCreateDocument = (parentPath) => {
   const newKey = `Doc${state.count}`;
   console.log("handleCreateDocument", parentPath, newKey);
@@ -192,8 +175,6 @@ return (
       handleTitleChange,
       handleTabChange,
       handlePublish,
-      handleRenameDocument,
-      handleMoveDocument,
       docs,
       content: state.content,
       tab: state.tab,

@@ -17,10 +17,10 @@ const RenderSelectedType = ({ selectedType }) => {
     const params = typeDef.properties?.reduce((acc, curr) => {
       acc[curr.name] = "";
       return acc;
-  }, {});
+    }, {});
 
     return (
-      <div style={{ width: "100%"}}>
+      <div style={{ width: "100%" }}>
         <Widget
           src="efiz.near/widget/MonacoEditor"
           props={{

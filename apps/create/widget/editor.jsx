@@ -1,4 +1,3 @@
-
 const data = props.data ?? {
   Doc1: {
     title: "Doc1",
@@ -52,7 +51,7 @@ const updateNestedDoc = (docs, path, value) => {
     docs[path[0]].children = updateNestedDoc(
       docs[path[0]].children,
       path.slice(1),
-      value
+      value,
     );
     return docs;
   }

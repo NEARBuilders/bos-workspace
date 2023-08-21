@@ -17,11 +17,13 @@ const RenderSelectedType = ({ selectedType }) => {
     const params = typeDef.properties?.map((it) => it.name);
 
     return (
-      <div style={{ width: "100%"}}>
+      <div style={{ width: "100%" }}>
         <Widget
           src="efiz.near/widget/MonacoEditor"
           props={{
-            code: `function doSomething({ ${params.join(", ")} }) {\n // DO SOMETHING\n }\nreturn { doSomething };\n`,
+            code: `function doSomething({ ${params.join(
+              ", ",
+            )} }) {\n // DO SOMETHING\n }\nreturn { doSomething };\n`,
             language: "javascript",
           }}
         />

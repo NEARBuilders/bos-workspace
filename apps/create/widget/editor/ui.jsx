@@ -105,7 +105,12 @@ return (
     </div>
     <div className="c__right">
       <div className="c__header">
-        <input type="text" placeholder="Untitled" defaultValue={props.title} onInput={(e) => props.handleTitleChange(e.target.value)}/>
+        <input
+          type="text"
+          placeholder="Untitled"
+          defaultValue={props.title}
+          onInput={(e) => props.handleTitleChange(e.target.value)}
+        />
       </div>
       <div className="c__tabs">
         <button
