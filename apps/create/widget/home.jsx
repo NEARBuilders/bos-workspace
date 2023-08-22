@@ -4,12 +4,23 @@ State.init({
   page: props.page ?? "projects",
 });
 
+// function init() {
+//   if (!state.page) {
+//     Storage.get()
+//   }
+// }
+
 console.log("home", props);
 
 return (
   <div>
     {widget("/*__@appAccount__*//widget/ui.navbar", {
-      onPageChange: (v) => State.update({ page: v }),
+      onPageChange: (v) => {
+        // we navigate pages in state so it's smooth
+        State.update({ page: v });
+        // but we set the url in storage so can share link
+        Storage.set("url", "#//*__@appAccount__*//widget/home?page=" + v)
+      },
       pages: ["projects", "list", "editor"],
     })}
     {state.page === "projects" ? (

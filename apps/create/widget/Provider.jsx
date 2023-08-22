@@ -8,7 +8,7 @@ const KEYS = {
   docs: (pid) => `docs/${pid}`, // project' docs structure without content
 };
 
-State.init();
+// State.init(); // we don't gotta init state
 
 const set = (k, v) => State.update({ [k]: v });
 const get = (k) => state[k];

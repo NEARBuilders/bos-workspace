@@ -55,7 +55,7 @@ function renderNavbar({ open, setOpen, pages, onPageChange }) {
                 <li className="nav-item">
                   <a
                     className="nav-link text-capitalize"
-                    href={"#//*__@appAccount__*//widget/home?page=" + p}
+                    // href={"#//*__@appAccount__*//widget/home?page=" + p}
                     onClick={() => onPageChange(p)}
                   >
                     {p}
@@ -65,6 +65,24 @@ function renderNavbar({ open, setOpen, pages, onPageChange }) {
             })}
         </ul>
       </div>
+      {/* Then this button could be installed on the gateway level */}
+    <Widget
+      src="nui.sking.near/widget/Input.Button"
+      props={{
+        children: (
+          <>
+            Share
+            <i className="bi bi-share"></i>
+          </>
+        ),
+        onClick: () => {
+          const url = Storage.get("url");
+          clipboard.writeText("https://everything.dev/" + url);
+        },
+        variant: "info outline",
+        size: "md",
+      }}
+    />
     </div>
   );
 }

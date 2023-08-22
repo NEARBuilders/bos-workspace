@@ -1,5 +1,7 @@
 /*__@import:QoL/widget__*/
 
+// Nice, it works
+return <p>{JSON.stringify(props.handle.project.getAll())}</p>
 const Root = styled.div`
   min-height: max(300px, 80vh);
   width: 100%;
