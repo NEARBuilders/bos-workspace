@@ -1,15 +1,18 @@
-const { handleCreateProject, projects } = props;
+const { handleCreateProject, projects, navigate } = props;
 
 function renderProject({ title, tags, logo, id }) {
   return (
     <a
-      className="rounded-2 overflow-hidden w-100"
-      href={"/#//*__@appAccount__*//widget/home?page=editor&project=" + id} // it would be cool if this could get.
+      className="rounded-2 overflow-hidden w-100 text-decoration-none"
+      onClick={() => {
+        navigate("editor", { project: id });
+      }}
       style={{
         width: "calc( 20% - 20px )",
         maxWidth: "100%",
         backgroundColor: "#f9fbfe",
         border: "1px solid #d1d5db",
+        cursor: "pointer",
       }}
     >
       <div className="ratio ratio-4x3">

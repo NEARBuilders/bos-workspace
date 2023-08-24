@@ -1,5 +1,10 @@
 /*__@import:QoL/widget__*/
-/*__@import:everything/utils/debounce__*/
+
+const { on } = props;
+
+State.init({
+  tab: props.tab || "EDIT",
+});
 
 const Root = styled.div`
   min-height: max(300px, 80vh);
@@ -99,36 +104,9 @@ const Root = styled.div`
   }
 `;
 
-State.init({
-  tab: props.tab || "EDIT",
-  // No need to have content in state, since the inputs are uncontrolled
-});
-
-function handleTitleChange(v) {
-  // these need to know the document id
-  debounce(() =>
-    props.handle["document"].update(props.projectId, props.did, { title: v })
-  ); // this almost needs to be abstracted out
-}
-
-function handleTabChange(v) {
-  State.update({ tab: v });
-}
-
-function handleContentChange(v) {
-  // it's almost like these could be accessed by the type
-  debounce(() =>
-    props.handle["document"].update(props.projectId, props.did, { content: v })
-  ); // this almost needs to be abstracted out
-}
-
-function handlePublish(v) {}
-
-// need to be fed a project id.
-
 return (
   <Root>
-    <div className="c__left" key={props.did}>
+    <div className="c__left" key={props.path}>
       {widget("/*__@appAccount__*//widget/editor.uiFolders", props)}
     </div>
     <div className="c__right">
@@ -137,20 +115,20 @@ return (
           type="text"
           placeholder="Untitled"
           defaultValue={props.doc.title}
-          onInput={(e) => handleTitleChange(e.target.value)}
-          key={props.did}
+          onInput={(e) => on.change("title", e.target.value)}
+          key={props.path}
         />
       </div>
       <div className="c__tabs">
         <button
           className={state.tab === "EDIT" ? "active" : ""}
-          onClick={() => handleTabChange("EDIT")}
+          onClick={() => State.update({ tab: "EDIT" })}
         >
           Write
         </button>
         <button
           className={state.tab === "VIEW" ? "active" : ""}
-          onClick={() => handleTabChange("VIEW")}
+          onClick={() => State.update({ tab: "VIEW" })}
         >
           View
         </button>
@@ -164,10 +142,10 @@ return (
         {/* Just hiding the iframe, so that it doesn't reload everything on tab change */}
         <div
           className={"w-100 h-100" + (state.tab !== "EDIT" ? " d-none" : "")}
-          key={props.did}
+          key={props.path}
         >
           {widget("efiz.near/widget/SimpleMDE", {
-            onChange: handleContentChange,
+            onChange: (v) => on.change("content", v),
             data: { content: props.doc.content },
             toolbar: [
               "heading",
@@ -197,7 +175,7 @@ return (
         {widget("/*__@replace:nui__*//widget/Input.Button", {
           children: "Publish",
           variant: "success",
-          onClick: props.handlePublish,
+          onClick: on.publish,
         })}
       </div>
     </div>

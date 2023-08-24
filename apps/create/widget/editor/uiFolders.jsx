@@ -3,10 +3,16 @@
 
 // TODO: should be able to hide/show children elements
 
-const project = props.handle["project"].get(1) ?? {};
-const flatFolders = props.handle["document"].getAll(project.id) ?? {};
+const { project: projectId, navigate } = props;
+
+// This should be in editor.index but let it be here for now
+const project = props.handle["project"].get(projectId) ?? {};
+const flatFolders = props.handle["document"].getAll(projectId) ?? {};
+
+// Also unflattenDocuments should be removed, it's just extra processing, the widget should be able to handle the flat structure
 const folders = props.handle["utils"].unflattenDocuments(flatFolders);
-const activeDoc = props.handle["document"].getSelected(project.id);
+
+const activeDoc = props.handle["document"].getSelected(projectId);
 const { DOC_SEPARATOR } = props.handle["other"];
 
 const isActive = (path) => path.join(DOC_SEPARATOR) === activeDoc;
@@ -14,13 +20,13 @@ const isActive = (path) => path.join(DOC_SEPARATOR) === activeDoc;
 const handler = (action, path) => {
   switch (action) {
     case "delete":
-      props.handle["document"].delete(project.id, path.join(DOC_SEPARATOR));
+      props.handle["document"].delete(projectId, path.join(DOC_SEPARATOR));
       break;
     case "create":
-      props.handle["document"].create(project.id, path.join(DOC_SEPARATOR));
+      props.handle["document"].create(projectId, path.join(DOC_SEPARATOR));
       break;
     case "open":
-      props.handle["document"].open(project.id, path.join(DOC_SEPARATOR));
+      props.handle["document"].open(projectId, path.join(DOC_SEPARATOR));
     case "rename":
       // props.handleRenameDocument(path, "modal not implemented");
       break;
@@ -113,8 +119,13 @@ const renderProject = (project) => {
     <div>
       <div className="mb-2">
         <a
-          href={`/#//*__@appAccount__*//widget/home?page=projects`}
+          onClick={() => {
+            navigate("projects");
+          }}
           className="text-decoration-none"
+          style={{
+            cursor: "pointer",
+          }}
         >
           <i className="bi bi-arrow-left"></i>
           Back to projects

@@ -3,7 +3,11 @@
 
 const DEBUG = true;
 
+const accountId = context.accountId;
 const Children = props.Children;
+
+let theprops = { ...props };
+delete theprops.Children;
 
 const KEYS = {
   selectedDoc: (pid) => `selectedDoc/${pid}`,
@@ -11,6 +15,7 @@ const KEYS = {
   docs: (pid) => `docs/${pid}`, // this should be the array of project docs
 };
 const DOC_SEPARATOR = ".";
+const DEFAULT_TEMPLATE = "/*__@appAccount__*//widget/templates.default";
 
 /**
  * 
@@ -146,12 +151,20 @@ const handleDocument = {
   },
 
   /**
-   * Get the selected document from Local Storage
+   * Get the selected document from Local Storage, if none is selected, then return the first document and open it
    * @param {string} pid - project id
    * @returns {path} - the path to the selected document
    */
   getSelected: (pid) => {
-    return retrieve(KEYS.selectedDoc(pid));
+    const selected = retrieve(KEYS.selectedDoc(pid));
+    if (selected) return selected;
+
+    const docs = handleDocument.getAll(pid);
+    const firstDoc = Object.keys(docs)[0];
+    if (firstDoc) {
+      handleDocument.open(pid, firstDoc);
+      return firstDoc;
+    }
   },
 
   /**
@@ -179,44 +192,54 @@ const handleDocument = {
 
 const handleProject = {
   getAll: () => {
-    // TODO: get projects from SocialDB
-    return [
-      {
-        id: "project1",
-        title: "Project 1",
-        logo: "https://ipfs.near.social/ipfs/bafkreifjxdfynw6icgtagcgyhsgq5ounl7u45i2pa2xadiax2bpg7kt3hu",
-        tags: ["tag", "docs"],
-        template: "/*__@appAccount__*//widget/templates/default",
-      },
-      {
-        id: "project2",
-        title: "Project 2 NEAR BOS NDC EVERYTHING",
-        tags: ["near", "bos"],
-        logo: "https://near.org/_next/static/media/logo-black.2e682d59.svg",
-        template: "/*__@appAccount__*//widget/templates/docs",
-      },
-    ];
+    return Social.get(`${accountId}/thing/project/**`);
   },
   get: (pid) => {
-    // TODO: get project from SocialDB
-    return {
-      id: pid,
-      title: "Project 1",
-      logo: "https://ipfs.near.social/ipfs/bafkreifjxdfynw6icgtagcgyhsgq5ounl7u45i2pa2xadiax2bpg7kt3hu",
-      tags: ["tag", "docs"],
-      template: "/*__@appAccount__*//widget/templates/default",
-    };
+    return Social.get(`${accountId}/thing/project/${pid}/**`);
   },
   create: (project) => {
     const pid = UUID.generate();
-
-    // TODO: publish project to SocialDB
+    const tags = {};
+    project.tags.forEach((tag) => {
+      tags[tag] = "";
+    });
+    Social.set({
+      thing: {
+        project: {
+          [pid]: {
+            data: {
+              title: project.title || "Untitled",
+              logo: project.logo || "",
+              tags: tags,
+            },
+            template: {
+              src: project.template || DEFAULT_TEMPLATE,
+            },
+            type: {
+              src: "/*__@appAccount__*//type/project",
+            },
+          },
+        },
+      },
+    });
   },
   delete: (pid) => {
-    // TODO: delete project from SocialDB
+    Social.set({
+      thing: {
+        project: {
+          [pid]: null,
+        },
+      },
+    });
   },
   update: (pid, project) => {
-    // TODO: update project metadata in SocialDB
+    Social.set({
+      thing: {
+        project: {
+          [pid]: project,
+        },
+      },
+    });
   },
 };
 
@@ -285,7 +308,7 @@ const handle = {
 };
 
 if (DEBUG) {
-  const selectedDoc = handle["document"].getSelected(props.projectId);
+  const selectedDoc = handle["document"].getSelected(props.project);
   const doc = handle["document"].get(selectedDoc);
 
   return (
@@ -297,15 +320,15 @@ if (DEBUG) {
         <Markdown
           text={
             "```json " +
-            JSON.stringify(handle["document"].getAll(props.projectId), null, 2)
+            JSON.stringify(handle["document"].getAll(props.project), null, 2)
           }
         />
         {}
       </p>
       <hr />
-      <Children handle={handle} {...props} />
+      <Children handle={handle} {...theprops} />
     </>
   );
 }
 
-return <Children handle={handle} {...props} />;
+return <Children handle={handle} {...theprops} />;

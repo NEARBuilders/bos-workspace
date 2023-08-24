@@ -54,8 +54,10 @@ function renderNavbar({ open, setOpen, pages, onPageChange }) {
               return (
                 <li className="nav-item">
                   <a
-                    className="nav-link text-capitalize"
-                    // href={"#//*__@appAccount__*//widget/home?page=" + p}
+                    className="nav-link text-capitalize text-decoration-none"
+                    style={{
+                      cursor: "pointer",
+                    }}
                     onClick={() => onPageChange(p)}
                   >
                     {p}
