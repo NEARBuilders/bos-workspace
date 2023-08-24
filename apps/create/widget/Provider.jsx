@@ -234,7 +234,7 @@ const handleDocument = {
             },
           });
         },
-      }
+      },
     );
   },
 
@@ -462,7 +462,7 @@ if (Storage.privateGet("debug")) {
             JSON.stringify(
               handle["document"].fetch(props.project, selectedDoc),
               null,
-              2
+              2,
             )
           }
         />
@@ -476,7 +476,7 @@ if (Storage.privateGet("debug")) {
             JSON.stringify(
               handle["document"].fetchAllTitles(props.project),
               null,
-              2
+              2,
             )
           }
         />
