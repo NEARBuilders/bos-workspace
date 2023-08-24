@@ -167,6 +167,24 @@ const handleDocument = {
     }
   },
 
+  // TODO
+  fetch: (pid, path) => {
+    const doc = Social.get(`${accountId}/document/${pid}/${path}`);
+    return doc;
+  },
+
+  // TODO
+  fetchAll: (pid) => {
+    const docs = Social.get(`${accountId}/document/${pid}/**`);
+    return docs;
+  },
+
+  // TODO
+  fetchAllTitles: (pid, path) => {
+    const docs = Social.get(`${accountId}/document/${pid}/*/title`);
+    return docs;
+  },
+
   /**
    * Set the selected document in Local Storage
    * @param {string} pid - project id
@@ -180,14 +198,27 @@ const handleDocument = {
    * @param {string} path - path to the document
    */
   publish: (pid, path) => {
-    // TODO:
+    const doc = handleDocument.get(path);
+
+    Social.set({
+      document: {
+        [pid]: {
+          [path]: {
+            data: doc,
+            type: {
+              src: "/*__@appAccount__*//type/document",
+            },
+          },
+        },
+      },
+    });
   },
 
   /**
    * Generates a new UID
    * @returns {string} - the new UID
    */
-  generateId: () => UUID.generate("xxxxxx"),
+  generateId: () => UUID.generate("xxxxxxx"),
 };
 
 const handleProject = {
@@ -310,12 +341,21 @@ const handle = {
 if (DEBUG) {
   const selectedDoc = handle["document"].getSelected(props.project);
   const doc = handle["document"].get(selectedDoc);
+  const projectData = handle["project"].get(props.project);
 
   return (
     <>
-      <p>{JSON.stringify(selectedDoc)}</p>
-      <p>{JSON.stringify(doc)}</p>
+      <Children handle={handle} {...theprops} />
       <hr />
+      <h3>Debug</h3>
+      <hr />
+      <p>Selected Project: {props.project}</p>
+      <p>Content: {JSON.stringify(projectData)}</p>
+      <hr />
+      <p>Selected Doc: {selectedDoc}</p>
+      <p>Content: {JSON.stringify(doc)}</p>
+      <hr />
+      All Docs:
       <p style={{ maxHeight: 300, overflow: "auto" }}>
         <Markdown
           text={
@@ -326,7 +366,6 @@ if (DEBUG) {
         {}
       </p>
       <hr />
-      <Children handle={handle} {...theprops} />
     </>
   );
 }

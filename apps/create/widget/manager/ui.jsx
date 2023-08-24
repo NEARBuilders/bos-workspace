@@ -1,3 +1,5 @@
+/*__@import:QoL/Url__*/
+
 const { handleCreateProject, projects, navigate } = props;
 
 function renderProject({ title, tags, logo, id }) {
@@ -7,6 +9,10 @@ function renderProject({ title, tags, logo, id }) {
       onClick={() => {
         navigate("editor", { project: id });
       }}
+      href={Url.construct("#//*__@appAccount__*//widget/home", {
+        page: "editor",
+        project: id,
+      })}
       style={{
         width: "calc( 20% - 20px )",
         maxWidth: "100%",

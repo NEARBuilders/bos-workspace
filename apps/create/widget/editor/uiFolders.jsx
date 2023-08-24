@@ -1,5 +1,6 @@
 /*__@import:QoL/classNames__*/
 /*__@import:QoL/widget__*/
+/*__@import:QoL/Url__*/
 
 // TODO: should be able to hide/show children elements
 
@@ -113,7 +114,7 @@ const renderFolder = (folder) => {
 };
 
 const renderProject = (project) => {
-  const { title, logo, id } = project;
+  const { title, logo } = project.data;
 
   return (
     <div>
@@ -122,6 +123,9 @@ const renderProject = (project) => {
           onClick={() => {
             navigate("projects");
           }}
+          href={Url.construct("#//*__@appAccount__*//widget/home", {
+            page: "projects",
+          })}
           className="text-decoration-none"
           style={{
             cursor: "pointer",
@@ -132,9 +136,15 @@ const renderProject = (project) => {
         </a>
       </div>
       <a
-        href={`/#//*__@appAccount__*//widget/home?page=project&project=${id}`}
         className="d-flex justify-content-center gap-3 align-items-center mb-auto w-100"
         title="Open project settings"
+        onClick={() => {
+          navigate("manage", { project: projectId });
+        }}
+        href={Url.construct("#//*__@appAccount__*//widget/home", {
+          page: "manage",
+          project: projectId,
+        })}
       >
         {logo && <img src={logo} alt={title} height={55} width={55} />}
         <h5
