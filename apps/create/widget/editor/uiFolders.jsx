@@ -28,6 +28,10 @@ const handler = (action, path) => {
       break;
     case "open":
       props.handle["document"].open(projectId, path.join(DOC_SEPARATOR));
+      break;
+    case "refresh":
+      props.handle["project"].init(projectId, true);
+      break;
     case "rename":
       // props.handleRenameDocument(path, "modal not implemented");
       break;
@@ -40,7 +44,7 @@ const handler = (action, path) => {
 };
 
 const renderFolderHeader = (folder) => {
-  const { title, path, icon, isFile } = folder;
+  const { title, path, icon, isFile, inBuffer } = folder;
 
   return (
     <div
@@ -64,6 +68,13 @@ const renderFolderHeader = (folder) => {
           ? "Untitled"
           : title}
       </span>
+      {inBuffer && (
+        <i
+          className="bi bi-asterisk ms-1"
+          title="unsaved changes"
+          style={{ color: "red" }}
+        ></i>
+      )}
       <i
         className="button bi bi-file-earmark-plus"
         id="create-file"
@@ -80,7 +91,11 @@ const renderFolderHeader = (folder) => {
 
 const renderFolder = (folder) => {
   const { path, value, index } = folder;
-  const { children, title } = value;
+  const {
+    children,
+    title,
+    _: { inBuffer },
+  } = value;
 
   return (
     <div
@@ -95,6 +110,7 @@ const renderFolder = (folder) => {
             title: title,
             path: path,
             isFile: !children || Object.keys(children).length === 0,
+            inBuffer,
           }),
       })}
 
@@ -321,6 +337,19 @@ return (
             });
           })}
       </Folders>
+    </div>
+
+    <div>
+      {/* TODO: The markdown editor doesn't refresh even if data is fresh */}
+      <Widget
+        src="/*__@replace:nui__*//widget/Input.Button"
+        props={{
+          children: "Refresh",
+          onClick: () => {
+            handler("refresh");
+          },
+        }}
+      />
     </div>
   </Wrapper>
 );

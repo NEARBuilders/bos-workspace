@@ -104,6 +104,12 @@ const Root = styled.div`
   }
 `;
 
+const selectedDoc = props.handle["document"].getSelected(props.project);
+const doc = props.handle["document"].get(selectedDoc);
+
+const lastUpdated = doc.updatedAt;
+const isBuffer = doc._.inBuffer;
+
 return (
   <Root>
     <div className="c__left" key={props.path}>
@@ -165,18 +171,21 @@ return (
       </div>
       <div className="c__footer">
         <span>
-          Draft auto-saved at{" "}
-          {new Date().toLocaleTimeString("en-US", {
+          {isBuffer ? "Draft auto-saved " : "Last published "} at{" "}
+          {new Date(lastUpdated).toLocaleTimeString("en-US", {
             hour: "2-digit",
             minute: "2-digit",
           })}
           .
         </span>
-        {widget("/*__@replace:nui__*//widget/Input.Button", {
-          children: "Publish",
-          variant: "success",
-          onClick: on.publish,
-        })}
+        <div>
+          {widget("/*__@replace:nui__*//widget/Input.Button", {
+            children: "Publish",
+            variant: "success",
+            onClick: on.publish,
+            disabled: !isBuffer,
+          })}
+        </div>
       </div>
     </div>
   </Root>

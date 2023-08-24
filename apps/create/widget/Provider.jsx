@@ -1,7 +1,9 @@
 /*__@import:everything/utils/UUID__*/
 /*__@import:QoL/storage__*/
 
-const DEBUG = true;
+State.init({
+  debug: true,
+});
 
 const accountId = context.accountId;
 const Children = props.Children;
@@ -13,6 +15,7 @@ const KEYS = {
   selectedDoc: (pid) => `selectedDoc/${pid}`,
   doc: (path) => `doc/${path}`, // having path here will let us always know the structure of the doc
   docs: (pid) => `docs/${pid}`, // this should be the array of project docs
+  init: (pid) => `init/${pid}`, // lets us know when the project has been initialized
 };
 const DOC_SEPARATOR = ".";
 const DEFAULT_TEMPLATE = "/*__@appAccount__*//widget/templates.default";
@@ -100,7 +103,14 @@ const handleDocument = {
    */
   update: (pid, path, value) => {
     const doc = retrieve(KEYS.doc(path));
-    handleDocument.set(pid, path, { ...doc, ...value });
+    handleDocument.set(pid, path, {
+      ...doc,
+      ...value,
+      updatedAt: new Date().toISOString(),
+      _: {
+        inBuffer: true,
+      },
+    });
   },
 
   /**
@@ -115,7 +125,13 @@ const handleDocument = {
     const path = `${parentPath}${
       parentPath && DOC_SEPARATOR
     }${handleDocument.generateId()}`;
-    handleDocument.set(pid, path, value);
+    handleDocument.set(pid, path, {
+      ...value,
+      createdAt: new Date().toISOString(),
+      _: {
+        inBuffer: true,
+      },
+    });
   },
 
   /**
@@ -169,7 +185,7 @@ const handleDocument = {
 
   // TODO
   fetch: (pid, path) => {
-    const doc = Social.get(`${accountId}/document/${pid}/${path}`);
+    const doc = Social.get(`${accountId}/document/${pid}/${path}/**`);
     return doc;
   },
 
@@ -199,19 +215,27 @@ const handleDocument = {
    */
   publish: (pid, path) => {
     const doc = handleDocument.get(path);
+    delete doc._;
 
-    Social.set({
-      document: {
-        [pid]: {
-          [path]: {
-            data: doc,
-            type: {
-              src: "/*__@appAccount__*//type/document",
-            },
+    Social.set(
+      {
+        document: {
+          [pid]: {
+            [path]: doc,
           },
         },
       },
-    });
+      {
+        onCommit: () => {
+          handleDocument.set(pid, path, {
+            ...doc,
+            _: {
+              inBuffer: false,
+            },
+          });
+        },
+      }
+    );
   },
 
   /**
@@ -272,7 +296,47 @@ const handleProject = {
       },
     });
   },
+
+  /**
+   * Fetches project documents from SocialDB and stores them in Local Storage,
+   * it does not override the local documents if updatedAt is more recent,
+   *
+   * @note I'm not sure if it's okay to store all documents in Local Storage, it may be too much data for big projects,
+   * I think it's better to use fetchTitle and fetch to get the document when user opens it, and then store it in Local Storage
+   * if edited.
+   *
+   * @param {string} pid - project id
+   * @returns {void} - nothing
+   */
+  init: (pid, force) => {
+    if (!pid) return;
+    if (!force) {
+      const lastInit = retrieve(KEYS.init(pid));
+      // if the project has already been initialized in the past 24 hours, then don't do it again
+      if (lastInit && new Date(lastInit) > new Date(Date.now() - 86400000))
+        return;
+    }
+
+    const docs = handleDocument.fetchAll(pid);
+    if (docs === null) return;
+
+    Object.keys(docs || {}).forEach((path) => {
+      const doc = docs[path];
+      const localDoc = handleDocument.get(path);
+      if (!localDoc || new Date(doc.updatedAt) > new Date(localDoc.updatedAt)) {
+        handleDocument.set(pid, path, doc);
+      }
+    });
+
+    store(KEYS.init(pid), new Date().toISOString());
+    console.log("Project initialized");
+  },
 };
+
+/**
+ * Initialize
+ */
+props.project && handleProject.init(props.project);
 
 const handleUtils = {
   /**
@@ -338,7 +402,7 @@ const handle = {
   other: { DOC_SEPARATOR },
 };
 
-if (DEBUG) {
+if (Storage.privateGet("debug")) {
   const selectedDoc = handle["document"].getSelected(props.project);
   const doc = handle["document"].get(selectedDoc);
   const projectData = handle["project"].get(props.project);
@@ -347,15 +411,40 @@ if (DEBUG) {
     <>
       <Children handle={handle} {...theprops} />
       <hr />
-      <h3>Debug</h3>
+      <Widget
+        src="/*__@replace:nui__*//widget/Input.Select"
+        props={{
+          label: "Debug",
+          value: `${!!Storage.privateGet("debug")}`,
+          onChange: (v) => {
+            Storage.privateSet("debug", v === "true");
+          },
+          options: [
+            {
+              title: "Enabled",
+              value: true,
+            },
+            {
+              title: "Disabled",
+              value: false,
+            },
+          ],
+        }}
+      />
       <hr />
       <p>Selected Project: {props.project}</p>
-      <p>Content: {JSON.stringify(projectData)}</p>
+      Content:
+      <p style={{ maxHeight: 300, overflow: "auto" }}>
+        <Markdown text={"```json " + JSON.stringify(projectData, null, 2)} />
+      </p>
       <hr />
       <p>Selected Doc: {selectedDoc}</p>
-      <p>Content: {JSON.stringify(doc)}</p>
+      Local Doc:
+      <p style={{ maxHeight: 300, overflow: "auto" }}>
+        <Markdown text={"```json " + JSON.stringify(doc, null, 2)} />
+      </p>
       <hr />
-      All Docs:
+      All Local Docs:
       <p style={{ maxHeight: 300, overflow: "auto" }}>
         <Markdown
           text={
@@ -363,11 +452,73 @@ if (DEBUG) {
             JSON.stringify(handle["document"].getAll(props.project), null, 2)
           }
         />
-        {}
       </p>
       <hr />
+      Fetched
+      <p style={{ maxHeight: 300, overflow: "auto" }}>
+        <Markdown
+          text={
+            "```json " +
+            JSON.stringify(
+              handle["document"].fetch(props.project, selectedDoc),
+              null,
+              2
+            )
+          }
+        />
+      </p>
+      <hr />
+      Fetch All Titles
+      <p style={{ maxHeight: 300, overflow: "auto" }}>
+        <Markdown
+          text={
+            "```json " +
+            JSON.stringify(
+              handle["document"].fetchAllTitles(props.project),
+              null,
+              2
+            )
+          }
+        />
+      </p>
+      <hr />
+      Fetch All
+      <p style={{ maxHeight: 300, overflow: "auto" }}>
+        <Markdown
+          text={
+            "```json " +
+            JSON.stringify(handle["document"].fetchAll(props.project), null, 2)
+          }
+        />
+      </p>
     </>
   );
 }
 
-return <Children handle={handle} {...theprops} />;
+return (
+  <>
+    <Children handle={handle} {...theprops} />
+    <hr />
+    <Widget
+      src="/*__@replace:nui__*//widget/Input.Select"
+      props={{
+        label: "Debug",
+        value: `${!!Storage.privateGet("debug")}`,
+        onChange: (v) => {
+          Storage.privateSet("debug", v === "true");
+        },
+        options: [
+          {
+            title: "Enabled",
+            value: true,
+          },
+          {
+            title: "Disabled",
+            value: false,
+          },
+        ],
+      }}
+    />
+    <hr />
+  </>
+);
