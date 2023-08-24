@@ -100,20 +100,14 @@ const Root = styled.div`
 `;
 
 State.init({
-  title: props.title || "",
   tab: props.tab || "EDIT",
-  content: props.content || "",
+  // No need to have content in state, since the inputs are uncontrolled
 });
 
 function handleTitleChange(v) {
-  State.update({ title: v });
   // these need to know the document id
   debounce(() =>
-    props.handle["document"].update(
-      props.projectId,
-      props.did,
-      { title: v }
-    )
+    props.handle["document"].update(props.projectId, props.did, { title: v })
   ); // this almost needs to be abstracted out
 }
 
@@ -122,16 +116,9 @@ function handleTabChange(v) {
 }
 
 function handleContentChange(v) {
-  State.update({
-    content: v,
-  });
   // it's almost like these could be accessed by the type
   debounce(() =>
-    props.handle["document"].update(
-      props.projectId,
-      props.did,
-      { content: v }
-    )
+    props.handle["document"].update(props.projectId, props.did, { content: v })
   ); // this almost needs to be abstracted out
 }
 
@@ -141,19 +128,7 @@ function handlePublish(v) {}
 
 return (
   <Root>
-    <p>
-      {JSON.stringify(
-        props.handle["document"].getAll(props.projectId)
-      )}
-    </p>
     <div className="c__left" key={props.did}>
-      {" "}
-      {/** this gets passed props, what is it expecting?
-       *
-       * a project id
-       *
-       * we are successfully creating different ids.
-       */}
       {widget("/*__@appAccount__*//widget/editor.uiFolders", props)}
     </div>
     <div className="c__right">
@@ -161,8 +136,9 @@ return (
         <input
           type="text"
           placeholder="Untitled"
-          defaultValue={state.title}
+          defaultValue={props.doc.title}
           onInput={(e) => handleTitleChange(e.target.value)}
+          key={props.did}
         />
       </div>
       <div className="c__tabs">
@@ -173,25 +149,26 @@ return (
           Write
         </button>
         <button
-          className={props.tab === "VIEW" ? "active" : ""}
-          onClick={() => props.handleTabChange("VIEW")}
+          className={state.tab === "VIEW" ? "active" : ""}
+          onClick={() => handleTabChange("VIEW")}
         >
           View
         </button>
       </div>
       <div className="c__editor">
-        {props.tab === "VIEW" &&
+        {state.tab === "VIEW" &&
           widget("openwebbuild.near/widget/Post.Markdown", {
-            text: props.content,
+            text: props.doc.content,
           })}
 
         {/* Just hiding the iframe, so that it doesn't reload everything on tab change */}
         <div
           className={"w-100 h-100" + (state.tab !== "EDIT" ? " d-none" : "")}
+          key={props.did}
         >
           {widget("efiz.near/widget/SimpleMDE", {
             onChange: handleContentChange,
-            data: { content: state.content },
+            data: { content: props.doc.content },
             toolbar: [
               "heading",
               "bold",

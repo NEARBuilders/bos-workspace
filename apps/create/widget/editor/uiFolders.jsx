@@ -1,22 +1,31 @@
 /*__@import:QoL/classNames__*/
 /*__@import:QoL/widget__*/
 
-// TODO: active document not showing
 // TODO: should be able to hide/show children elements
 
 const project = props.handle["project"].get(1) ?? {};
-const folders = props.handle["document"].getAll(project.id) ?? {};
+const flatFolders = props.handle["document"].getAll(project.id) ?? {};
+const folders = props.handle["utils"].unflattenDocuments(flatFolders);
+const activeDoc = props.handle["document"].getSelected(project.id);
+const { DOC_SEPARATOR } = props.handle["other"];
+
+const isActive = (path) => path.join(DOC_SEPARATOR) === activeDoc;
 
 const handler = (action, path) => {
   switch (action) {
     case "delete":
-      props.handle["document"].delete(project.id, path);
+      props.handle["document"].delete(project.id, path.join(DOC_SEPARATOR));
       break;
+    case "create":
+      props.handle["document"].create(project.id, path.join(DOC_SEPARATOR));
+      break;
+    case "open":
+      props.handle["document"].open(project.id, path.join(DOC_SEPARATOR));
     case "rename":
-      props.handleRenameDocument(path, "modal not implemented");
+      // props.handleRenameDocument(path, "modal not implemented");
       break;
     case "move":
-      props.handleMoveDocument(path, "modal not implemented");
+      // props.handleMoveDocument(path, "modal not implemented");
       break;
     default:
       break;
@@ -29,13 +38,12 @@ const renderFolderHeader = (folder) => {
   return (
     <div
       className={path.length > 1 ? "folder__child__header" : "folder__header"}
-      data-active={folder.active}
+      data-active={isActive(path)}
       role="button"
       tabIndex="0"
       title="Open folder"
       onClick={(e) => {
-        if (e.target.id !== "create-file")
-          props.handle["document"].open(project.id, path); 
+        if (e.target.id !== "create-file") handler("open", path);
       }}
     >
       <i
@@ -53,7 +61,7 @@ const renderFolderHeader = (folder) => {
         className="button bi bi-file-earmark-plus"
         id="create-file"
         onClick={() => {
-          props.handle["document"].create(project.id, path);
+          handler("create", path);
         }}
         role="button"
         tabIndex="0"
@@ -77,7 +85,7 @@ const renderFolder = (folder) => {
         handler,
         renderTrigger: () =>
           renderFolderHeader({
-            title: props.handle["document"].get(project.id, path).title, // Hmmmm is there a better way to do this?
+            title: title,
             path: path,
             isFile: !children || Object.keys(children).length === 0,
           }),
@@ -142,6 +150,7 @@ const Folders = styled.div`
   }
   .folder__header,
   .folder__child__header {
+    user-select: none;
     display: flex;
     align-items: center;
     gap: 6px;
@@ -273,7 +282,7 @@ return (
             className="bi bi-file-earmark-plus"
             role="button"
             onClick={() => {
-              props.handle["document"].create(project.id, path);
+              handler("create", []);
             }}
             title="Create new folder"
             tabIndex="0"

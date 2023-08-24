@@ -1,211 +1,311 @@
 /*__@import:everything/utils/UUID__*/
+/*__@import:QoL/storage__*/
+
+const DEBUG = true;
 
 const Children = props.Children;
 
 const KEYS = {
   selectedDoc: (pid) => `selectedDoc/${pid}`,
-  doc: (did) => `doc/${did}`,
-  docs: (pid) => `docs/${pid}`, // project' docs structure without content
+  doc: (path) => `doc/${path}`, // having path here will let us always know the structure of the doc
+  docs: (pid) => `docs/${pid}`, // this should be the array of project docs
 };
+const DOC_SEPARATOR = ".";
 
-const store = (k, v) => Storage.privateSet(k, v);
-const retrieve = (k) => Storage.privateGet(k);
-
-const setPath = (docs, path, value) => {
-  if (path.length === 1) {
-    if (value !== null) {
-      const updatedDoc = {
-        ...docs[path[0]],
-        ...value,
-      };
-      return {
-        ...docs,
-        [path[0]]: updatedDoc,
-      };
-    } else {
-      // We're deleting a document
-      const remainingDocs = JSON.parse(JSON.stringify(docs));
-      delete remainingDocs[path[0]];
-      return remainingDocs;
-    }
-  } else {
-    docs[path[0]].children = setPath(
-      docs[path[0]].children,
-      path.slice(1),
-      value
-    );
-    return docs;
-  }
-};
-const getPath = (docs, path) => {
-  return path.reduce((currentDoc, key, index) => {
-    // If it's the last key in the path, return the document itself
-    if (index === path.length - 1) {
-      return currentDoc[key];
-    }
-    // Otherwise, navigate to the children of the current document
-    return currentDoc[key].children;
-  }, docs);
-};
-const didToPath = (docs, id) => {
-  const path = [];
-  const traverse = (docs, id) => {
-    for (const key in docs) {
-      if (key === id) {
-        path.push(key);
-        return true;
-      }
-      if (docs[key].children) {
-        path.push(key);
-        if (traverse(docs[key].children, id)) {
-          return true;
-        }
-        path.pop();
-      }
-    }
-    return false;
-  };
-  traverse(docs, id);
-  return path;
-};
-const pathToObj = (path) => {
-  const obj = {};
-  path.reduce((currentObj, key, index) => {
-    if (index === path.length - 1) {
-      currentObj[key] = {};
-    } else {
-      currentObj[key] = {};
-      return currentObj[key];
-    }
-  }, obj);
-  return obj;
-};
-
-const handle = {
-  document: {
-    get: (path) => {
-      return retrieve(KEYS.doc(path))
-      // TODO: get document from SocialDB, including children
-      return {
-        title: "Hello",
-        content: "Hello, World!",
-        children: {
-          1: {
-            title: "World",
-            content: "Hello, World!",
-            children: {
-              2: {
-                title: "NEAR",
-                content: "Hello, World!",
-              },
-            },
+/**
+ * 
+ * I'm trying to learn what is the best way to structure our data, 
+ * I think a lot of the complexity in code comes from keeping the documents structured in an object. 
+ * Objects are great for storing data, but they are not great for keeping track of the structure of the data, 
+ * they get messy and hard to work with. But strings paths are very predictable and easy to work with.
+ * 
+ * So we can just store the documents in a flat structure, similar to how the widgets are stored in SocialDB
+ * and we can keep the paths in keys.
+ * 
+   {
+       "project1": {
+          "": {
+              "title": "Project 1",
           },
-          2: {
-            title: "NEAR",
-            content: "Hello, World!",
+          "doc1": {
+              "title": "Document 1",
           },
-        },
-      };
-    },
-    getAll: (pid) => {
-      return retrieve(KEYS.docs(pid))
-      // TODO: get document from SocialDB, including children
-    },
-    getSelected: (pid) => { // the pid, which is a random uuid
-      const val = retrieve(KEYS.selectedDoc(pid));
-      console.log(val);
-      return val;
-    },
-    open: (pid, path) => { // changed from path to did (?)
-      store(KEYS.selectedDoc(pid), path);
-    },
-    create: (pid, parentPath) => {
-      const docs = retrieve(KEYS.docs(pid));
-
-      const newKey = UUID.generate();
-      let newPath; // This will store the path to the newly created document
-
-      if (parentPath && parentPath.length) {
-        newPath = [...parentPath, newKey];
-      } else {
-        newPath = [newKey];hand
+          "doc1.doc2": {
+              "title": "Document 1",
+              "content": "Content here..."
+          },
+          "doc1.doc2.doc3": {
+              "title": "Document 2",
+              "content": "Content here..."
+          }
       }
+   }
+ * 
+ * Realistically, a project will never have more than 100 documents, so we don't need to worry about performance, 
+ * and we can just use Social.keys to get all the keys and play around with them.
+ * 
+ */
 
-      // Update the docs structure in storage
-      store(KEYS.docs(pid), setPath(docs, newPath, {}));
+const handleDocument = {
+  /**
+   * Create, or updates, or deletes document in Local Storage
+   *
+   * if value is an object, then create or update the document
+   * if value is null, then delete the document
+   *
+   * @param {string} pid - project id
+   * @param {string} path - path to the document
+   * @param {object} value - the value to set at the path
+   *
+   * @returns {void} - nothing
+   */
+  set: (pid, path, value) => {
+    store(KEYS.doc(path), value);
 
-      // open the new document
-      store(KEYS.selectedDoc(pid), newPath);
-    },
-    delete: (pid, path) => {
-      const docs = retrieve(KEYS.docs(pid));
+    // We need to keep track of the documents in the project
+    let paths = retrieve(KEYS.docs(pid));
+    paths = Array.isArray(paths) ? paths : [];
 
-      // Update the docs in storage
-      store(KEYS.docs(pid), setPath(docs, path, null));
+    // If the document is being deleted, then we need to remove it from the docs array
+    if (value === null) {
+      const newDocs = paths.filter((docPath) => docPath !== path);
+      store(KEYS.docs(pid), newDocs);
+    }
 
-      // If the deleted document is the selected document, clear the selected document
-      if (path === retrieve(KEYS.selectedDoc(pid))) {
-        store(KEYS.selectedDoc(pid), null);
-      }
-    },
-    update: (pid, path, value) => {
-      const doc = retrieve(KEYS.doc(path));
-      
-      // Update the doc content in storage
-      store(KEYS.doc(path), { ...doc, ...value });
-    },
-    publish: (pid, did) => {
-      const doc = retrieve(KEYS.doc(did));
-      const docWithPath = pathToObj(didToPath(docs, did));
+    // If the document is being created or updated, we need to make sure it's in the docs array
+    if (value !== null && !paths.includes(path)) {
+      store(KEYS.docs(pid), [...paths, path]);
+    }
 
-      // TODO: publish doc to SocialDB
-
-      // Remove the doc from the doc storage
-      store(KEYS.doc(did), null);
-    },
+    // Open the new document
+    store(KEYS.selectedDoc(pid), path);
   },
-  project: {
-    getAll: () => {
-      // TODO: get projects from SocialDB
-      return [
-        {
-          id: "project1",
-          title: "Project 1",
-          logo: "https://ipfs.near.social/ipfs/bafkreifjxdfynw6icgtagcgyhsgq5ounl7u45i2pa2xadiax2bpg7kt3hu",
-          tags: ["tag", "docs"],
-          template: "/*__@appAccount__*//widget/templates/default",
-        },
-        {
-          id: "project2",
-          title: "Project 2 NEAR BOS NDC EVERYTHING",
-          tags: ["near", "bos"],
-          logo: "https://near.org/_next/static/media/logo-black.2e682d59.svg",
-          template: "/*__@appAccount__*//widget/templates/docs",
-        },
-      ];
-    },
-    get: (pid) => {
-      // TODO: get project from SocialDB
-      return {
-        id: pid,
+
+  /**
+   * Wrapper for set that only updates the document keys
+   *
+   * @param {string} pid - project id
+   * @param {string} path - path to the document
+   * @param {object} value - the value to set at the path
+   * @returns {void} - nothing
+   *
+   * @example
+   * // This will update the document title, without afecting the content
+   * handle["document"].update(projectId, path, { title: "New Title" });
+   */
+  update: (pid, path, value) => {
+    const doc = retrieve(KEYS.doc(path));
+    handleDocument.set(pid, path, { ...doc, ...value });
+  },
+
+  /**
+   * Wrapper for set that creates a new document under parent path
+   * @param {string} pid - project id
+   * @param {string} parentPath - optional path to the parent document
+   * @param {object} value - optional value to set at the path
+   */
+  create: (pid, parentPath, value) => {
+    if (!value) value = { title: "", content: "" };
+    if (!parentPath) parentPath = "";
+    const path = `${parentPath}${
+      parentPath && DOC_SEPARATOR
+    }${handleDocument.generateId()}`;
+    handleDocument.set(pid, path, value);
+  },
+
+  /**
+   * Wrapper for set that deletes a document
+   * @param {string} pid - project id
+   * @param {string} path - path to the document
+   * @returns {void} - nothing
+   */
+  delete: (pid, path) => handleDocument.set(pid, path, undefined),
+
+  /**
+   * Get a document from Local Storage
+   * @param {string} path - path to the document
+   * @returns {object} - the document
+   */
+  get: (path) => retrieve(KEYS.doc(path)),
+
+  /**
+   * Get project documents from Local Storage
+   * @param {string} pid - project id
+   * @returns {object} - the documents
+   */
+  getAll: (pid) => {
+    let paths = retrieve(KEYS.docs(pid)) || [];
+    paths = Array.isArray(paths) ? paths : [];
+
+    let docs = {};
+    paths.forEach((path) => {
+      const doc = retrieve(KEYS.doc(path));
+      if (doc) docs[path] = retrieve(KEYS.doc(path));
+    });
+    return docs;
+  },
+
+  /**
+   * Get the selected document from Local Storage
+   * @param {string} pid - project id
+   * @returns {path} - the path to the selected document
+   */
+  getSelected: (pid) => {
+    return retrieve(KEYS.selectedDoc(pid));
+  },
+
+  /**
+   * Set the selected document in Local Storage
+   * @param {string} pid - project id
+   * @param {string} path - path to the document
+   */
+  open: (pid, path) => store(KEYS.selectedDoc(pid), path),
+
+  /**
+   * Saves the document to SocialDB
+   * @param {string} pid - project id
+   * @param {string} path - path to the document
+   */
+  publish: (pid, path) => {
+    // TODO:
+  },
+
+  /**
+   * Generates a new UID
+   * @returns {string} - the new UID
+   */
+  generateId: () => UUID.generate("xxxxxx"),
+};
+
+const handleProject = {
+  getAll: () => {
+    // TODO: get projects from SocialDB
+    return [
+      {
+        id: "project1",
         title: "Project 1",
         logo: "https://ipfs.near.social/ipfs/bafkreifjxdfynw6icgtagcgyhsgq5ounl7u45i2pa2xadiax2bpg7kt3hu",
         tags: ["tag", "docs"],
         template: "/*__@appAccount__*//widget/templates/default",
-      };
-    },
-    create: (project) => {
-      const pid = UUID.generate();
+      },
+      {
+        id: "project2",
+        title: "Project 2 NEAR BOS NDC EVERYTHING",
+        tags: ["near", "bos"],
+        logo: "https://near.org/_next/static/media/logo-black.2e682d59.svg",
+        template: "/*__@appAccount__*//widget/templates/docs",
+      },
+    ];
+  },
+  get: (pid) => {
+    // TODO: get project from SocialDB
+    return {
+      id: pid,
+      title: "Project 1",
+      logo: "https://ipfs.near.social/ipfs/bafkreifjxdfynw6icgtagcgyhsgq5ounl7u45i2pa2xadiax2bpg7kt3hu",
+      tags: ["tag", "docs"],
+      template: "/*__@appAccount__*//widget/templates/default",
+    };
+  },
+  create: (project) => {
+    const pid = UUID.generate();
 
-      // TODO: publish project to SocialDB
-    },
-    delete: (pid) => {
-      // TODO: delete project from SocialDB
-    },
-    update: (pid, project) => {
-      // TODO: update project metadata in SocialDB
+    // TODO: publish project to SocialDB
+  },
+  delete: (pid) => {
+    // TODO: delete project from SocialDB
+  },
+  update: (pid, project) => {
+    // TODO: update project metadata in SocialDB
+  },
+};
+
+const handleUtils = {
+  /**
+   * Unflatten the documents object
+   * @param {object} inputObject - the object to unflatten
+   * @returns {object} - the unflattened object
+   * @example
+   * 
+const input = {
+  702250: { title: "", content: "" },
+  "702250.3cbbb3": { title: "", content: "" },
+  "702250.3cbbb3.acuont": { title: "", content: "" },
+  "702250.89thao": { title: "", content: "" },
+};
+
+const output = {
+  702250: {
+    title: "",
+    content: "",
+    children: {
+      "3cbbb3": {
+        title: "",
+        content: "",
+        children: {
+          acuont: { title: "", content: "" },
+        },
+      },
+      "89thao": {
+        title: "",
+        content: "",
+      },
     },
   },
 };
+    */
+  unflattenDocuments: (inputObject) => {
+    const result = {};
+
+    Object.keys(inputObject).forEach((key) => {
+      const keys = key.split(".");
+      let currentLevel = result;
+
+      keys.forEach((k, i) => {
+        if (i === keys.length - 1) {
+          // last key
+          currentLevel[k] = inputObject[key];
+        } else {
+          currentLevel[k] = currentLevel[k] || {};
+          currentLevel[k].children = currentLevel[k].children || {};
+          currentLevel = currentLevel[k].children;
+        }
+      });
+    });
+
+    return result;
+  },
+};
+
+const handle = {
+  document: handleDocument,
+  project: handleProject,
+  utils: handleUtils,
+  other: { DOC_SEPARATOR },
+};
+
+if (DEBUG) {
+  const selectedDoc = handle["document"].getSelected(props.projectId);
+  const doc = handle["document"].get(selectedDoc);
+
+  return (
+    <>
+      <p>{JSON.stringify(selectedDoc)}</p>
+      <p>{JSON.stringify(doc)}</p>
+      <hr />
+      <p style={{ maxHeight: 300, overflow: "auto" }}>
+        <Markdown
+          text={
+            "```json " +
+            JSON.stringify(handle["document"].getAll(props.projectId), null, 2)
+          }
+        />
+        {}
+      </p>
+      <hr />
+      <Children handle={handle} {...props} />
+    </>
+  );
+}
 
 return <Children handle={handle} {...props} />;
