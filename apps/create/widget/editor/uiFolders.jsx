@@ -4,13 +4,13 @@
 // TODO: active document not showing
 // TODO: should be able to hide/show children elements
 
-const folders = props.docs ?? {};
-const project = props.project;
+const project = props.handle["project"].get(1) ?? {};
+const folders = props.handle["document"].getAll(project.id) ?? {};
 
 const handler = (action, path) => {
   switch (action) {
     case "delete":
-      props.handleDeleteDocument(path);
+      props.handle["document"].delete(project.id, path);
       break;
     case "rename":
       props.handleRenameDocument(path, "modal not implemented");
@@ -34,7 +34,8 @@ const renderFolderHeader = (folder) => {
       tabIndex="0"
       title="Open folder"
       onClick={(e) => {
-        if (e.target.id !== "create-file") props.handleDocumentClick(path);
+        if (e.target.id !== "create-file")
+          props.handle["document"].open(project.id, path); 
       }}
     >
       <i
@@ -52,7 +53,7 @@ const renderFolderHeader = (folder) => {
         className="button bi bi-file-earmark-plus"
         id="create-file"
         onClick={() => {
-          props.handleCreateDocument(path);
+          props.handle["document"].create(project.id, path);
         }}
         role="button"
         tabIndex="0"
@@ -76,7 +77,7 @@ const renderFolder = (folder) => {
         handler,
         renderTrigger: () =>
           renderFolderHeader({
-            title: Storage.privateGet(path).title ?? title, // do we like this privateGet here?
+            title: props.handle["document"].get(project.id, path).title, // Hmmmm is there a better way to do this?
             path: path,
             isFile: !children || Object.keys(children).length === 0,
           }),
@@ -272,7 +273,7 @@ return (
             className="bi bi-file-earmark-plus"
             role="button"
             onClick={() => {
-              props.handleCreateDocument();
+              props.handle["document"].create(project.id, path);
             }}
             title="Create new folder"
             tabIndex="0"

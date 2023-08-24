@@ -4,7 +4,7 @@ function renderProject({ title, tags, logo, id }) {
   return (
     <a
       className="rounded-2 overflow-hidden w-100"
-      href={"/#//*__@appAccount__*//widget/home?page=editor&project=" + id}
+      href={"/#//*__@appAccount__*//widget/home?page=editor&project=" + id} // it would be cool if this could get.
       style={{
         width: "calc( 20% - 20px )",
         maxWidth: "100%",

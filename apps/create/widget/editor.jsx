@@ -1,4 +1,4 @@
-const projectID = props.project;
+
 
 // TODO: get data from SocialDB using projectID
 const data = {
@@ -18,39 +18,10 @@ const project = {
 
 State.init({ docs: data });
 
-const updateNestedDoc = (docs, path, value) => {
-  if (path.length === 1) {
-    if (value !== null) {
-      const updatedDoc = {
-        ...docs[path[0]],
-        ...value,
-      };
-      return {
-        ...docs,
-        [path[0]]: updatedDoc,
-      };
-    } else {
-      // We're deleting a document
-      const remainingDocs = JSON.parse(JSON.stringify(docs));
-      delete remainingDocs[path[0]];
-      return remainingDocs;
-    }
-  } else {
-    docs[path[0]].children = updateNestedDoc(
-      docs[path[0]].children,
-      path.slice(1),
-      value,
-    );
-    return docs;
-  }
-};
+/**
+ * I'm trying to imagine this as the start of a plugin. 
+ */
 
-const handleDocChange = (path, value) => {
-  const updatedDocs = updateNestedDoc({ ...state.docs }, path, value);
-  State.update({
-    docs: updatedDocs,
-  });
-};
 
 return (
   <>

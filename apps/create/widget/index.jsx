@@ -2,17 +2,21 @@
  * Trying it out like you said and it's awesome.
  */
 
+
+// This is on our project page, when we click into it, set the id
 return (
   <>
     <Widget
       src="create.near/widget/Provider" 
       props={{
-        Children: ((p) => <Widget src="create.near/widget/editor.ui" props={p} />),
+        Children: ((p) => <Widget src="create.near/widget/editor.index" props={p} />),
+        projectId: 1,
         ...props,
       }}
     />
   </>
 );
+// You can't do that.
 
 
 /**

@@ -8,10 +8,6 @@ const KEYS = {
   docs: (pid) => `docs/${pid}`, // project' docs structure without content
 };
 
-// State.init(); // we don't gotta init state
-
-const set = (k, v) => State.update({ [k]: v });
-const get = (k) => state[k];
 const store = (k, v) => Storage.privateSet(k, v);
 const retrieve = (k) => Storage.privateGet(k);
 
@@ -87,7 +83,8 @@ const pathToObj = (path) => {
 
 const handle = {
   document: {
-    get: (pid, path) => {
+    get: (path) => {
+      return retrieve(KEYS.doc(path))
       // TODO: get document from SocialDB, including children
       return {
         title: "Hello",
@@ -110,7 +107,16 @@ const handle = {
         },
       };
     },
-    open: (pid, path) => {
+    getAll: (pid) => {
+      return retrieve(KEYS.docs(pid))
+      // TODO: get document from SocialDB, including children
+    },
+    getSelected: (pid) => { // the pid, which is a random uuid
+      const val = retrieve(KEYS.selectedDoc(pid));
+      console.log(val);
+      return val;
+    },
+    open: (pid, path) => { // changed from path to did (?)
       store(KEYS.selectedDoc(pid), path);
     },
     create: (pid, parentPath) => {
@@ -122,7 +128,7 @@ const handle = {
       if (parentPath && parentPath.length) {
         newPath = [...parentPath, newKey];
       } else {
-        newPath = [newKey];
+        newPath = [newKey];hand
       }
 
       // Update the docs structure in storage
@@ -142,11 +148,11 @@ const handle = {
         store(KEYS.selectedDoc(pid), null);
       }
     },
-    update: (pid, did, value) => {
-      const doc = retrieve(KEYS.doc(did));
-
+    update: (pid, path, value) => {
+      const doc = retrieve(KEYS.doc(path));
+      
       // Update the doc content in storage
-      store(KEYS.doc(did), { ...doc, ...value });
+      store(KEYS.doc(path), { ...doc, ...value });
     },
     publish: (pid, did) => {
       const doc = retrieve(KEYS.doc(did));

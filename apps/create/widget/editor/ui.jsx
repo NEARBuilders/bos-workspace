@@ -1,7 +1,6 @@
 /*__@import:QoL/widget__*/
+/*__@import:everything/utils/debounce__*/
 
-// Nice, it works
-return <p>{JSON.stringify(props.handle.project.getAll())}</p>
 const Root = styled.div`
   min-height: max(300px, 80vh);
   width: 100%;
@@ -100,9 +99,61 @@ const Root = styled.div`
   }
 `;
 
+State.init({
+  title: props.title || "",
+  tab: props.tab || "EDIT",
+  content: props.content || "",
+});
+
+function handleTitleChange(v) {
+  State.update({ title: v });
+  // these need to know the document id
+  debounce(() =>
+    props.handle["document"].update(
+      props.projectId,
+      props.did,
+      { title: v }
+    )
+  ); // this almost needs to be abstracted out
+}
+
+function handleTabChange(v) {
+  State.update({ tab: v });
+}
+
+function handleContentChange(v) {
+  State.update({
+    content: v,
+  });
+  // it's almost like these could be accessed by the type
+  debounce(() =>
+    props.handle["document"].update(
+      props.projectId,
+      props.did,
+      { content: v }
+    )
+  ); // this almost needs to be abstracted out
+}
+
+function handlePublish(v) {}
+
+// need to be fed a project id.
+
 return (
   <Root>
-    <div className="c__left">
+    <p>
+      {JSON.stringify(
+        props.handle["document"].getAll(props.projectId)
+      )}
+    </p>
+    <div className="c__left" key={props.did}>
+      {" "}
+      {/** this gets passed props, what is it expecting?
+       *
+       * a project id
+       *
+       * we are successfully creating different ids.
+       */}
       {widget("/*__@appAccount__*//widget/editor.uiFolders", props)}
     </div>
     <div className="c__right">
@@ -110,14 +161,14 @@ return (
         <input
           type="text"
           placeholder="Untitled"
-          defaultValue={props.title}
-          onInput={(e) => props.handleTitleChange(e.target.value)}
+          defaultValue={state.title}
+          onInput={(e) => handleTitleChange(e.target.value)}
         />
       </div>
       <div className="c__tabs">
         <button
-          className={props.tab === "EDIT" ? "active" : ""}
-          onClick={() => props.handleTabChange("EDIT")}
+          className={state.tab === "EDIT" ? "active" : ""}
+          onClick={() => handleTabChange("EDIT")}
         >
           Write
         </button>
@@ -136,11 +187,11 @@ return (
 
         {/* Just hiding the iframe, so that it doesn't reload everything on tab change */}
         <div
-          className={"w-100 h-100" + (props.tab !== "EDIT" ? " d-none" : "")}
+          className={"w-100 h-100" + (state.tab !== "EDIT" ? " d-none" : "")}
         >
           {widget("efiz.near/widget/SimpleMDE", {
-            onChange: props.handleContentChange,
-            data: { content: props.content },
+            onChange: handleContentChange,
+            data: { content: state.content },
             toolbar: [
               "heading",
               "bold",
