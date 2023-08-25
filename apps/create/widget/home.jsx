@@ -39,17 +39,24 @@ const navigate = (v, params) => {
 
 return (
   <>
-    {widget("/*__@appAccount__*//widget/ui.navbar", {
+    {widget("/*__@appAccount__*//widget/Layout", {
+      templates: {
+        "NAVBAR": "create.near/widget/templates.ui.navbar.left"
+      },
       onPageChange: navigate,
       pages: ["projects"],
+      Children: () => (
+        <>
+          {activePage.provider
+            ? widget(activePage.provider, {
+                Children: (p) => widget(activePage.widget, p),
+                navigate,
+                project,
+                ...props,
+              })
+            : widget(activePage.widget, { ...props, navigate, project })}
+        </>
+      ),
     })}
-    {activePage.provider
-      ? widget(activePage.provider, {
-          Children: (p) => widget(activePage.widget, p),
-          navigate,
-          project,
-          ...props,
-        })
-      : widget(activePage.widget, { ...props, navigate, project })}
   </>
 );
