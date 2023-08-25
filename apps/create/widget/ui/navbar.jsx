@@ -1,6 +1,6 @@
 /*__@import:QoL/widget__*/
 
-const { pages, onPageChange, template, Children } = props;
+const { pages, onPageChange, template } = props;
 
 State.init({
   mobileNavbarOpen: false,
@@ -15,8 +15,7 @@ return (
       open: state.mobileNavbarOpen,
       setOpen: (v) => update("mobileNavbarOpen", v),
       pages,
-      onPageChange,
-      Children
+      onPageChange
     })}
   </>
 );

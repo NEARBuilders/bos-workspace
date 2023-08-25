@@ -39,24 +39,50 @@ const navigate = (v, params) => {
 
 return (
   <>
-    {widget("/*__@appAccount__*//widget/Layout", {
-      templates: {
-        "NAVBAR": "create.near/widget/templates.ui.navbar.left"
-      },
-      onPageChange: navigate,
-      pages: ["projects"],
-      Children: () => (
-        <>
-          {activePage.provider
-            ? widget(activePage.provider, {
-                Children: (p) => widget(activePage.widget, p),
-                navigate,
-                project,
-                ...props,
-              })
-            : widget(activePage.widget, { ...props, navigate, project })}
-        </>
-      ),
-    })}
+    {/** First did swapping templates (switch between templates.ui.navbar.nearui and templates.ui.navbar.default) */}
+    <div className="row">
+      {widget("/*__@appAccount__*//widget/ui.navbar", {
+        template: "create.near/widget/templates.ui.navbar.nearui",
+        onPageChange: navigate,
+        pages: ["projects"],
+      })}
+      <div className="col">
+        {activePage.provider
+          ? widget(activePage.provider, {
+              Children: (p) => widget(activePage.widget, p),
+              navigate,
+              project,
+              ...props,
+              // Ok now I'm thinking about this...
+              // we can pass down the templates/things/plugins to use
+              templates: {
+                Folders: () =>
+                  widget("/*__@appAccount__*//widget/editor.uiFolders", props),
+              },
+            })
+          : widget(activePage.widget, { ...props, navigate, project })}
+      </div>
+    </div>
   </>
 );
+
+// {/** Now I'm thinking about Layouts, because I'd like to be able to have a fixed sidebar */}
+// {widget("/*__@appAccount__*//widget/Layout", {
+//   templates: {
+//     NAVBAR: "create.near/widget/templates.ui.navbar.left",
+//   },
+//   onPageChange: navigate,
+//   pages: ["projects"],
+//   Children: () => (
+//     <>
+//       {activePage.provider
+//         ? widget(activePage.provider, {
+//             Children: (p) => widget(activePage.widget, p),
+//             navigate,
+//             project,
+//             ...props,
+//           })
+//         : widget(activePage.widget, { ...props, navigate, project })}
+//     </>
+//   ),
+// })}
