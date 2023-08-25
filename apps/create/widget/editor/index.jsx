@@ -1,184 +1,155 @@
-const { docs, onChange, project } = props;
-
-State.init({
-  tab: "EDIT",
-  count: Object.keys(docs).length + 1,
-});
-
-function init() {
-  // When we first load, check if there is a selected document in state
-  const docId = Storage.privateGet("selectedDoc");
-  if (docId) {
-    // If there is, then get the content for it
-    const doc = Storage.privateGet(docId);
-    State.update({
-      selectedDoc: docId,
-      content: doc.content,
-      title: doc.title,
-    });
-  } else {
-    // If there's not, then default to first doc
-    const firstDocPath = [Object.keys(docs)[0]];
-    const firstDocContent = docs[firstDocPath[0]].content;
-    State.update({
-      selectedDoc: firstDocPath,
-      content: firstDocContent,
-      title: firstDocPath.title,
-    });
-  }
-}
-
-init();
-
-const getDocFromPath = (docs, path) => {
-  return path.reduce((currentDoc, key, index) => {
-    // If it's the last key in the path, return the document itself
-    if (index === path.length - 1) {
-      return currentDoc[key];
-    }
-    // Otherwise, navigate to the children of the current document
-    return currentDoc[key].children;
-  }, docs);
-};
-
-const handleDocumentClick = (path) => {
-  // Set selected document in local storage
-  Storage.privateSet("selectedDoc", path);
-  // And check if there are any stored changes for it
-  const doc = Storage.privateGet(path);
-  if (doc) {
-    State.update({
-      selectedDoc: path,
-      content: doc.content,
-      title: doc.title,
-    });
-  } else {
-    // Else, grab from default object
-    const doc = getDocFromPath(docs, path);
-    State.update({
-      selectedDoc: path,
-      content: doc.content,
-      title: path[0],
-    });
-  }
-};
-
-let timeoutId;
-
-const debounce = (func, delay) => {
-  if (!delay) {
-    delay = 300;
-  }
-  clearTimeout(timeoutId);
-  timeoutId = setTimeout(func, delay);
-};
-
-const handleContentChange = (value) => {
-  debounce(() => {
-    try {
-      Storage.privateSet(state.selectedDoc, {
-        title: state.title,
-        content: value,
-      });
-      State.update({ content: value });
-      // onChange(state.selectedDoc, { content: value});
-    } catch (error) {
-      console.error("Error saving content: ", error);
-    }
-  });
-};
-
-const handleTitleChange = (value) => {
-  debounce(() => {
-    try {
-      Storage.privateSet(state.selectedDoc, {
-        title: value,
-        content: state.content,
-      });
-      State.update({ title: value });
-      // onChange(state.selectedDoc, { title: value});
-    } catch (error) {
-      console.error("Error saving title: ", error);
-    }
-  });
-};
-
-const handlePublish = () => {
-  const thingId = "docs";
-  Social.set({
-    thing: { docs },
-    index: {
-      every: JSON.stringify({
-        key: "efiz.near/type/docs",
-        value: {
-          id: thingId,
-          type: "efiz.near/type/docs",
-        },
-      }),
-    },
-  });
-};
-
-const handleCreateDocument = (parentPath) => {
-  const newKey = `Doc${state.count}`;
-  let newPath; // This will store the path to the newly created document
-
-  if (parentPath && parentPath.length) {
-    newPath = [...parentPath, newKey];
-  } else {
-    newPath = [newKey];
-  }
-  // Notify the parent about the addition of the new document
-  onChange(newPath, { title: "", content: "", children: {} });
-
-  State.update({
-    selectedDoc: newPath,
-    title: "",
-    content: "",
-    count: state.count + 1,
-  });
-};
-
-const handleDeleteDocument = (path) => {
-  console.log("handleDeleteDocument", path);
-  onChange(path, null);
-  Storage.privateSet(path, null);
-
-  // Check if the deleted document was the currently selected one
-  if (JSON.stringify(path) === JSON.stringify(state.selectedDoc)) {
-    const newSelectedDocPath = [Object.keys(docs)[0]];
-    const newSelectedDocContent = docs[newSelectedDocPath[0]].content;
-
-    Storage.privateSet("selectedDoc", newSelectedDocPath);
-
-    State.update({
-      selectedDoc: newSelectedDocPath,
-      content: newSelectedDocContent,
-    });
-  }
-};
-
-function handleTabChange(newTab) {
-  State.update({ tab: newTab });
-}
-
 /*__@import:QoL/widget__*/
+/*__@import:everything/utils/debounce__*/
+
+const { project: projectId, handle } = props;
+
+const path = handle["document"].getSelected(projectId);
+const doc = handle["document"].get(path);
+
+const on = {
+  change: (k, v) => {
+    debounce(() => handle["document"].update(projectId, path, { [k]: v }));
+  },
+  publish: () => handle["document"].publish(projectId, path),
+};
+
+const lastUpdated = doc.updatedAt;
+const isBuffer = doc._.inBuffer;
+
+const Root = styled.div`
+  min-height: max(300px, 80vh);
+  width: 100%;
+  border-radius: 16px;
+  background-color: #f9fbfe;
+  color: #000;
+  display: flex;
+  gap: 4px;
+  border: 1px solid var(--c__border-color);
+
+  --c__border-color: rgb(209, 213, 219);
+
+
+  .c__left {
+    min-height: inherit;
+    border-radius: inherit;
+    width: min(300px, 100%);
+  }
+
+  .c__right {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    margin: 1rem 1rem 1rem 0rem;
+    background-color: #fff;
+    padding: 1rem;
+  }
+
+  .c__header {
+    padding: .5rem 1rem;
+    width: 100%;
+    border-radius: 16px;
+    background-color: #fff;
+    border: 1px solid var(--c__border-color);
+    margin-bottom: 1rem;
+
+    input {
+      font-size: 20px;
+      margin: 0 auto;
+      background: none !important;
+      outline: none !important;
+      border: none !important;
+      box-shadow: none !important;
+    }
+  }
+
+  .c__tabs {
+    width: 100%;
+    padding: 0 1rem;
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+
+    button {
+      outline: none;
+      background: none;
+      padding: 0.5rem 1rem;
+      border-radius: 16px;x
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: 600;
+      color: #000;
+      transition: all 0.3s;
+      transform: translateY(1px);
+      border-radius: 16px 16px 0 0;
+      border: 1px solid transparent;
+      border-bottom: none;
+      
+      &.active {
+        border-color: var(--c__border-color);
+        background-color: #fff;
+      }
+    }
+  }
+
+  .c__editor {
+    width: 100%;
+    padding: 1rem;
+    border: 1px solid var(--c__border-color);
+    border-bottom: none;
+    border-radius: 16px 16px 0 0 ;
+    min-height: 450px;
+  }
+
+  .c__footer {
+    width: 100%;
+    padding: 1rem;
+    border-radius: 0 0 16px 16px;
+    background-color: #fff;
+    border: 1px solid var(--c__border-color);
+    border-top: none;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  `;
 
 return (
-  <div key={state.selectedDoc}>
-    {widget("/*__@appAccount__*//widget/editor.ui", {
-      handleCreateDocument,
-      handleDeleteDocument,
-      handleDocumentClick,
-      handleContentChange,
-      handleTitleChange,
-      handleTabChange,
-      handlePublish,
-      docs,
-      content: state.content,
-      tab: state.tab,
-      title: state.title,
-      project,
-    })}
-  </div>
+  <>
+    <Root>
+      <div className="c__left">
+        {/* Pulled this out so selecting a document doesn't refresh the folders too */}
+        {widget("/*__@appAccount__*//widget/editor.uiFolders", props)}
+      </div>
+      <div className="c__right" key={path}>
+        {/* 
+          * We can now swap out the editor below
+        */}
+        {widget("/*__@appAccount__*//widget/editor.ui", {
+          key: path,
+          doc,
+          on,
+          ...props,
+        })}
+        <div className="c__footer">
+          <span>
+            {isBuffer ? "Draft auto-saved " : "Last published "} at{" "}
+            {new Date(lastUpdated).toLocaleTimeString("en-US", {
+              hour: "2-digit",
+              minute: "2-digit",
+            })}
+            .
+          </span>
+          <div>
+            {widget("/*__@replace:nui__*//widget/Input.Button", {
+              children: "Publish",
+              variant: "success",
+              onClick: on.publish,
+              disabled: !isBuffer,
+            })}
+          </div>
+        </div>
+      </div>
+    </Root>
+  </>
 );

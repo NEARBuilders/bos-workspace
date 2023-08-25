@@ -1,8 +1,5 @@
 {
   "properties": {
-    "id": {
-      "type": "UUID"
-    },
     "title": {
       "type": "string"
     },
@@ -17,15 +14,6 @@
       "itemTypes": [
         {
           "type": "string"
-        }
-      ]
-    },
-    "documents": {
-      // IDK about this one
-      "type": "array",
-      "itemTypes": [
-        {
-          "type": "UUID"
         }
       ]
     }

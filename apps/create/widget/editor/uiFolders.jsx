@@ -1,22 +1,42 @@
 /*__@import:QoL/classNames__*/
 /*__@import:QoL/widget__*/
+/*__@import:QoL/Url__*/
 
-// TODO: active document not showing
 // TODO: should be able to hide/show children elements
 
-const folders = props.docs ?? {};
-const project = props.project;
+const { project: projectId, navigate } = props;
+
+// This should be in editor.index but let it be here for now
+const project = props.handle["project"].get(projectId) ?? {};
+const flatFolders = props.handle["document"].getAll(projectId) ?? {};
+
+// Also unflattenDocuments should be removed, it's just extra processing, the widget should be able to handle the flat structure
+const folders = props.handle["utils"].unflattenDocuments(flatFolders);
+
+const activeDoc = props.handle["document"].getSelected(projectId);
+const { DOC_SEPARATOR } = props.handle["other"];
+
+const isActive = (path) => path.join(DOC_SEPARATOR) === activeDoc;
 
 const handler = (action, path) => {
   switch (action) {
     case "delete":
-      props.handleDeleteDocument(path);
+      props.handle["document"].delete(projectId, path.join(DOC_SEPARATOR));
+      break;
+    case "create":
+      props.handle["document"].create(projectId, path.join(DOC_SEPARATOR));
+      break;
+    case "open":
+      props.handle["document"].open(projectId, path.join(DOC_SEPARATOR));
+      break;
+    case "refresh":
+      props.handle["project"].init(projectId, true);
       break;
     case "rename":
-      props.handleRenameDocument(path, "modal not implemented");
+      // props.handleRenameDocument(path, "modal not implemented");
       break;
     case "move":
-      props.handleMoveDocument(path, "modal not implemented");
+      // props.handleMoveDocument(path, "modal not implemented");
       break;
     default:
       break;
@@ -24,17 +44,17 @@ const handler = (action, path) => {
 };
 
 const renderFolderHeader = (folder) => {
-  const { title, path, icon, isFile } = folder;
+  const { title, path, icon, isFile, inBuffer } = folder;
 
   return (
     <div
       className={path.length > 1 ? "folder__child__header" : "folder__header"}
-      data-active={folder.active}
+      data-active={isActive(path)}
       role="button"
       tabIndex="0"
       title="Open folder"
       onClick={(e) => {
-        if (e.target.id !== "create-file") props.handleDocumentClick(path);
+        if (e.target.id !== "create-file") handler("open", path);
       }}
     >
       <i
@@ -48,11 +68,18 @@ const renderFolderHeader = (folder) => {
           ? "Untitled"
           : title}
       </span>
+      {inBuffer && (
+        <i
+          className="bi bi-asterisk ms-1"
+          title="unsaved changes"
+          style={{ color: "red" }}
+        ></i>
+      )}
       <i
         className="button bi bi-file-earmark-plus"
         id="create-file"
         onClick={() => {
-          props.handleCreateDocument(path);
+          handler("create", path);
         }}
         role="button"
         tabIndex="0"
@@ -64,7 +91,11 @@ const renderFolderHeader = (folder) => {
 
 const renderFolder = (folder) => {
   const { path, value, index } = folder;
-  const { children, title } = value;
+  const {
+    children,
+    title,
+    _: { inBuffer },
+  } = value;
 
   return (
     <div
@@ -76,9 +107,10 @@ const renderFolder = (folder) => {
         handler,
         renderTrigger: () =>
           renderFolderHeader({
-            title: Storage.privateGet(path).title ?? title, // do we like this privateGet here?
+            title: title,
             path: path,
             isFile: !children || Object.keys(children).length === 0,
+            inBuffer,
           }),
       })}
 
@@ -98,23 +130,37 @@ const renderFolder = (folder) => {
 };
 
 const renderProject = (project) => {
-  const { title, logo, id } = project;
+  const { title, logo } = project.data;
 
   return (
     <div>
       <div className="mb-2">
         <a
-          href={`/#//*__@appAccount__*//widget/home?page=projects`}
+          onClick={() => {
+            navigate("projects");
+          }}
+          href={Url.construct("#//*__@appAccount__*//widget/home", {
+            page: "projects",
+          })}
           className="text-decoration-none"
+          style={{
+            cursor: "pointer",
+          }}
         >
           <i className="bi bi-arrow-left"></i>
           Back to projects
         </a>
       </div>
       <a
-        href={`/#//*__@appAccount__*//widget/home?page=project&project=${id}`}
         className="d-flex justify-content-center gap-3 align-items-center mb-auto w-100"
         title="Open project settings"
+        onClick={() => {
+          navigate("manage", { project: projectId });
+        }}
+        href={Url.construct("#//*__@appAccount__*//widget/home", {
+          page: "manage",
+          project: projectId,
+        })}
       >
         {logo && <img src={logo} alt={title} height={55} width={55} />}
         <h5
@@ -141,6 +187,7 @@ const Folders = styled.div`
   }
   .folder__header,
   .folder__child__header {
+    user-select: none;
     display: flex;
     align-items: center;
     gap: 6px;
@@ -272,7 +319,7 @@ return (
             className="bi bi-file-earmark-plus"
             role="button"
             onClick={() => {
-              props.handleCreateDocument();
+              handler("create", []);
             }}
             title="Create new folder"
             tabIndex="0"
@@ -290,6 +337,19 @@ return (
             });
           })}
       </Folders>
+    </div>
+
+    <div>
+      {/* TODO: The markdown editor doesn't refresh even if data is fresh */}
+      <Widget
+        src="/*__@replace:nui__*//widget/Input.Button"
+        props={{
+          children: "Refresh",
+          onClick: () => {
+            handler("refresh");
+          },
+        }}
+      />
     </div>
   </Wrapper>
 );

@@ -1,15 +1,24 @@
-const { handleCreateProject, projects } = props;
+/*__@import:QoL/Url__*/
+
+const { handleCreateProject, projects, navigate } = props;
 
 function renderProject({ title, tags, logo, id }) {
   return (
     <a
-      className="rounded-2 overflow-hidden w-100"
-      href={"/#//*__@appAccount__*//widget/home?page=editor&project=" + id}
+      className="rounded-2 overflow-hidden w-100 text-decoration-none"
+      onClick={() => {
+        navigate("editor", { project: id });
+      }}
+      href={Url.construct("#//*__@appAccount__*//widget/home", {
+        page: "editor",
+        project: id,
+      })}
       style={{
         width: "calc( 20% - 20px )",
         maxWidth: "100%",
         backgroundColor: "#f9fbfe",
         border: "1px solid #d1d5db",
+        cursor: "pointer",
       }}
     >
       <div className="ratio ratio-4x3">
