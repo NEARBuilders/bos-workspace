@@ -42,7 +42,7 @@ return (
     {/** First did swapping templates (switch between templates.ui.navbar.nearui and templates.ui.navbar.default) */}
     <div className="row">
       {widget("/*__@appAccount__*//widget/ui.navbar", {
-        template: "create.near/widget/templates.ui.navbar.nearui",
+        template: "create.near/widget/templates.ui.navbar.default",
         onPageChange: navigate,
         pages: ["projects"],
       })}
@@ -56,8 +56,7 @@ return (
               // Ok now I'm thinking about this...
               // we can pass down the templates/things/plugins to use
               templates: {
-                Folders: () =>
-                  widget("/*__@appAccount__*//widget/editor.uiFolders", props),
+                Folders: "/*__@appAccount__*//widget/editor.uiFolders",
               },
             })
           : widget(activePage.widget, { ...props, navigate, project })}

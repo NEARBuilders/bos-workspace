@@ -114,7 +114,7 @@ const Root = styled.div`
   }
   `;
 
-const Folders = props.things["Folders"]
+const Folders = props.templates["Folders"];
 // We can create layout files that look just like this one
 // They are stateless
 // It holds the styles and gets passed the definitions
@@ -125,12 +125,12 @@ return (
     <Root>
       <div className="c__left">
         {/* And just reference the component here */}
-        <Folders props={props} />
+        <Widget src={Folders} props={props} />
       </div>
       <div className="c__right" key={path}>
-        {/* 
-          * We can now swap out the editor below
-        */}
+        {/*
+         * We can now swap out the editor below
+         */}
         {widget("/*__@appAccount__*//widget/editor.ui", {
           key: path,
           doc,
