@@ -1,27 +1,13 @@
-const getCurrentDate = () => {
-  const currentDate = new Date();
+/*__@import:everything/utils/UUID__*/
+/*__@import:everything/utils/date-time__*/
 
-  const year = currentDate.getFullYear();
-  const month = (currentDate.getMonth() + 1).toString().padStart(2, "0"); // Months are 0-indexed
-  const day = currentDate.getDate().toString().padStart(2, "0");
-
-  return `${year}-${month}-${day}`;
-};
-
-const getCurrentTime = () => {
-  const currentDate = new Date();
-
-  const hours = currentDate.getHours().toString().padStart(2, "0");
-  const minutes = currentDate.getMinutes().toString().padStart(2, "0");
-
-  return `${hours}:${minutes}`;
-};
+const addEvent = props.addEvent;
 
 State.init({
-  id: "",
+  id: UUID.generate(),
   title: "",
   description: {
-    content: "",
+    content: "# New Event Description",
   },
   start: getCurrentDate(),
   startTime: getCurrentTime(),
@@ -36,13 +22,7 @@ State.init({
   background: null,
   tempHash: "",
   hashTags: [],
-
-  events: [],
 });
-
-const onIdChange = ({ target }) => {
-  State.update({ id: target.value });
-};
 
 const onTitleChange = ({ target }) => {
   State.update({ title: target.value });
@@ -109,10 +89,10 @@ const onHashTagAdd = () => {
 
 const clearFields = () => {
   State.update({
-    id: "",
+    id: UUID.generate(),
     title: "",
     description: {
-      content: "",
+      content: "# New Event Description",
     },
     start: getCurrentDate(),
     startTime: getCurrentTime(),
@@ -132,45 +112,38 @@ const clearFields = () => {
 
 const handleNewEvent = () => {
   const newEvent = {
-    id: state.id,
-    title: state.title,
-    description: state.description,
-    start: state.start,
-    startTime: state.startTime,
-    end: state.end,
-    endTime: state.endTime,
-    location: state.location,
-    link: state.link,
-    organizer: state.organizer,
-    isAllDay: state.isAllDay,
-    category: state.category,
-    logo: state.logo,
-    background: state.background,
-    hashTags: state.hashTags,
+    data: {
+      id: state.id,
+      title: state.title,
+      description: state.description,
+      start: state.start,
+      startTime: state.startTime,
+      end: state.end,
+      endTime: state.endTime,
+      location: state.location,
+      link: state.link,
+      organizer: state.organizer,
+      isAllDay: state.isAllDay,
+      category: state.category,
+      logo: state.logo,
+      background: state.background,
+      hashTags: state.hashTags,
+    },
+    template: {
+      src: "",
+    },
+    type: "every.near/type/event",
   };
 
-  State.update({ events: [...state.events, newEvent] });
+  addEvent(newEvent);
   clearFields();
-
-  console.log(state.events);
 };
 
-const CreateEvent = () => {
+const EventForm = () => {
   return (
     <div className="container">
-      <h2>Create Event</h2>
-      <div>
-        <div className="mb-3">
-          <label class="form-label" for="id">
-            Event ID
-          </label>
-          <input
-            class="form-control"
-            id="id"
-            value={state.id}
-            onChange={onIdChange}
-          />
-        </div>
+      <h2>Create a new Event</h2>
+      <div className="needs-validation" novalidate>
         <div className="mb-3">
           <label class="form-label" for="title">
             Event Title
@@ -180,6 +153,7 @@ const CreateEvent = () => {
             id="title"
             value={state.title}
             onChange={onTitleChange}
+            placeholder="New Event Title"
           />
         </div>
         <div className="mb-3">
@@ -191,11 +165,12 @@ const CreateEvent = () => {
             props={{
               data: state.description,
               onChange: onDescriptionChange,
+              height: "250px",
             }}
           />
         </div>
-        <div className="d-flex justify-content-around gap-3 mb-3">
-          <div className="flex-fill">
+        <div className="row  mb-3">
+          <div className="col">
             <label for="start">Event Start Date</label>
             <input
               class="form-control"
@@ -205,7 +180,7 @@ const CreateEvent = () => {
               onChange={onStartChange}
             />
           </div>
-          <div className="flex-fill">
+          <div className="col">
             <label for="startTime">Event Start Time</label>
             <input
               class="form-control"
@@ -216,8 +191,8 @@ const CreateEvent = () => {
             />
           </div>
         </div>
-        <div className="d-flex justify-content-around gap-3 mb-3">
-          <div className="flex-fill">
+        <div className="row  mb-3">
+          <div className="col">
             <label for="end">Event End Date</label>
             <input
               class="form-control"
@@ -227,7 +202,7 @@ const CreateEvent = () => {
               onChange={onEndChange}
             />
           </div>
-          <div className="flex-fill">
+          <div className="col">
             <label for="endTime">Event End Time</label>
             <input
               class="form-control"
@@ -247,6 +222,7 @@ const CreateEvent = () => {
             id="location"
             value={state.location}
             onChange={onLocationChange}
+            placeholder="New Event Location"
           />
         </div>
         <div className="mb-3">
@@ -259,6 +235,7 @@ const CreateEvent = () => {
             type="url"
             value={state.link}
             onChange={onLinkChange}
+            placeholder="New Event Link"
           />
         </div>
         <div className="mb-3">
@@ -270,6 +247,7 @@ const CreateEvent = () => {
             id="organizer"
             value={state.organizer}
             onChange={onOrganizerChange}
+            placeholder="New Event Organizer(s)"
           />
         </div>
         <div className="mb-3">
@@ -296,17 +274,18 @@ const CreateEvent = () => {
             id="category"
             value={state.category}
             onChange={onCategoryChange}
+            placeholder="New Event Category"
           />
         </div>
-        <div className="mb-3 d-flex flex-justify-content-around gap-3">
-          <div className="flex-fill">
+        <div className="mb-3 row ">
+          <div className="col">
             <label>Logo Image</label>
             <Widget
               src="near/widget/ImageEditorTabs"
               props={{ image: state.logo, onChange: onLogoChange }}
             />
           </div>
-          <div className="flex-fill">
+          <div className="col">
             <label>Background Image</label>
             <Widget
               src="near/widget/ImageEditorTabs"
@@ -321,7 +300,7 @@ const CreateEvent = () => {
               {state.hashTags.length !== 0 &&
                 state.hashTags.map((item) => (
                   <>
-                    <span className="badge bg-secondary">{item}</span>{" "}
+                    <span className="badge bg-primary">{item}</span>{" "}
                   </>
                 ))}
             </p>
@@ -331,24 +310,18 @@ const CreateEvent = () => {
               id="hashtags"
               value={state.tempHash}
               onChange={onTempHashChange}
+              placeholder="New Event Tags"
             />
             <button onClick={onHashTagAdd}>Add</button>
           </div>
         </div>
         <div className="mb-3">
           <button onClick={handleNewEvent}>Add Event</button>
+          <button onClick={clearFields}>Clear Fields</button>
         </div>
       </div>
     </div>
   );
 };
 
-return (
-  <div>
-    <CreateEvent />
-    <Widget
-      src="evrything.near/widget/Calendar"
-      props={{ events: state.events }}
-    />
-  </div>
-);
+return <EventForm />;
