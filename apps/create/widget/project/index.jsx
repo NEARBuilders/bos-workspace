@@ -16,7 +16,7 @@ if (!projectRaw) return "Project not found";
 const project = {
   id: projectID,
   ...projectRaw.data,
-  tags: Object.keys(projectRaw.data.tags),
+  tags: Object.keys(projectRaw.data.tags || {}),
   templateSrc: projectRaw.template.src,
   theme: projectRaw.template.theme,
 };
