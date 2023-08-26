@@ -163,12 +163,8 @@ const renderProject = (project) => {
         })}
         className="d-flex align-items-center mb-4 justify-content-between gap-1"
       >
-        <img src={logo} alt={title} height={40} />
-        <span
-          className="h6 m-0 flex-fill ms-2"
-        >
-          {title}
-        </span>
+        {logo && <img src={logo} alt={title} height={40} />}
+        <span className="h6 m-0 flex-fill ms-2">{title}</span>
         <i className="ms-1 bi bi-box-arrow-up-right"></i>
       </a>
       <div>

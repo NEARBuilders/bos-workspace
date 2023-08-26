@@ -4,21 +4,26 @@ if (!projectID) {
   return <div>Please specify a project ID</div>;
 }
 
-const handleUpdateProject = (new_project) => {};
+const handleUpdateProject = (new_project) => {
+  props.handle["project"].update(projectID, new_project);
+};
 
-// TODO: get project from SocialDB using projectID
+const projectRaw = props.handle["project"].get(projectID);
+
+if (projectRaw === null) return "";
+if (!projectRaw) return "Project not found";
+
 const project = {
   id: projectID,
-  title: "Project 1",
-  logo: "https://ipfs.near.social/ipfs/bafkreifjxdfynw6icgtagcgyhsgq5ounl7u45i2pa2xadiax2bpg7kt3hu",
-  tags: ["tag", "docs"],
-  description: "This is a project description",
-  templateSrc: "/*__@appAccount__*//widget/templates/default",
+  ...projectRaw.data,
+  tags: Object.keys(projectRaw.data.tags),
+  templateSrc: projectRaw.template.src,
+  theme: projectRaw.template.theme,
 };
 
 return (
   <Widget
     src="/*__@appAccount__*//widget/project.ui"
-    props={{ project: project }}
+    props={{ ...props, project: project }}
   />
 );

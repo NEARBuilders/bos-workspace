@@ -1,5 +1,16 @@
 const { id, doc, by } = props;
 
+const final_id = "??replace_with_id??";
+const final_by = "??replace_with_account??";
+
+if (final_id !== "??replace_with_id??") {
+  id = final_id;
+}
+
+if (final_by !== "??replace_with_account??") {
+  by = final_by;
+}
+
 const project = Social.get(`${by}/thing/project/${id}/**`);
 const docs = Social.get(`${by}/document/${id}/*/title`);
 
@@ -60,10 +71,11 @@ const unflattenDocuments = (inputObject) => {
 return (
   <Widget
     src={
-      "/*__@appAccount__*//widget/templates.project.doc" || project.template.src
+      project.template.src || "/*__@appAccount__*//widget/templates.project.doc"
     }
     props={{
       project: project.data,
+      theme: project.template.theme,
       documents: docs,
       folders: unflattenDocuments(docs),
       activeDocument: state.doc,

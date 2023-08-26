@@ -5,8 +5,6 @@
 const { handleCreateProject, defaultProject, buttonChildren, buttonProps } =
   props;
 
-console.log("project.form", props);
-
 State.init({
   error: undefined,
   project: defaultProject ?? {
@@ -37,7 +35,9 @@ const IB = "/*__@replace:nui__*//widget/Input.Button";
 return (
   <div className="p-4 bg-white rounded-4">
     <div className="d-flex flex-column gap-3">
-      <h5>New Project</h5>
+      <h3>
+        {buttonChildren || "Create Project"}
+      </h3>
       {widget(IT, {
         label: "Title",
         placeholder: "My project",
