@@ -3,16 +3,16 @@
  */
 return (
   <Widget
-    src="create.near/widget/layouts.Container"
+    src="/*__@appAccount__*//widget/layouts.Container"
     props={{
       Left: () => (
         <>
-          <Widget src="create.near/widget/layouts.placeholder" props={{}} />
+          <Widget src="/*__@appAccount__*//widget/layouts.placeholder" props={{}} />
         </>
       ),
       Right: () => (
         <>
-          <Widget src="create.near/widget/layouts.placeholder" props={{}} />
+          <Widget src="/*__@appAccount__*//widget/layouts.placeholder" props={{}} />
         </>
       ),
     }}
