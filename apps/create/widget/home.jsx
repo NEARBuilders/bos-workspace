@@ -1,3 +1,9 @@
+/**
+ * Project: Create
+ * By: efiz.near, sking.near
+ * Repository: https://github.com/near-everything/bos-workspace
+ */
+
 /*__@import:QoL/widget__*/
 /*__@import:QoL/Url__*/
 
@@ -52,8 +58,6 @@ return (
               navigate,
               project,
               ...props,
-              // Ok now I'm thinking about this...
-              // we can pass down the templates/things/plugins to use
               templates: {
                 Folders: "/*__@appAccount__*//widget/editor.uiFolders",
               },

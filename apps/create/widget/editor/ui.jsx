@@ -45,26 +45,23 @@ return (
         className={"w-100 h-100" + (state.tab !== "EDIT" ? " d-none" : "")}
         key={props.key}
       >
-        {widget(
-          "efiz.near/widget/SimpleMDE",
-          {
-            onChange: (v) => on.change("content", v),
-            data: { content: props.doc.content },
-            toolbar: [
-              "heading",
-              "bold",
-              "italic",
-              "quote",
-              "code",
-              "link",
-              "unordered-list",
-              "ordered-list",
-              "checklist",
-              "mention",
-              "reference",
-            ],
-          }
-        )}
+        {widget("efiz.near/widget/SimpleMDE", {
+          onChange: (v) => on.change("content", v),
+          data: { content: props.doc.content },
+          toolbar: [
+            "heading",
+            "bold",
+            "italic",
+            "quote",
+            "code",
+            "link",
+            "unordered-list",
+            "ordered-list",
+            "checklist",
+            "mention",
+            "reference",
+          ],
+        })}
       </div>
     </div>
   </>

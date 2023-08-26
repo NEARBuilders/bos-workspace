@@ -9,11 +9,11 @@ if (!widgetCode)
 
 widgetCode.replace(
   /const final_id = "\?\?replace_with_id\?\?";/,
-  `const final_id = "${project.id}";`
+  `const final_id = "${project.id}";`,
 );
 widgetCode.replace(
   /const final_by = "??replace_with_account??";/,
-  `const final_by = "${context.accountId}";`
+  `const final_by = "${context.accountId}";`,
 );
 
 State.init({

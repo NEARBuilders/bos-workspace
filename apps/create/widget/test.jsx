@@ -6,5 +6,8 @@ const content = fetch(
 if (content === null) return "";
 
 return (
-  <Widget src="/*__@appAccount__*//widget/render" props={{ content: content.body }} />
+  <Widget
+    src="/*__@appAccount__*//widget/render"
+    props={{ content: content.body }}
+  />
 );

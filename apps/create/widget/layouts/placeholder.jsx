@@ -16,6 +16,4 @@ const Placeholder = styled.div`
   justify-content: center;
 `;
 
-return (
-  <Placeholder />
-);
+return <Placeholder />;

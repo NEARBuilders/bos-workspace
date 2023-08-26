@@ -7,12 +7,18 @@ return (
     props={{
       Left: () => (
         <>
-          <Widget src="/*__@appAccount__*//widget/layouts.placeholder" props={{}} />
+          <Widget
+            src="/*__@appAccount__*//widget/layouts.placeholder"
+            props={{}}
+          />
         </>
       ),
       Right: () => (
         <>
-          <Widget src="/*__@appAccount__*//widget/layouts.placeholder" props={{}} />
+          <Widget
+            src="/*__@appAccount__*//widget/layouts.placeholder"
+            props={{}}
+          />
         </>
       ),
     }}

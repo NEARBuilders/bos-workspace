@@ -20,7 +20,6 @@ const KEYS = {
 const DOC_SEPARATOR = ".";
 const DEFAULT_TEMPLATE = "/*__@appAccount__*//widget/templates.project.doc";
 
-
 const handleDocument = {
   /**
    * Create, or updates, or deletes document in Local Storage

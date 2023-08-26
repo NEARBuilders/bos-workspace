@@ -374,7 +374,7 @@ const temps = [
           line-height: 1.4;
         }
       }`,
-  }
+  },
 ];
 
 console.log(project);
@@ -478,7 +478,9 @@ function renderTemplate() {
               },
             });
           },
-          disabled: state.selected == temps.indexOf(selectedTemp) || state.selected == project.templateSrc,
+          disabled:
+            state.selected == temps.indexOf(selectedTemp) ||
+            state.selected == project.templateSrc,
         }}
       />
     </Wrapper>
