@@ -18,7 +18,7 @@ const KEYS = {
   init: (pid) => `init/${pid}`, // lets us know when the project has been initialized
 };
 const DOC_SEPARATOR = ".";
-const DEFAULT_TEMPLATE = "/*__@appAccount__*//widget/templates.default";
+const DEFAULT_TEMPLATE = "/*__@appAccount__*//widget/templates.project.doc";
 
 /**
  * 
