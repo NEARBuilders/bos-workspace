@@ -20,39 +20,6 @@ const KEYS = {
 const DOC_SEPARATOR = ".";
 const DEFAULT_TEMPLATE = "/*__@appAccount__*//widget/templates.project.doc";
 
-/**
- * 
- * I'm trying to learn what is the best way to structure our data, 
- * I think a lot of the complexity in code comes from keeping the documents structured in an object. 
- * Objects are great for storing data, but they are not great for keeping track of the structure of the data, 
- * they get messy and hard to work with. But strings paths are very predictable and easy to work with.
- * 
- * So we can just store the documents in a flat structure, similar to how the widgets are stored in SocialDB
- * and we can keep the paths in keys.
- * 
-   {
-       "project1": {
-          "": {
-              "title": "Project 1",
-          },
-          "doc1": {
-              "title": "Document 1",
-          },
-          "doc1.doc2": {
-              "title": "Document 1",
-              "content": "Content here..."
-          },
-          "doc1.doc2.doc3": {
-              "title": "Document 2",
-              "content": "Content here..."
-          }
-      }
-   }
- * 
- * Realistically, a project will never have more than 100 documents, so we don't need to worry about performance, 
- * and we can just use Social.keys to get all the keys and play around with them.
- * 
- */
 
 const handleDocument = {
   /**
