@@ -17,12 +17,13 @@ function Navbar({ open, setOpen, pages, onPageChange }) {
         onClick={() => onPageChange("projects")}
       >
         <img
-          src="https://ipfs.near.social/ipfs/bafkreifjxdfynw6icgtagcgyhsgq5ounl7u45i2pa2xadiax2bpg7kt3hu"
+          src="https://ipfs.near.social/ipfs/bafkreidttc7hbxdkykiwjefngcpwguapc6jhtaro65laysquzrgwlsxlo4"
           alt="Create Logo"
           height={30}
           width={30}
           style={{
             marginBottom: 5,
+            objectFit: "contain",
           }}
         />
         <span
