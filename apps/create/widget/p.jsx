@@ -28,7 +28,7 @@ if (state.doc) {
   });
 } else {
   State.update({
-    doc: Object.keys(docs)[0],
+    doc: Object.keys(docs || {})?.[0],
   });
 }
 
@@ -51,7 +51,7 @@ const unflattenDocuments = (inputObject) => {
 
     keys.forEach((k, i) => {
       if (i === keys.length - 1) {
-        if (currentLevel[k] && Object.keys(currentLevel[k]).length > 0) {
+        if (currentLevel[k] && Object.keys(currentLevel[k] || {}).length > 0) {
           Object.assign(currentLevel[k], inputObject[key]);
         } else {
           currentLevel[k] = inputObject[key];

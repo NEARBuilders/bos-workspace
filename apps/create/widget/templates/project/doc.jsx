@@ -417,7 +417,7 @@ function Navbar({ project, goTo, href, folders }) {
         </a>
       </div>
       <div right="">
-        {Object.entries(folders).map(([key, value]) => {
+        {Object.entries(folders || {}).map(([key, value]) => {
           return (
             <a
               key={key}
@@ -438,7 +438,7 @@ function DocumentTree(p) {
   return (
     <ul tree="">
       {folders &&
-        Object.entries(folders).map(([key, value]) => {
+        Object.entries(folders || {}).map(([key, value]) => {
           return (
             <li
               key={key}
