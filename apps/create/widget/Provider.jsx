@@ -177,7 +177,7 @@ const handleDocument = {
 
   // TODO
   fetchAll: (pid) => {
-    const docs = Social.get(`${accountId}/document/${pid}/**`);
+    const docs = JSON.parse(Social.get(`${accountId}/thing/${pid}/documents`) || "null");
     return docs;
   },
 
@@ -203,15 +203,16 @@ const handleDocument = {
     const doc = handleDocument.get(path);
     delete doc._;
     const did = path.split(DOC_SEPARATOR).pop();
+    
     // TODO: check if document has already been added
     function addDocumentToProject() {
       const project = handleProject.get(pid);
       const documents = JSON.parse(project.documents) || [];
-      // TODO: this should hold the heirachical data
+      // this holds the heirachical data
       return {
         thing: {
           [pid]: {
-            documents: [...documents, path], // paths
+            documents: [...documents, path],
           },
         },
       };
@@ -313,7 +314,7 @@ const handleProject = {
     const docs = handleDocument.fetchAll(pid);
     if (docs === null) return;
 
-    Object.keys(docs || {}).forEach((path) => {
+    docs.forEach((path) => {
       const doc = docs[path];
       const localDoc = handleDocument.get(path);
       if (!localDoc || new Date(doc.updatedAt) > new Date(localDoc.updatedAt)) {
