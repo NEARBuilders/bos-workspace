@@ -1,18 +1,18 @@
 const { project } = props;
 
 const widgetToFork = "/*__@appAccount__*//widget/p";
-const widgetCode = Social.get(widgetToFork);
+let widgetCode = Social.get(widgetToFork);
 
 if (widgetCode === null) return <></>;
 if (!widgetCode)
   return "Something went wrong. Please reach out to sking.near or efiz.near";
 
-widgetCode.replace(
+widgetCode = widgetCode.replace(
   /const final_id = "\?\?replace_with_id\?\?";/,
-  `const final_id = "${project.id}";`,
+  `const final_id = "${project.id}";\n`,
 );
-widgetCode.replace(
-  /const final_by = "??replace_with_account??";/,
+widgetCode = widgetCode.replace(
+  /const final_by = "\?\?replace_with_account\?\?";/,
   `const final_by = "${context.accountId}";`,
 );
 
