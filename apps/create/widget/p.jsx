@@ -1,5 +1,7 @@
 const { id, doc, by } = props;
 
+// every.thing.view
+
 const final_id = "??replace_with_id??";
 const final_by = "??replace_with_account??";
 
@@ -11,8 +13,7 @@ if (final_by !== "??replace_with_account??") {
   by = final_by;
 }
 
-const project = Social.get(`${by}/thing/project/${id}/**`);
-const docs = Social.get(`${by}/document/${id}/*/title`);
+const project = Social.get(`${by}/thing/${id}/**`);
 
 if (project === null || docs === null) return <></>;
 if (project === undefined) return <>Project not found</>;
