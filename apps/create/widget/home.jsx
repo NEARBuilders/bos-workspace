@@ -1,3 +1,9 @@
+/**
+ * Project: Create
+ * By: efiz.near, sking.near
+ * Repository: https://github.com/near-everything/bos-workspace
+ */
+
 /*__@import:QoL/widget__*/
 /*__@import:QoL/Url__*/
 
@@ -39,17 +45,25 @@ const navigate = (v, params) => {
 
 return (
   <>
-    {widget("/*__@appAccount__*//widget/ui.navbar", {
-      onPageChange: navigate,
-      pages: ["projects"],
-    })}
-    {activePage.provider
-      ? widget(activePage.provider, {
-          Children: (p) => widget(activePage.widget, p),
-          navigate,
-          project,
-          ...props,
-        })
-      : widget(activePage.widget, { ...props, navigate, project })}
+    <div className="row">
+      {widget("/*__@appAccount__*//widget/ui.navbar", {
+        template: "/*__@appAccount__*//widget/templates.ui.navbar.default",
+        onPageChange: navigate,
+        pages: ["projects"],
+      })}
+      <div className="col">
+        {activePage.provider
+          ? widget(activePage.provider, {
+              Children: (p) => widget(activePage.widget, p),
+              navigate,
+              project,
+              ...props,
+              templates: {
+                Folders: "/*__@appAccount__*//widget/editor.uiFolders",
+              },
+            })
+          : widget(activePage.widget, { ...props, navigate, project })}
+      </div>
+    </div>
   </>
 );

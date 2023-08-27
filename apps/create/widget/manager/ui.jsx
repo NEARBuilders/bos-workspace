@@ -68,6 +68,7 @@ const Projects = styled.div`
   margin-bottom: 36px;
 `;
 
+// projects = null;
 return (
   <>
     {renderHeader({
@@ -77,7 +78,18 @@ return (
       <Projects>{projects.map(renderProject)}</Projects>
     )}
     {(!projects || !projects.length) && (
-      <div className="text-center">You don't have any projects yet</div>
+      <div className="text-center">
+        <b>You don't have any projects yet. Create one to get started.</b>{" "}
+        <br />
+        Also check out
+        <a
+          target="_blank"
+          href="/#//*__@appAccount__*//widget/p?id=62151bc4-093d-2fdd-a30b-539ba27f45d1&by=sking.near"
+        >
+          this example
+        </a>{" "}
+        created by the Create app.
+      </div>
     )}
   </>
 );

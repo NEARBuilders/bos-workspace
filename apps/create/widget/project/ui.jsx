@@ -11,7 +11,7 @@ const tabs = {
 };
 
 State.init({
-  tab: "metadata",
+  tab: "template",
 });
 
 const Wrapper = styled.div`
