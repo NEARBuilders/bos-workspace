@@ -8,8 +8,7 @@ const { project: projectId, navigate } = props;
 
 // This should be in editor.index but let it be here for now
 const project = props.handle["project"].get(projectId) ?? {};
-const flatFolders = JSON.parse(project.documents) ?? {};
-console.log("flatFolders", flatFolders);
+const flatFolders = props.handle["document"].getAll(projectId) ?? {};
 
 // Also unflattenDocuments should be removed, it's just extra processing, the widget should be able to handle the flat structure
 const folders = props.handle["utils"].unflattenDocuments(flatFolders);
@@ -94,7 +93,7 @@ const renderFolder = (folder) => {
   const { path, value, index } = folder;
   const {
     children,
-    title,
+    data: { title },
     _: { inBuffer },
   } = value;
 

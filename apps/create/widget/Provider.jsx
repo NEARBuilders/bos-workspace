@@ -73,11 +73,13 @@ const handleDocument = {
     console.log("doc", doc);
     // TODO need to fix the structure
     handleDocument.set(pid, path, {
-      ...doc,
-      ...value,
+      data: {
+        ...doc.data,
+        ...value,
+      },
       metadata: {
         ...doc.metadata,
-        updatedAt: new Date().toISOString(), 
+        updatedAt: new Date().toISOString(),
       },
       _: {
         inBuffer: true,
@@ -94,10 +96,18 @@ const handleDocument = {
   create: (pid, parentPath, value) => {
     if (!value) value = { title: "", content: "" };
     if (!parentPath) parentPath = "";
-    const document = createThing("/*__@appAccount__*//type/document", value, {
-      createdAt: new Date().toISOString(),
-    });
-    const did = Object.keys(document)[0];
+    const did = UUID.generate("xxxxxxx");
+
+    const document = {
+      // I'm doing it this funny nested away cuz I'm trying to figure out a generic createThing
+      [did]: {
+        data: value,
+        metadata: {
+          createdAt: new Date().toISOString(),
+          type: "/*__@appAccount__*//type/document",
+        },
+      },
+    };
     const path = `${parentPath}${parentPath && DOC_SEPARATOR}${did}`;
 
     // Now just using pid to help with Storage
@@ -190,11 +200,9 @@ const handleDocument = {
    * @param {string} path - path to the document
    */
   publish: (pid, path) => {
-    const doc = handleDocument.get(path); // there is metadata here I'd like to separate out
+    const doc = handleDocument.get(path);
     delete doc._;
-    console.log("doc", doc);
-    const document = createThing("/*__@appAccount__*//type/document", doc);
-    const did = Object.keys(document)[0];
+    const did = path.split(DOC_SEPARATOR).pop();
     // TODO: check if document has already been added
     function addDocumentToProject() {
       const project = handleProject.get(pid);
@@ -225,7 +233,10 @@ const handleDocument = {
     const docToProject = addDocumentToProject(pid, did);
 
     //combine the json from createThing and addDocumentToProject
-    const combined = deepMerge(deepMerge({ thing: document }, projectToDoc), docToProject);
+    const combined = deepMerge(
+      deepMerge({ thing: { [did]: doc } }, projectToDoc),
+      docToProject
+    );
 
     Social.set(combined, {
       onCommit: () => {
@@ -435,6 +446,13 @@ if (Storage.privateGet("debug")) {
           }
         />
       </p>
+      <button
+        onClick={() => {
+          store(KEYS.docs(props.project), []);
+        }}
+      >
+        clear local docs
+      </button>
       <hr />
       Fetched
       <p style={{ maxHeight: 300, overflow: "auto" }}>
