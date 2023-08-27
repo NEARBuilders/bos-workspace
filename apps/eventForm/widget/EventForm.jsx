@@ -3,6 +3,8 @@
 
 const addEvent = props.addEvent;
 
+let user_account = context.accountId;
+
 State.init({
   id: UUID.generate(),
   title: "",
@@ -15,7 +17,7 @@ State.init({
   endTime: getCurrentTime(),
   location: "",
   link: "",
-  organizer: "",
+  organizer: user_account,
   isAllDay: false,
   category: "",
   logo: null,
@@ -29,7 +31,7 @@ const onTitleChange = ({ target }) => {
 };
 
 const onDescriptionChange = (target) => {
-  State.update({ description: { content: target } });
+  State.update({ description: target });
 };
 
 const onStartChange = ({ target }) => {
@@ -87,6 +89,11 @@ const onHashTagAdd = () => {
   State.update({ tempHash: "" });
 };
 
+const onHashTagRemove = (target) => {
+  const newTags = state.hashTags.filter((item) => item !== target);
+  State.update({ hashTags: newTags });
+};
+
 const clearFields = () => {
   State.update({
     id: UUID.generate(),
@@ -100,7 +107,7 @@ const clearFields = () => {
     endTime: getCurrentTime(),
     location: "",
     link: "",
-    organizer: "",
+    organizer: user_account,
     isAllDay: false,
     category: "",
     logo: null,
@@ -130,7 +137,7 @@ const handleNewEvent = () => {
       hashTags: state.hashTags,
     },
     template: {
-      src: "",
+      src: "itexpert120.near/widget/EventView",
     },
     type: "every.near/type/event",
   };
@@ -247,7 +254,7 @@ const EventForm = () => {
             id="organizer"
             value={state.organizer}
             onChange={onOrganizerChange}
-            placeholder="New Event Organizer(s)"
+            placeholder="New Event Organizer"
           />
         </div>
         <div className="mb-3">
@@ -300,7 +307,13 @@ const EventForm = () => {
               {state.hashTags.length !== 0 &&
                 state.hashTags.map((item) => (
                   <>
-                    <span className="badge bg-primary">{item}</span>{" "}
+                    <span className="badge text-bg-primary">
+                      {item}{" "}
+                      <i
+                        className="bi bi-x ms-2 p-1"
+                        onClick={() => onHashTagRemove(item)}
+                      ></i>
+                    </span>{" "}
                   </>
                 ))}
             </p>
