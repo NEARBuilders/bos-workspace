@@ -92,8 +92,11 @@ function createThing(type, data, metadata) {
   // Temporary small id
   const id = UUID.generate("xxxxxxx");
   return {
-    [id]: {
+    [id]: { // I think there may be some value in stringify-ing the data and storing in empty key, but I'm not sure
+      // Maybe it's for published data? Data that has no relations?
+      // It's more space efficient for the social contract if we limit the number of keys
       "": JSON.stringify(data),
+      data, // so I'm just gonna do both for right now :)
       metadata: { ...metadata, type },
     },
   };

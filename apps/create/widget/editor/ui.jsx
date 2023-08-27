@@ -15,7 +15,7 @@ return (
       <input
         type="text"
         placeholder="Untitled"
-        defaultValue={props.doc.title}
+        defaultValue={props.data.title}
         onInput={(e) => on.change("title", e.target.value)}
         key={props.key}
       />
@@ -37,7 +37,7 @@ return (
     <div className="c__editor">
       {state.tab === "VIEW" &&
         widget("openwebbuild.near/widget/Post.Markdown", {
-          text: props.doc.content,
+          text: props.data.content,
         })}
 
       {/* Just hiding the iframe, so that it doesn't reload everything on tab change */}
@@ -47,7 +47,7 @@ return (
       >
         {widget("efiz.near/widget/SimpleMDE", {
           onChange: (v) => on.change("content", v),
-          data: { content: props.doc.content },
+          data: { content: props.data.content },
           toolbar: [
             "heading",
             "bold",
