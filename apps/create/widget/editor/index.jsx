@@ -114,17 +114,23 @@ const Root = styled.div`
   }
   `;
 
+const Folders = props.templates["Folders"];
+// We can create layout files that look just like this one
+// They are stateless
+// It holds the styles and gets passed the definitions
+// for the components it shows.
+// Folders can then be swapped out for other "Folders" templates, it just has to follow the props
 return (
   <>
     <Root>
       <div className="c__left">
-        {/* Pulled this out so selecting a document doesn't refresh the folders too */}
-        {widget("/*__@appAccount__*//widget/editor.uiFolders", props)}
+        {/* And just reference the component here */}
+        <Widget src={Folders} props={props} />
       </div>
       <div className="c__right" key={path}>
-        {/* 
-          * We can now swap out the editor below
-        */}
+        {/*
+         * We can now swap out the editor below
+         */}
         {widget("/*__@appAccount__*//widget/editor.ui", {
           key: path,
           doc,
