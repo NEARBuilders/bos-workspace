@@ -96,7 +96,6 @@ const onHashTagRemove = (target) => {
 
 const clearFields = () => {
   State.update({
-    id: UUID.generate(),
     title: "",
     description: {
       content: "# New Event Description",
@@ -120,7 +119,6 @@ const clearFields = () => {
 const handleNewEvent = () => {
   const newEvent = {
     data: {
-      id: state.id,
       title: state.title,
       description: state.description,
       start: state.start,
