@@ -38,36 +38,80 @@ const endDate = data.end;
 const endTime = data.endTime;
 const location = data.location;
 
+const bgComponent = () => {
+  return (
+    <Widget
+      src="mob.near/widget/Image"
+      props={{
+        image: backgroundImage,
+        alt: "event background",
+        className: "w-full h-full object-cover shadow-md rounded-md",
+        fallbackUrl:
+          "https://ipfs.near.social/ipfs/bafkreibmiy4ozblcgv3fm3gc6q62s55em33vconbavfd2ekkuliznaq3zm",
+      }}
+    />
+  );
+};
+
+const logoComponent = () => {
+  return (
+    <div className="relative w-28 h-28 md:w-36 md:h-36">
+      <Widget
+        src="mob.near/widget/Image"
+        props={{
+          image: logo,
+          alt: "event logo",
+          className:
+            "w-full h-full object-cover rounded-full bottom-20 md:bottom-16 md:-right-8 absolute shadow-md",
+          fallbackUrl:
+            "https://ipfs.near.social/ipfs/bafkreibmiy4ozblcgv3fm3gc6q62s55em33vconbavfd2ekkuliznaq3zm",
+        }}
+      />
+    </div>
+  );
+};
+
+const hashTagsComponent = () => {
+  return (
+    hashtags.length !== 0 && (
+      <p className="flex flex-wrap items-center">
+        <i className="bi bi-hash mr-3"></i>
+        {hashtags.map((tag) => (
+          <span className="badge bg-primary mr-2">#{tag}</span>
+        ))}
+      </p>
+    )
+  );
+};
+
+const timeComponent = () => {
+  return (
+    <p>
+      <i className="bi bi-calendar-event mr-2"></i>
+      {new Date(startDate).toLocaleString("en-us", {
+        month: "short",
+        day: "numeric",
+      })}{" "}
+      @ {startTime} -{" "}
+      {startDate === endDate
+        ? endTime
+        : `${new Date(endDate).toLocaleString("en-us", {
+            month: "short",
+            day: "numeric",
+          })} @ ${endTime}`}
+    </p>
+  );
+};
+
 const Content = () => {
   return (
     <div>
       <div className="w-full shadow-md my-4 rounded-md">
         <div className="relative h-36 md:h-48">
           {/* BG */}
-          <Widget
-            src="mob.near/widget/Image"
-            props={{
-              image: backgroundImage,
-              alt: "event background",
-              className: "w-full h-full object-cover shadow-md rounded-md",
-              fallbackUrl:
-                "https://ipfs.near.social/ipfs/bafkreibmiy4ozblcgv3fm3gc6q62s55em33vconbavfd2ekkuliznaq3zm",
-            }}
-          />
+          <bgComponent />
           {/* Logo */}
-          <div className="relative w-28 h-28 md:w-36 md:h-36">
-            <Widget
-              src="mob.near/widget/Image"
-              props={{
-                image: logo,
-                alt: "event logo",
-                className:
-                  "w-full h-full object-cover rounded-full bottom-20 md:bottom-16 md:-right-8 absolute shadow-md",
-                fallbackUrl:
-                  "https://ipfs.near.social/ipfs/bafkreibmiy4ozblcgv3fm3gc6q62s55em33vconbavfd2ekkuliznaq3zm",
-              }}
-            />
-          </div>
+          <logoComponent />
         </div>
         <div className="mx-4 mt-16 mb-4 md:mt-24 flex flex-col gap-y-2">
           {/* Title */}
@@ -88,20 +132,7 @@ const Content = () => {
             </div>
           )}
           {/* Time */}
-          <p>
-            <i className="bi bi-calendar-event mr-2"></i>
-            {new Date(startDate).toLocaleString("en-us", {
-              month: "short",
-              day: "numeric",
-            })}{" "}
-            @ {startTime} -{" "}
-            {startDate === endDate
-              ? endTime
-              : `${new Date(endDate).toLocaleString("en-us", {
-                  month: "short",
-                  day: "numeric",
-                })} @ ${endTime}`}
-          </p>
+          <timeComponent />
           {/* Link */}
           {eventLink && (
             <p>
@@ -122,14 +153,7 @@ const Content = () => {
             </p>
           )}
           {/* Hashtags */}
-          {hashtags.length !== 0 && (
-            <p className="flex flex-wrap items-center">
-              <i className="bi bi-hash mr-3"></i>
-              {hashtags.map((tag) => (
-                <span className="badge bg-primary mr-2">#{tag}</span>
-              ))}
-            </p>
-          )}
+          <hashTagsComponent />
         </div>
       </div>
     </div>
