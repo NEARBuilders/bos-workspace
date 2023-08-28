@@ -74,7 +74,7 @@ const logoComponent = () => {
 const hashTagsComponent = () => {
   return (
     hashtags.length !== 0 && (
-      <p className="flex flex-wrap items-center">
+      <p className="flex flex-wrap items-center mb-3">
         <i className="bi bi-hash mr-3"></i>
         {hashtags.map((tag) => (
           <span className="badge bg-primary mr-2">#{tag}</span>
