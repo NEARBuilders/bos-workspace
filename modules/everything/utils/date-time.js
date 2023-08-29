@@ -16,3 +16,17 @@ const getCurrentTime = () => {
 
   return `${hours}:${minutes}`;
 };
+
+const isoTime = (date, time) => {
+  const temp = new Date(`${date} ${time}`);
+  const now = temp.toISOString();
+
+  return now.split("T")[1];
+};
+
+const isoDate = (date, time) => {
+  const temp = new Date(`${date} ${time}`);
+  const now = temp.toISOString();
+
+  return now.split("T")[0];
+};

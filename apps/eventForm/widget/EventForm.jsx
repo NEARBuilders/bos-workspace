@@ -121,10 +121,10 @@ const handleNewEvent = () => {
     data: {
       title: state.title,
       description: state.description,
-      start: state.start,
-      startTime: state.startTime,
-      end: state.end,
-      endTime: state.endTime,
+      start: isoDate(state.start, state.startTime),
+      startTime: isoTime(state.start, state.startTime),
+      end: isoDate(state.end, state.endTime),
+      endTime: isoTime(state.end, state.endTime),
       location: state.location,
       link: state.link,
       organizer: state.organizer,
@@ -135,7 +135,7 @@ const handleNewEvent = () => {
       hashTags: state.hashTags,
     },
     template: {
-      src: "itexpert120.near/widget/EventView",
+      src: "itexpert120-contra.near/widget/EventView",
     },
     type: "every.near/type/event",
   };

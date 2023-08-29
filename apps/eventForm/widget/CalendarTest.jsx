@@ -5,9 +5,9 @@ const dummyData = {
     content: "Test",
   },
   start: "2023-08-29",
-  startTime: "13:43",
+  startTime: "16:02:00.000Z",
   end: "2023-08-29",
-  endTime: "14:45",
+  endTime: "18:02:00.000Z",
   location: "Earth",
   link: "https://test.com",
   organizer: "itexpert120.near",
@@ -19,6 +19,7 @@ const dummyData = {
     url: "https://static.wikia.nocookie.net/gameofthronesfanon/images/e/e8/Geralt2-e1520342690656_%282%29.jpg",
   },
   isAllDay: false,
+  category: "test",
 };
 
 const dummyData2 = {
@@ -42,6 +43,7 @@ const dummyData2 = {
     url: "https://static.wikia.nocookie.net/gameofthronesfanon/images/e/e8/Geralt2-e1520342690656_%282%29.jpg",
   },
   isAllDay: true,
+  category: "test",
 };
 
 const fetchedEvents = Social.get("every.near/type/event/*");
@@ -52,13 +54,18 @@ const events = fetchedEvents || [dummyData, dummyData2];
 const formattedEvents = events.map((event) => {
   return {
     title: event.title,
-    start: `${event.start}T${event.startTime}`,
-    end: `${event.end}T${event.endTime}`,
+    start: new Date(`${event.start} ${event.startTime}`),
+    end: new Date(`${event.end} ${event.endTime}`),
     url: event.link,
     allDay: event.isAllDay,
     editable: false,
+    extendedProps: {
+      category: event.category,
+    },
   };
 });
+
+console.log(formattedEvents);
 
 return (
   <Widget
