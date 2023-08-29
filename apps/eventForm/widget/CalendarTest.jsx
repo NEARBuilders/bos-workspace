@@ -69,7 +69,7 @@ console.log(formattedEvents);
 
 return (
   <Widget
-    src="evrything.near/widget/Calendar"
+    src="itexpert120-contra.near/widget/Calendar"
     props={{ events: formattedEvents }}
   />
 );

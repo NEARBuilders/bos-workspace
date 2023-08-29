@@ -20,7 +20,13 @@ const dummyData = {
   },
 };
 
-const data = props.data || dummyData;
+const data = props.data;
+
+console.log("Log from Widget: ", data);
+
+if (!data) {
+  return <div>No Data Props passed</div>;
+}
 
 const title = data.title || "No-title event";
 const description = data.description;
@@ -74,7 +80,7 @@ const logoComponent = () => {
 const hashTagsComponent = () => {
   return (
     hashtags.length !== 0 && (
-      <p className="flex flex-wrap items-center mb-3ya">
+      <p className="flex flex-wrap items-center mb-3">
         <i className="bi bi-hash mr-3"></i>
         {hashtags.map((tag) => (
           <span className="badge bg-primary mr-2">#{tag}</span>
@@ -166,7 +172,7 @@ return (
       src="igris.near/widget/TailwindWrapper"
       props={{ children: <Content /> }}
     />
-    <Widget
+    {/* <Widget
       src="every.near/widget/every.feed.view"
       props={{
         data: {
@@ -180,6 +186,6 @@ return (
           hashtagWhitelist: hashtags,
         },
       }}
-    />
+    /> */}
   </>
 );
