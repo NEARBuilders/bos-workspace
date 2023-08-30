@@ -16,11 +16,9 @@ const formattedEvents = fetchedEvents.map((event) => {
   };
 });
 
-// if (!formattedEvents) {
-//   return <div>Loading...</div>;
-// }
-
-console.log(formattedEvents);
+if (!formattedEvents) {
+  return <div>Loading...</div>;
+}
 
 return (
   <Widget
