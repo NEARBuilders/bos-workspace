@@ -1,143 +1,160 @@
-const data = props.data;
+const path = props.path;
+const blockHeight = props.blockHeight;
 
-if (!data) {
-  return <div>No Data Props passed</div>;
+const eventThing = Social.getr(path, blockHeight);
+
+if (!eventThing) {
+  return <div>Loading...</div>;
 }
 
-const title = data.title || "No-title event";
-const description = data.description;
-const logo = data.logo;
-const backgroundImage = data.background;
-const tags = Object.keys(data.tags ?? {});
-const organizer = data.organizer;
-const eventLink = data.link;
-const link = `https://near.org/near/widget/ProfilePage?accountId=${organizer}`;
-const category = data.category;
-const hashtags = data.hashTags;
-const startDate = data.start;
-const startTime = data.startTime;
-const endDate = data.end;
-const endTime = data.endTime;
-const location = data.location;
+const {
+  title,
+  description,
+  start,
+  startTime,
+  end,
+  endTime,
+  location,
+  link,
+  organizer,
+  isAllDay,
+  category,
+  logo,
+  background,
+  hashTags,
+} = eventThing.data;
 
-const Content = () => {
-  return (
-    <div>
-      <div className="w-full shadow-md my-4 rounded-md">
-        <div className="relative h-36 md:h-48">
-          {/* BG */}
+const startDate = new Date(`${start} ${startTime}`);
+const endDate = new Date(`${end} ${endTime}`);
+
+const formatDate = () => {
+  const eventStartDate = startDate.toLocaleString("en-is", {
+    month: "short",
+    day: "numeric",
+  });
+  const eventStartTime = `${startDate.getHours()}:${startDate.getMinutes()}`;
+
+  const eventEndDate = endDate.toLocaleString("en-is", {
+    month: "short",
+    day: "numeric",
+  });
+  const eventEndTime = `${endDate.getHours()}:${endDate.getMinutes()}`;
+
+  if (startDate.getDate() === endDate.getDate()) {
+    return `${eventStartDate} @ ${eventStartTime} - ${eventEndTime}`;
+  } else {
+    return `${eventStartDate} @ ${eventStartTime} - ${eventEndDate} @ ${eventEndTime}`;
+  }
+};
+
+const tags = JSON.parse(hashTags);
+
+return (
+  <>
+    <div className="container">
+      <div className="shadow mb-5 rounded">
+        <div className="position-relative ">
+          {/* Background Image */}
           <Widget
             src="mob.near/widget/Image"
             props={{
-              image: backgroundImage,
+              image: background,
               alt: "event background",
-              className: "w-full h-full object-cover shadow-md rounded-md",
+              className: "img-fluid rounded-top mb-3 shadow",
+              style: { width: "100%", height: "14rem", objectFit: "cover" },
               fallbackUrl:
                 "https://ipfs.near.social/ipfs/bafkreibmiy4ozblcgv3fm3gc6q62s55em33vconbavfd2ekkuliznaq3zm",
             }}
           />
-          {/* Logo */}
-          <div className="relative w-28 h-28 md:w-36 md:h-36">
-            <Widget
-              src="mob.near/widget/Image"
-              props={{
-                image: logo,
-                alt: "event logo",
-                className:
-                  "w-full h-full object-cover rounded-full bottom-20 md:bottom-16 md:-right-8 absolute shadow-md",
-                fallbackUrl:
-                  "https://ipfs.near.social/ipfs/bafkreibmiy4ozblcgv3fm3gc6q62s55em33vconbavfd2ekkuliznaq3zm",
-              }}
-            />
-          </div>
+
+          <Widget
+            src="mob.near/widget/Image"
+            props={{
+              image: logo,
+              alt: "event logo",
+              className: "rounded-circle position-absolute shadow",
+              style: {
+                width: "128px",
+                height: "128px",
+                objectFit: "cover",
+                bottom: -25,
+                left: 25,
+              },
+              fallbackUrl:
+                "https://ipfs.near.social/ipfs/bafkreibmiy4ozblcgv3fm3gc6q62s55em33vconbavfd2ekkuliznaq3zm",
+            }}
+          />
         </div>
-        <div className="mx-4 mt-16 mb-4 md:mt-24 flex flex-col gap-y-2">
-          {/* Title */}
-          <h2 className="text-3xl font-bold">{title}</h2>
-          {/* Organizer */}
-          <p>
-            <i className="bi bi-person mr-2"></i>
-            {organizer}
-          </p>
-          {/* Description */}
-          {description && (
-            <div className="flex items-start">
-              <i className="bi bi-info-circle mr-3"></i>
+        <div className="mt-5 ms-3">
+          <div className="d-flex flex-column">
+            {/* Event Title */}
+            <h3>{title}</h3>
+
+            {/* Organizer */}
+            <p>
+              <i className="bi bi-person me-2"></i>
+              {organizer}
+            </p>
+
+            {/* Event Description */}
+            <div>
               <Widget
                 src="efiz.near/widget/every.markdown.view"
                 props={{ data: description }}
               />
             </div>
-          )}
-          {/* Time */}
-          <p>
-            <i className="bi bi-calendar-event mr-2"></i>
-            {new Date(startDate).toLocaleString("en-us", {
-              month: "short",
-              day: "numeric",
-            })}{" "}
-            @ {startTime} -{" "}
-            {startDate === endDate
-              ? endTime
-              : `${new Date(endDate).toLocaleString("en-us", {
-                  month: "short",
-                  day: "numeric",
-                })} @ ${endTime}`}
-          </p>
-          {/* Link */}
-          {eventLink && (
+
+            {/* Time */}
             <p>
-              <i className="bi bi-link mr-2"></i>
-              <a
-                className="underline hover:text-blue-500 transition"
-                href={eventLink}
-              >
-                {eventLink}
-              </a>
+              <i className="bi bi-calendar-event me-2"></i>
+              {formatDate()}
             </p>
-          )}
-          {/* Location */}
-          {location && (
-            <p>
-              <i className="bi bi-pin-map mr-2"></i>
-              {location}
-            </p>
-          )}
-          {/* Hashtags */}
-          {hashtags.length !== 0 && (
-            <p className="flex flex-wrap items-center mb-3">
-              <i className="bi bi-hash mr-3"></i>
-              {hashtags.map((tag) => (
-                <span className="badge bg-primary mr-2">#{tag}</span>
-              ))}
-            </p>
-          )}
+
+            {/* Link */}
+            {link && (
+              <p>
+                <i className="bi bi-box-arrow-up-right me-2"></i>
+                <a href={link}>{link}</a>
+              </p>
+            )}
+
+            {/* Location */}
+            {location && (
+              <p>
+                <i className="bi bi-pin-map me-2"></i>
+                {location}
+              </p>
+            )}
+
+            {/* Hashtags */}
+            {tags.length !== 0 && (
+              <div className="d-flex">
+                <i className="bi bi-hash me-2"></i>
+                <p>
+                  {tags.map((item) => (
+                    <span className="badge bg-primary me-1">#{item}</span>
+                  ))}
+                </p>
+              </div>
+            )}
+          </div>
         </div>
       </div>
+      <Widget
+        src="every.near/widget/every.feed.view"
+        props={{
+          data: {
+            typeWhitelist: ["md"],
+            sources: [
+              {
+                domain: "post",
+                key: "main",
+              },
+            ],
+            hashtagWhitelist: tags,
+          },
+        }}
+      />
     </div>
-  );
-};
-
-return (
-  <>
-    <Widget
-      src="igris.near/widget/TailwindWrapper"
-      props={{ children: <Content /> }}
-    />
-    {/* <Widget
-      src="every.near/widget/every.feed.view"
-      props={{
-        data: {
-          typeWhitelist: ["md"],
-          sources: [
-            {
-              domain: "post",
-              key: "main",
-            },
-          ],
-          hashtagWhitelist: hashtags,
-        },
-      }}
-    /> */}
   </>
 );

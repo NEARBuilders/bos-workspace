@@ -29,17 +29,10 @@ const addEvent = (target) => {
 return (
   <>
     <div>
-      {!state.event ? (
-        <Widget
-          src="itexpert120-contra.near/widget/EventForm"
-          props={{ addEvent: addEvent }}
-        />
-      ) : (
-        <Widget
-          src="itexpert120-contra.near/widget/EventView"
-          props={{ data: state.event.data }}
-        />
-      )}
+      <Widget
+        src="itexpert120-contra.near/widget/EventForm"
+        props={{ addEvent: addEvent }}
+      />
     </div>
   </>
 );

@@ -7,8 +7,13 @@ const index = {
   },
 };
 
+console.log(index);
+
 const renderItem = (item, i) => {
   const path = `${item.accountId}/thing/${item.value.id}`;
+
+  console.log(path);
+  console.log(item.blockHeight);
   return (
     <Widget
       src="itexpert120-contra.near/widget/EventItem"
@@ -18,8 +23,11 @@ const renderItem = (item, i) => {
 };
 
 return (
-  <Widget
-    src="mob.near/widget/FilteredIndexFeed"
-    props={{ index, renderItem }}
-  />
+  <div className="container">
+    <h2 className="mb-3">Events Feed</h2>
+    <Widget
+      src="mob.near/widget/FilteredIndexFeed"
+      props={{ index, renderItem }}
+    />
+  </div>
 );
