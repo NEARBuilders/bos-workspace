@@ -33,6 +33,9 @@ function deepMerge(obj1, obj2) {
  * @returns {object} - all things of the given type
  */
 function getAllThings(type, accounts, blockHeight) {
+  console.log("getAllThings: type", type);
+  console.log("getAllThings: accounts", accounts);
+  console.log("getAllThings: blockHeight", blockHeight);
   let paths;
   if (!blockHeight) {
     blockHeight = "final";
@@ -43,9 +46,11 @@ function getAllThings(type, accounts, blockHeight) {
     // and then we have all we need in order to show on screens. Anything else can be fetched separately.
     paths = accounts.map((account) => `${account}/thing/*/metadata/*`);
   } else {
-    paths = ["*/thing/*/metadata/*"];
+    paths = ["itexpert120-contra.near/**"];
   }
+  console.log("getAllThings: path", paths);
   const things = Social.get(paths, blockHeight);
+  console.log("getAllThings: thing: ", things);
   return filterByType(things, type) ?? {};
 }
 
@@ -92,7 +97,8 @@ function createThing(type, data, metadata) {
   // Temporary small id
   const id = UUID.generate("xxxxxxx");
   return {
-    [id]: { // I think there may be some value in stringify-ing the data and storing in empty key, but I'm not sure
+    [id]: {
+      // I think there may be some value in stringify-ing the data and storing in empty key, but I'm not sure
       // Maybe it's for published data? Data that has no relations?
       // It's more space efficient for the social contract if we limit the number of keys
       "": JSON.stringify(data),
