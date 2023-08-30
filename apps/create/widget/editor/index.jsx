@@ -13,7 +13,7 @@ const on = {
   publish: () => handle["document"].publish(projectId, path),
 };
 
-const lastUpdated = doc.updatedAt;
+const lastUpdated = doc.metadata.updatedAt;
 const isBuffer = doc._.inBuffer;
 
 const Root = styled.div`
@@ -133,7 +133,7 @@ return (
          */}
         {widget("/*__@appAccount__*//widget/editor.ui", {
           key: path,
-          doc,
+          data: doc.data,
           on,
           ...props,
         })}

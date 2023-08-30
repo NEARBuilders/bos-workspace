@@ -93,7 +93,7 @@ const renderFolder = (folder) => {
   const { path, value, index } = folder;
   const {
     children,
-    title,
+    data: { title },
     _: { inBuffer },
   } = value;
 
@@ -151,8 +151,7 @@ const Project = styled.div`
 `;
 
 const renderProject = (project) => {
-  const { title, logo } = project.data;
-
+  const { title, logo } = project.metadata;
   return (
     <Project>
       <a

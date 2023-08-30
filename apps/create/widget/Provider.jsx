@@ -1,4 +1,5 @@
 /*__@import:everything/utils/UUID__*/
+/*__@import:everything/sdk__*/
 /*__@import:QoL/storage__*/
 
 State.init({
@@ -69,10 +70,17 @@ const handleDocument = {
    */
   update: (pid, path, value) => {
     const doc = retrieve(KEYS.doc(path));
+    console.log("doc", doc);
+    // TODO need to fix the structure
     handleDocument.set(pid, path, {
-      ...doc,
-      ...value,
-      updatedAt: new Date().toISOString(),
+      data: {
+        ...doc.data,
+        ...value,
+      },
+      metadata: {
+        ...doc.metadata,
+        updatedAt: new Date().toISOString(),
+      },
       _: {
         inBuffer: true,
       },
@@ -81,19 +89,30 @@ const handleDocument = {
 
   /**
    * Wrapper for set that creates a new document under parent path
-   * @param {string} pid - project id
+   * @param {string} pid - project id (root id)
    * @param {string} parentPath - optional path to the parent document
    * @param {object} value - optional value to set at the path
    */
   create: (pid, parentPath, value) => {
     if (!value) value = { title: "", content: "" };
     if (!parentPath) parentPath = "";
-    const path = `${parentPath}${
-      parentPath && DOC_SEPARATOR
-    }${handleDocument.generateId()}`;
+    const did = UUID.generate("xxxxxxx");
+
+    const document = {
+      // I'm doing it this funny nested away cuz I'm trying to figure out a generic createThing
+      [did]: {
+        data: value,
+        metadata: {
+          createdAt: new Date().toISOString(),
+          type: "/*__@appAccount__*//type/document",
+        },
+      },
+    };
+    const path = `${parentPath}${parentPath && DOC_SEPARATOR}${did}`;
+
+    // Now just using pid to help with Storage
     handleDocument.set(pid, path, {
-      ...value,
-      createdAt: new Date().toISOString(),
+      ...document[did],
       _: {
         inBuffer: true,
       },
@@ -114,6 +133,7 @@ const handleDocument = {
    * @returns {object} - the document
    */
   get: (path) => retrieve(KEYS.doc(path)),
+  // TODO: this should get from local storage first and then from SocialDB if not found
 
   /**
    * Get project documents from Local Storage
@@ -150,14 +170,14 @@ const handleDocument = {
   },
 
   // TODO
-  fetch: (pid, path) => {
-    const doc = Social.get(`${accountId}/document/${pid}/${path}/**`);
+  fetch: (did) => {
+    const doc = Social.get(`${accountId}/thing/${did}/**`);
     return doc;
   },
 
   // TODO
   fetchAll: (pid) => {
-    const docs = Social.get(`${accountId}/document/${pid}/**`);
+    const docs = JSON.parse(Social.get(`${accountId}/thing/${pid}/documents`) || "null");
     return docs;
   },
 
@@ -182,26 +202,53 @@ const handleDocument = {
   publish: (pid, path) => {
     const doc = handleDocument.get(path);
     delete doc._;
-
-    Social.set(
-      {
-        document: {
+    const did = path.split(DOC_SEPARATOR).pop();
+    
+    // TODO: check if document has already been added
+    function addDocumentToProject() {
+      const project = handleProject.get(pid);
+      const documents = JSON.parse(project.documents) || [];
+      // this holds the heirachical data
+      return {
+        thing: {
           [pid]: {
-            [path]: doc,
+            documents: [...documents, path],
           },
         },
-      },
-      {
-        onCommit: () => {
-          handleDocument.set(pid, path, {
-            ...doc,
-            _: {
-              inBuffer: false,
-            },
-          });
+      };
+    }
+
+    // TODO: check if project has already been added
+    function addProjectToDocument() {
+      const projects = JSON.parse(document[did].projects) || [];
+      return {
+        thing: {
+          [did]: {
+            projects: [...projects, pid],
+          },
         },
-      },
+      };
+    }
+
+    const projectToDoc = addProjectToDocument(did, pid);
+    const docToProject = addDocumentToProject(pid, did);
+
+    //combine the json from createThing and addDocumentToProject
+    const combined = deepMerge(
+      deepMerge({ thing: { [did]: doc } }, projectToDoc),
+      docToProject
     );
+
+    Social.set(combined, {
+      onCommit: () => {
+        handleDocument.set(pid, path, {
+          ...doc,
+          _: {
+            inBuffer: false,
+          },
+        });
+      },
+    });
   },
 
   /**
@@ -213,52 +260,33 @@ const handleDocument = {
 
 const handleProject = {
   getAll: () => {
-    return Social.get(`${accountId}/thing/project/**`);
+    return getAllThings("/*__@appAccount__*//type/project", [accountId]);
   },
   get: (pid) => {
-    return Social.get(`${accountId}/thing/project/${pid}/**`);
+    return getThing(pid, [accountId]);
   },
   create: (project) => {
-    const pid = UUID.generate();
+    // TODO: this should be prehandled by the form
     const tags = {};
     project.tags.forEach((tag) => {
       tags[tag] = "";
     });
+    // currently setting project as metadata, need to match with typical metadata
     Social.set({
-      thing: {
-        project: {
-          [pid]: {
-            data: {
-              title: project.title || "Untitled",
-              logo: project.logo || "",
-              tags: tags,
-            },
-            template: {
-              src: project.template || DEFAULT_TEMPLATE,
-            },
-            type: {
-              src: "/*__@appAccount__*//type/project",
-            },
-          },
-        },
-      },
+      thing: createThing("/*__@appAccount__*//type/project", {}, project),
     });
   },
   delete: (pid) => {
     Social.set({
       thing: {
-        project: {
-          [pid]: null,
-        },
+        [pid]: null,
       },
     });
   },
   update: (pid, project) => {
     Social.set({
       thing: {
-        project: {
-          [pid]: project,
-        },
+        [pid]: project,
       },
     });
   },
@@ -286,7 +314,7 @@ const handleProject = {
     const docs = handleDocument.fetchAll(pid);
     if (docs === null) return;
 
-    Object.keys(docs || {}).forEach((path) => {
+    docs.forEach((path) => {
       const doc = docs[path];
       const localDoc = handleDocument.get(path);
       if (!localDoc || new Date(doc.updatedAt) > new Date(localDoc.updatedAt)) {
@@ -419,6 +447,13 @@ if (Storage.privateGet("debug")) {
           }
         />
       </p>
+      <button
+        onClick={() => {
+          store(KEYS.docs(props.project), []);
+        }}
+      >
+        clear local docs
+      </button>
       <hr />
       Fetched
       <p style={{ maxHeight: 300, overflow: "auto" }}>
@@ -428,7 +463,7 @@ if (Storage.privateGet("debug")) {
             JSON.stringify(
               handle["document"].fetch(props.project, selectedDoc),
               null,
-              2,
+              2
             )
           }
         />
@@ -442,7 +477,7 @@ if (Storage.privateGet("debug")) {
             JSON.stringify(
               handle["document"].fetchAllTitles(props.project),
               null,
-              2,
+              2
             )
           }
         />

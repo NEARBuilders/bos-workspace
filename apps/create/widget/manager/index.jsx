@@ -2,7 +2,7 @@
 
 const projectsObj = props.handle["project"].getAll();
 const projects = Object.keys(projectsObj || {}).map((k) => ({
-  ...projectsObj[k].data,
+  ...projectsObj[k].metadata,
   template: projectsObj[k].template.src,
   id: k,
 }));
