@@ -38,6 +38,7 @@ function handleAssets(assets) {
     console.log("assets", assets);
   }
   if (props.handleAssets) {
+    // Here, do I want to do createThing?
     props.handleAssets(assets);
   }
 }

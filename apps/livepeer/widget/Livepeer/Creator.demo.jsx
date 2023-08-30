@@ -14,9 +14,9 @@ const propsTable = `
 | ${"`debug`"}         | Boolean         | ${"`false`"}        | Whether to log debug messages or not.              |
 | ${"`...props`"} | any    | ${"`N/A`"}| Any other props will be passed to the underlying [Livepeer Asset Creator](https://docs.livepeer.org/reference/livepeer-js/asset/useCreateAsset). |
 `;
+
 const widgetCode = `
 \`\`\`jsx
-
 // Use Files if you need the user to upload a video asset from file system
 <Files
   multiple={false}
