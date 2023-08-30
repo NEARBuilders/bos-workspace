@@ -6,7 +6,7 @@ const VideoCard = styled.div`
   border-radius: 8px;
   padding: 16px;
   margin: 16px;
-  width: 300px;
+  width: 450px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   background-color: #fff;
 `;
@@ -52,7 +52,7 @@ return (
   <VideoCard>
     <div onClick={handleExpandVideo} style={{ cursor: "pointer" }}>
       <VideoThumbnail
-        src={data.poster || "https://picsum.photos/300/200"}
+        src={data.poster || "https://placehold.co/450x300/000000/000000/png"}
         alt={videoThing.metadata.name}
       />
     </div>

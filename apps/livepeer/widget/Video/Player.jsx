@@ -49,9 +49,14 @@ if (!videoThing) return <p>Loading...</p>;
 
 const data = JSON.parse(videoThing[""] || "null");
 
+const Button = styled.button``;
+
 return (
   <div className="container">
     <VideoCard>
+      <Button onClick={() => props.handleNavigate && props.handleNavigate()}>
+        back
+      </Button>
       <Widget
         src="livepeer.near/widget/Livepeer.Player"
         props={{
@@ -59,7 +64,9 @@ return (
           title: videoThing.metadata.name,
           PostImage: data?.poster && (
             <img
-              src={data?.poster}
+              src={
+                data?.poster || "https://placehold.co/450x300/000000/FFFFFF/png"
+              }
               alt={videoThing.metadata.name}
             />
           ),
