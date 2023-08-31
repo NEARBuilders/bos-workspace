@@ -60,7 +60,7 @@ return (
         <Button>back</Button>
       </RouterLink>
       <Widget
-        src="livepeer.near/widget/Livepeer.Player"
+        src="/*__@appAccount__*//widget/Livepeer.Player"
         props={{
           playbackId: data.storage.ipfs.cid,
           title: videoThing.metadata.name,

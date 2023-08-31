@@ -1,4 +1,4 @@
-const ROOT_ACCOUNT = "livepeer.near";
+const ROOT_ACCOUNT = "/*__@appAccount__*/";
 
 State.init({
   widget: state.widget ?? props.widget ?? "Library.Overview",

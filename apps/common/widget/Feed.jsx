@@ -19,10 +19,6 @@ const renderItem = (item, i) => {
   const Item = props.Item;
   return (
     <Item path={path} blockHeight={item.blockHeight} />
-    <Widget
-      src="livepeer.near/widget/EventItem"
-      props={{ path, blockHeight: item.blockHeight }}
-    />
   );
 };
 

@@ -1,4 +1,4 @@
-const ROOT_ACCOUNT = props.ROOT_ACCOUNT ?? "livepeer.near";
+const ROOT_ACCOUNT = props.ROOT_ACCOUNT ?? "/*__@appAccount__*/";
 
 const propsTable = `
 

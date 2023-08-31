@@ -89,18 +89,52 @@ const ImageUploaderContainer = styled.div`
   width: 100%;
 `;
 
+const ProcessingOverlay = styled.div`
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(4px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+`;
+
+const Main = styled.div`
+  display: flex;
+  width: 100%;
+  height: 100%;
+
+  .left,
+  .right {
+    width: 50%;
+    padding: 20px;
+    box-sizing: border-box;
+  }
+
+  input,
+  button {
+    margin-top: 10px;
+  }
+`;
+
+const Button = styled.button``;
+
 return (
   <Main className="container">
     <div className="left" style={{ position: "relative" }}>
       {state.uploadStatus === "loading" && (
         <ProcessingOverlay>
-          <p>Processing...</p>
+          <p>Processing... (this can take a minute)</p>
         </ProcessingOverlay>
       )}
       <h2>Upload to Livepeer</h2>
 
       <Widget
-        src={"livepeer.near/widget/Inputs.File"}
+        src={"/*__@appAccount__*//widget/Inputs.File"}
         props={{
           label: "Video",
           id: "livepeer-video",
@@ -143,7 +177,7 @@ return (
         }}
       />
       <Widget
-        src="livepeer.near/widget/Livepeer.Creator"
+        src="/*__@appAccount__*//widget/Livepeer.Creator"
         props={{
           video: state.currentUpload,
           metadata: { title, description },
@@ -163,7 +197,7 @@ return (
       />
       {state.playbackId && (
         <Widget
-          src="livepeer.near/widget/Livepeer.Player"
+          src="/*__@appAccount__*//widget/Livepeer.Player"
           props={{
             playbackId: state.playbackId,
             title: state.title,

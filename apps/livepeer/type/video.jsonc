@@ -72,7 +72,7 @@
     }
   },
   "widgets": {
-    "view": "livepeer.near/widget/Livepeer.Player",
-    "create": "livepeer.near/widget/Livepeer.Creator"
+    "view": "efiz.near/widget/Livepeer.Player",
+    "create": "efiz.near/widget/Livepeer.Creator"
   }
 }
