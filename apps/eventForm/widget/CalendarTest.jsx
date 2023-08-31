@@ -2,6 +2,10 @@
 
 const fetchedEvents = fetchAllEvents();
 
+if (!fetchedEvents) {
+  return <div>Loading...</div>;
+}
+
 const formattedEvents = fetchedEvents.map((event) => {
   return {
     title: event.title,
@@ -13,16 +17,15 @@ const formattedEvents = fetchedEvents.map((event) => {
     extendedProps: {
       category: event.category,
     },
+    description: event.description,
   };
 });
 
-if (!formattedEvents) {
-  return <div>Loading...</div>;
-}
-
 return (
-  <Widget
-    src="itexpert120-contra.near/widget/Calendar"
-    props={{ events: formattedEvents }}
-  />
+  <div className="container">
+    <Widget
+      src="itexpert120-contra.near/widget/Calendar"
+      props={{ events: formattedEvents }}
+    />
+  </div>
 );
