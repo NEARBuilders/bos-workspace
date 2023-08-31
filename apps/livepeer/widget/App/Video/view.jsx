@@ -51,12 +51,14 @@ const data = JSON.parse(videoThing[""] || "null");
 
 const Button = styled.button``;
 
+const RouterLink = props.RouterLink;
+
 return (
   <div className="container">
     <VideoCard>
-      <Button onClick={() => props.handleNavigate && props.handleNavigate()}>
-        back
-      </Button>
+      <RouterLink to="home">
+        <Button>back</Button>
+      </RouterLink>
       <Widget
         src="livepeer.near/widget/Livepeer.Player"
         props={{

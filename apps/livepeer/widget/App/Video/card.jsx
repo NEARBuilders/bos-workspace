@@ -47,15 +47,16 @@ const videoThing = Social.getr(path, blockHeight);
 if (!videoThing) return <p>Loading...</p>;
 
 const data = JSON.parse(videoThing[""] || "null");
+const RouterLink = props.RouterLink;
 
 return (
   <VideoCard>
-    <div onClick={handleExpandVideo} style={{ cursor: "pointer" }}>
+    <RouterLink to={"view"} passProps={{ path, blockHeight }}>
       <VideoThumbnail
         src={data.poster || "https://placehold.co/450x300/000000/000000/png"}
         alt={videoThing.metadata.name}
       />
-    </div>
+    </RouterLink>
     <VideoTitle>{videoThing.metadata.name}</VideoTitle>
     <VideoDescription>{videoThing.metadata.description}</VideoDescription>
     <VideoInfo>

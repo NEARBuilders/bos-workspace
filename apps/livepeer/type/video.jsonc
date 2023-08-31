@@ -1,25 +1,74 @@
 {
   "properties": {
-    "title": {
+    "name": {
       "type": "string"
     },
-    "content": {
-      "type": "md",
-      "defaultValue": ""
+    "playbackPolicy": {
+      "type": "PlaybackPolicy"
     },
-    "description": {
-      "type": "string"
-    },
-    "coverImage": {
-      "type": "string"
-    },
-    "tags": {
-      "type": "array",
-      "itemTypes": [
-        {
-          "type": "string"
+    "storage": {
+      "type": "object",
+      "properties": {
+        "ipfs": {
+          "type": "object",
+          "properties": {
+            "cid": {
+              "type": "string"
+            },
+            "url": {
+              "type": "string"
+            },
+            "gatewayUrl": {
+              "type": "string"
+            },
+            "spec": {
+              "type": "object",
+              "properties": {
+                "nftMetadataTemplate": {
+                  "type": "string",
+                  "enum": ["player", "file"]
+                },
+                "nftMetadata": {
+                  "type": "object"
+                }
+              }
+            },
+            "nftMetadata": {
+              "type": "object",
+              "properties": {
+                "cid": {
+                  "type": "string"
+                },
+                "url": {
+                  "type": "string"
+                },
+                "gatewayUrl": {
+                  "type": "string"
+                }
+              }
+            }
+          }
         }
-      ]
+      }
+    },
+    "type": {
+      "type": "string",
+      "defaultValue": "video"
+    },
+    "playbackId": {
+      "type": "string"
+    },
+    "playbackUrl": {
+      "type": "string"
+    },
+    "downloadUrl": {
+      "type": "string"
+    },
+    "createdAt": {
+      "type": "number"
+    },
+    "size": {
+      "type": "number"
     }
   },
   "widgets": {

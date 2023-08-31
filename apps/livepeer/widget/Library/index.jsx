@@ -1,12 +1,14 @@
 const ROOT_ACCOUNT = "livepeer.near";
 
 State.init({
-  widget: state.widget ?? props.widget ?? "overview",
+  widget: state.widget ?? props.widget ?? "Library.Overview",
 });
 
 const data = Social.keys(`${ROOT_ACCOUNT}/widget/*`, "final", {
   return_type: "BlockHeight",
 });
+
+const RouterLink = props.RouterLink;
 
 if (!data) return "";
 
@@ -105,14 +107,12 @@ const Content = styled.div`
 
 
 const widgets = {
-  index: 0,
+  "index": 0,
   "Livepeer.Creator": 0,
   "Livepeer.Creator.demo": 0,
   "Livepeer.Player": 0,
   "Livepeer.Player.demo": 0,
-  "Livepeer.Feed": 0,
-  "Livepeer.Feed.demo": 0,
-  overview: 0,
+  "Library.Overview": 0,
 };
 const widgetsObj = convertToNestedObject(widgets);
 
@@ -151,7 +151,7 @@ return (
         if (typeof widgetsObj[folder] !== "object") {
           return (
             <a
-              href={`#/${ROOT_ACCOUNT}/widget/index?widget=${folder}`}
+              href={`#/${ROOT_ACCOUNT}/widget/Library.index?widget=${folder}`}
               onClick={() => {
                 State.update({
                   widget: folder,
@@ -176,7 +176,7 @@ return (
                 const fullWidgetName = `${folder}.${widget}`;
                 return (
                   <a
-                    href={`#/${ROOT_ACCOUNT}/widget/index?widget=${fullWidgetName}`}
+                    href={`#/${ROOT_ACCOUNT}/widget/Library.index?widget=${fullWidgetName}`}
                     onClick={() => {
                       State.update({
                         widget: fullWidgetName,
