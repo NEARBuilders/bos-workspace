@@ -5,7 +5,6 @@ const srcData = `
 <!DOCTYPE html>
 <html>
   <head>
-
     <link href='https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css' rel='stylesheet'>
     <link href='https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css' rel='stylesheet'>
     <script src='https://cdn.jsdelivr.net/npm/fullcalendar/index.global.js'></script>
@@ -37,9 +36,10 @@ const srcData = `
               }
             },
           },
-          
+          expandRows: true,
           headerToolbar: {
             start: 'title prev,next dayGridMonth list', // will normally be on the left. if RTL, will be on the right
+            center: '',
             // end: 'timeGridDay list' 
             end: 'filterBy addEvent' 
           },
@@ -50,13 +50,7 @@ const srcData = `
           viewDidMount: function () {
             var addEvent = document.querySelector('.fc-addEvent-button');
             addEvent.innerHTML = 'Add Event <i class="bi bi-plus-circle-fill" style="color: #05EB97; margin-left: 2px;"></i>';
-          
-            //
-            // const titleElement = document.querySelector('.fc-toolbar-title');
-            // const text = titleElement.textContent;
-            // const words= text.split(" ");
-            // words[0] = '<strong>' + words[0] + '</strong>';
-            // titleElement.innerHTML = words.join(" ");
+        
           }
         })
         calendar.render()
@@ -130,14 +124,8 @@ const srcData = `
 
   .fc-dayGridMonth-button.fc-button.fc-button-primary.fc-button-active {
     border: 1px solid #03B172;
-
     background-color: white;
-
     color: #03B172;
-    font-size: 16px;
-    font-style: normal;
-    font-weight: 600;
-    line-height: normal;
   }
 
   .fc-list-button.fc-button.fc-button-primary {
@@ -161,14 +149,8 @@ const srcData = `
 
   .fc-list-button.fc-button.fc-button-primary.fc-button-active {
     border: 1px solid #03B172;
-
     background-color: white;
-
     color: #03B172;
-    font-size: 16px;
-    font-style: normal;
-    font-weight: 600;
-    line-height: normal;
   }
 
   .fc-header-toolbar.fc-toolbar {
@@ -263,6 +245,103 @@ const srcData = `
   tbody, td, tfoot, th, thead, tr {
     border-radius: 6px;
   }
+
+  @media (width < 720px) {
+    .fc .fc-toolbar-title {
+      font-size: 1rem;
+    }
+
+    .fc-toolbar-chunk {
+      display: flex;
+      align-items: center;
+    }
+  }
+
+  @media (width < 550px) {
+    .fc-dayGridMonth-button.fc-button.fc-button-primary {
+      font-size: 0.75rem;
+      width: 50px;
+      height: 30px;
+      padding: 0.5rem;
+    }
+
+    .fc-list-button.fc-button.fc-button-primary {
+      font-size: 0.75rem;
+      width: 50px;
+      height: 30px;
+      padding: 0.5rem;
+    }
+
+    .fc-filterBy-button.fc-button.fc-button-primary {
+      font-size: 0.75rem;
+      width: 60px;
+      height: 30px;
+      padding: 0.5rem;
+    }
+
+    .fc-addEvent-button.fc-button.fc-button-primary {
+      font-size: 0.75rem;
+      width: 95px;
+      height: 30px;
+      padding: 0.5rem;
+    }
+
+    .fc-prev-button.fc-button.fc-button-primary {
+      font-size: 0.75rem;
+    }
+
+    .fc-next-button.fc-button.fc-button-primary {
+      font-size: 0.75rem;
+    }
+  }
+
+  @media (width < 480px) {
+    .fc-header-toolbar.fc-toolbar {
+      padding: 0.25rem;
+      text-align: center;
+    } 
+
+    .fc-direction-ltr .fc-toolbar > * > :not(:first-child) {
+      margin-left: 0px;
+    }
+
+    .fc-prev-button.fc-button.fc-button-primary {
+      padding: 2px;
+    }
+
+    .fc-next-button.fc-button.fc-button-primary {
+      padding: 2px;
+    }
+
+    .fc-dayGridMonth-button.fc-button.fc-button-primary {
+      font-size: 0.75rem;
+      width: 50px;
+      height: 30px;
+      padding: 0.5rem;
+    }
+
+    .fc-list-button.fc-button.fc-button-primary {
+      font-size: 0.75rem;
+      width: 50px;
+      height: 30px;
+      padding: 0.5rem;
+    }
+
+    .fc-filterBy-button.fc-button.fc-button-primary {
+      font-size: 0.75rem;
+      width: 60px;
+      height: 30px;
+      padding: 0.5rem;
+    }
+
+    .fc-addEvent-button.fc-button.fc-button-primary {
+      font-size: 0.75rem;
+      width: 90px;
+      height: 30px;
+      padding: 0.2rem;
+    }
+  }
+
 </style>
 `;
 
