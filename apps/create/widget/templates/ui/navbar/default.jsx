@@ -1,4 +1,3 @@
-/*__@import:QoL/widget__*/
 /*__@import:QoL/Url__*/
 /*__@import:QoL/classNames__*/
 

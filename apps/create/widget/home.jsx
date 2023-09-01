@@ -4,7 +4,6 @@
  * Repository: https://github.com/near-everything/bos-workspace
  */
 
-/*__@import:QoL/widget__*/
 /*__@import:QoL/Url__*/
 
 State.init({
@@ -46,23 +45,34 @@ const navigate = (v, params) => {
 return (
   <>
     <div className="row">
-      {widget("/*__@appAccount__*//widget/ui.navbar", {
-        template: "/*__@appAccount__*//widget/templates.ui.navbar.default",
-        onPageChange: navigate,
-        pages: ["projects"],
-      })}
+      <Widget
+        src={"/*__@appAccount__*//widget/ui.navbar"}
+        props={{
+          template: "/*__@appAccount__*//widget/templates.ui.navbar.default",
+          onPageChange: navigate,
+          pages: ["projects"],
+        }}
+      />
       <div className="col">
-        {activePage.provider
-          ? widget(activePage.provider, {
-              Children: (p) => widget(activePage.widget, p),
+        {activePage.provider ? (
+          <Widget
+            src={activePage.provider}
+            props={{
+              Children: (p) => <Widget src={activePage.widget} props={p} />,
               navigate,
               project,
               ...props,
               templates: {
                 Folders: "/*__@appAccount__*//widget/editor.uiFolders",
               },
-            })
-          : widget(activePage.widget, { ...props, navigate, project })}
+            }}
+          />
+        ) : (
+          <Widget
+            src={activePage.widget}
+            props={{ ...props, navigate, project }}
+          />
+        )}
       </div>
     </div>
   </>

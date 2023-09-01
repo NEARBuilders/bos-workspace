@@ -1,5 +1,3 @@
-/*__@import:QoL/widget__*/
-
 const projectsObj = props.handle["project"].getAll();
 const projects = Object.keys(projectsObj || {}).map((k) => ({
   ...projectsObj[k].metadata,
@@ -7,8 +5,13 @@ const projects = Object.keys(projectsObj || {}).map((k) => ({
   id: k,
 }));
 
-return widget("/*__@appAccount__*//widget/manager.ui", {
-  handleCreateProject: props.handle["project"].create,
-  projects,
-  navigate: props.navigate,
-});
+return (
+  <Widget
+    src="/*__@appAccount__*//widget/manager.ui"
+    props={{
+      handleCreateProject: props.handle["project"].create,
+      projects,
+      navigate: props.navigate,
+    }}
+  />
+);

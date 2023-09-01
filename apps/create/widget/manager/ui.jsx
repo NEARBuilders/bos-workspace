@@ -44,16 +44,29 @@ function renderHeader({ handleCreateProject }) {
   return (
     <div className="d-flex gap-4 justify-content-between py-4">
       <h4>All my projects</h4>
-      {widget("/*__@replace:nui__*//widget/Layout.Modal", {
-        toggle: widget("/*__@replace:nui__*//widget/Input.Button", {
-          variant: "success",
-          size: "lg",
-          children: "New project",
-        }),
-        content: widget("/*__@appAccount__*//widget/project.form", {
-          handleCreateProject,
-        }),
-      })}
+      <Widget
+        src="/*__@replace:nui__*//widget/Layout.Modal"
+        props={{
+          toggle: (
+            <Widget
+              src="/*__@replace:nui__*//widget/Input.Button"
+              props={{
+                variant: "success",
+                size: "lg",
+                children: "New project",
+              }}
+            />
+          ),
+          content: (
+            <Widget
+              src="/*__@appAccount__*//widget/project.form"
+              props={{
+                handleCreateProject,
+              }}
+            />
+          ),
+        }}
+      />
     </div>
   );
 }

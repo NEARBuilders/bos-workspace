@@ -1,5 +1,3 @@
-/*__@import:QoL/widget__*/
-
 const { on } = props;
 
 State.init({
@@ -35,33 +33,40 @@ return (
       </button>
     </div>
     <div className="c__editor">
-      {state.tab === "VIEW" &&
-        widget("openwebbuild.near/widget/Post.Markdown", {
-          text: props.data.content,
-        })}
+      {state.tab === "VIEW" && (
+        <Widget
+          src="openwebbuild.near/widget/Post.Markdown"
+          props={{
+            text: props.data.content,
+          }}
+        />
+      )}
 
       {/* Just hiding the iframe, so that it doesn't reload everything on tab change */}
       <div
         className={"w-100 h-100" + (state.tab !== "EDIT" ? " d-none" : "")}
         key={props.key}
       >
-        {widget("efiz.near/widget/SimpleMDE", {
-          onChange: (v) => on.change("content", v),
-          data: { content: props.data.content },
-          toolbar: [
-            "heading",
-            "bold",
-            "italic",
-            "quote",
-            "code",
-            "link",
-            "unordered-list",
-            "ordered-list",
-            "checklist",
-            "mention",
-            "reference",
-          ],
-        })}
+        <Widget
+          src="efiz.near/widget/SimpleMDE"
+          props={{
+            onChange: (v) => on.change("content", v),
+            data: { content: props.data.content },
+            toolbar: [
+              "heading",
+              "bold",
+              "italic",
+              "quote",
+              "code",
+              "link",
+              "unordered-list",
+              "ordered-list",
+              "checklist",
+              "mention",
+              "reference",
+            ],
+          }}
+        />
       </div>
     </div>
   </>
