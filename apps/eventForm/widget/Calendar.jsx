@@ -25,14 +25,16 @@ const srcData = `
           customButtons: {
             filterBy: {
               text: 'Filter by',
-              click: function() {
-                alert('clicked the custom button!');
+              click: function(e) {
+                e.preventDefault();
+                window.parent.postMessage(JSON.stringify({ handler: "filter"}), '*');
               }
             },
             addEvent: {
               text: '',
-              click: function() {
-                location.href="google.com";
+              click: function(e) {
+                e.preventDefault();
+                window.parent.postMessage(JSON.stringify({ handler: "add-event"}), '*');
               }
             },
           },
@@ -45,6 +47,11 @@ const srcData = `
           },
           navLinks: true,
           events: ${JSON.stringify(events)},
+          eventClick: function(info) {
+            info.jsEvent.preventDefault(); // don't let the browser navigate
+            // Post the event details to the parent window
+            window.parent.postMessage(JSON.stringify({ handler: "event-click", data: info.event }), '*');
+          },
 
           // Render the custom button with an icon
           viewDidMount: function () {
@@ -336,9 +343,13 @@ const srcData = `
 
     .fc-addEvent-button.fc-button.fc-button-primary {
       font-size: 0.75rem;
-      width: 90px;
+      width: 65px;
       height: 30px;
       padding: 0.2rem;
+    }
+
+    .fc-addEvent-button.fc-button.fc-button-primary i {
+      display: none;
     }
   }
 
@@ -347,11 +358,31 @@ const srcData = `
 
 return (
   <>
-    <div className="container">
+    <div>
       <iframe
         srcDoc={srcData}
         onMessage={(data) => {
-          console.log(data);
+          const dataObj = JSON.parse(data);
+          switch (dataObj.handler) {
+            case "filter": {
+              if (props.handleFilter) {
+                props.handleFilter();
+              }
+              break;
+            }
+            case "add-event": {
+              if (props.handleAddEvent) {
+                props.handleAddEvent();
+              }
+              break;
+            }
+            case "event-click": {
+              if (props.handleEventClick) {
+                props.handleEventClick();
+              }
+              break;
+            }
+          }
         }}
         style={{
           height: "100vh",

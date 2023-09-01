@@ -36,12 +36,10 @@ const onDescriptionChange = (target) => {
 
 const onStartChange = ({ target }) => {
   State.update({ start: target.value });
-  console.log(state.start);
 };
 
 const onStartTimeChange = ({ target }) => {
   State.update({ startTime: target.value });
-  console.log(state.startTime);
 };
 
 const onEndChange = ({ target }) => {
@@ -147,8 +145,7 @@ const handleNewEvent = () => {
 const EventForm = () => {
   return (
     <div className="container">
-      <h2>Create a new Event</h2>
-      <div className="needs-validation" novalidate>
+      <div>
         <div className="mb-3">
           <label class="form-label" for="title">
             Event Title
@@ -174,7 +171,7 @@ const EventForm = () => {
             }}
           />
         </div>
-        <div className="row  mb-3">
+        <div className="row mb-3">
           <div className="col">
             <label for="start">Event Start Date</label>
             <input
