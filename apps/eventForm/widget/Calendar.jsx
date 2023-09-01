@@ -178,7 +178,7 @@ const srcData = `
     align-items: center;
     align-self: stretch;
 
-    border-radius: 6px 6px 0px 0px;
+    border-radius: 6px;
     border: 1px solid var(--Stroke, rgba(218, 220, 224, 0.60));
     background: #FFF;
   } 
