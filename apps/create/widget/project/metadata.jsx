@@ -1,7 +1,5 @@
 const { project } = props;
 
-/*__@import:QoL/widget__*/
-
 const objectDiff = (a, b) => {
   const aKeys = Object.keys(a);
   const bKeys = Object.keys(b);
@@ -46,8 +44,13 @@ const handleUpdateProject = (new_project) => {
   });
 };
 
-return widget("/*__@appAccount__*//widget/project.form", {
-  handleCreateProject: handleUpdateProject,
-  defaultProject: project,
-  buttonChildren: "Update Project",
-});
+return (
+  <Widget
+    src="/*__@appAccount__*//widget/project.form"
+    props={{
+      handleCreateProject: handleUpdateProject,
+      defaultProject: project,
+      buttonChildren: "Update Project",
+    }}
+  />
+);

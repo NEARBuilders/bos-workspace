@@ -1,5 +1,4 @@
 /*__@import:QoL/classNames__*/
-/*__@import:QoL/widget__*/
 /*__@import:QoL/Url__*/
 
 // TODO: should be able to hide/show children elements
@@ -102,7 +101,7 @@ const renderFolder = (folder) => {
       className={classNames([path.length > 1 ? "folder__child" : "folder"])}
       key={path}
     >
-      {widget("/*__@appAccount__*//widget/editor.uiFoldersMenu", {
+      <Widget src="/*__@appAccount__*//widget/editor.uiFoldersMenu" props={{
         path,
         handler,
         renderTrigger: () =>
@@ -112,7 +111,7 @@ const renderFolder = (folder) => {
             isFile: !children || Object.keys(children).length === 0,
             inBuffer,
           }),
-      })}
+      }} />
 
       {children && !!Object.keys(children).length && (
         <div className="folder__children">

@@ -1,0 +1,78 @@
+{
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "playbackPolicy": {
+      "type": "PlaybackPolicy"
+    },
+    "storage": {
+      "type": "object",
+      "properties": {
+        "ipfs": {
+          "type": "object",
+          "properties": {
+            "cid": {
+              "type": "string"
+            },
+            "url": {
+              "type": "string"
+            },
+            "gatewayUrl": {
+              "type": "string"
+            },
+            "spec": {
+              "type": "object",
+              "properties": {
+                "nftMetadataTemplate": {
+                  "type": "string",
+                  "enum": ["player", "file"]
+                },
+                "nftMetadata": {
+                  "type": "object"
+                }
+              }
+            },
+            "nftMetadata": {
+              "type": "object",
+              "properties": {
+                "cid": {
+                  "type": "string"
+                },
+                "url": {
+                  "type": "string"
+                },
+                "gatewayUrl": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "type": {
+      "type": "string",
+      "defaultValue": "video"
+    },
+    "playbackId": {
+      "type": "string"
+    },
+    "playbackUrl": {
+      "type": "string"
+    },
+    "downloadUrl": {
+      "type": "string"
+    },
+    "createdAt": {
+      "type": "number"
+    },
+    "size": {
+      "type": "number"
+    }
+  },
+  "widgets": {
+    "view": "efiz.near/widget/Livepeer.Player",
+    "create": "efiz.near/widget/Livepeer.Creator"
+  }
+}
