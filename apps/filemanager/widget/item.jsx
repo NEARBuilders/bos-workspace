@@ -24,16 +24,20 @@ function toggleExpand(key) {
 }
 
 function getBackgroundColor(counter) {
-  return counter % 2 === 0 ? '#f7f7f7' : '#e7e7e7'; // Light gray for even, slightly darker gray for odd
+  return counter % 2 === 0 ? "#f7f7f7" : "#e7e7e7"; // Light gray for even, slightly darker gray for odd
 }
 
-const { data, level, padding, eFolder, eFile, counter } = props;
+const { data, level, path, padding, eFolder, eFile, counter } = props;
 
 if (level === undefined) {
   level = 0;
 }
 if (data === undefined) {
   data = {};
+}
+
+if (path === undefined) {
+  path = [];
 }
 
 if (counter === undefined) {
@@ -57,27 +61,47 @@ if (eFile === undefined) {
 }
 
 return (
-  <div style={{ marginLeft: `${level * (padding ?? 20)}px`, width: '100%' }}>
-    {Object.keys(data).map((key, index) => (
-      <div key={index} style={{ backgroundColor: getBackgroundColor(counter + index), width: '100%' }}>
-        {typeof data[key] === "object" ? (
-          <>
-            <eFolder
-              key={key}
-              isExpanded={state.expandedKeys[key]}
-              toggleExpand={() => toggleExpand(key)}
-            />
-            {state.expandedKeys[key] && (
-              <Widget
-                src="voyager.near/widget/item"
-                props={{ data: data[key], level: level + 1, eFolder, eFile, counter: counter + index + 1 }}
-              />
+  <>
+    <div style={{ marginLeft: `${level * (padding ?? 20)}px`, width: "100%" }}>
+      {Object.keys(data).map((key, index) => {
+        const currentPath = [...path, key].join("/");
+        return (
+          <div
+            key={index}
+            style={{
+              backgroundColor: getBackgroundColor(counter + index),
+              width: "100%",
+            }}
+          >
+            {typeof data[key] === "object" ? (
+              <>
+                <eFolder
+                  key={key}
+                  data={data[key]}
+                  isExpanded={state.expandedKeys[key]}
+                  toggleExpand={() => toggleExpand(key)}
+                  path={currentPath}
+                />
+                {state.expandedKeys[key] && (
+                  <Widget
+                    src="voyager.near/widget/item"
+                    props={{
+                      data: data[key],
+                      level: level + 1,
+                      path: [...path, key],
+                      eFolder,
+                      eFile,
+                      counter: counter + index + 1,
+                    }}
+                  />
+                )}
+              </>
+            ) : (
+              <eFile key={key} data={data[key]} path={currentPath} />
             )}
-          </>
-        ) : (
-          <eFile key={key} data={data[key]} />
-        )}
-      </div>
-    ))}
-  </div>
+          </div>
+        );
+      })}
+    </div>
+  </>
 );

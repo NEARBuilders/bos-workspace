@@ -1,3 +1,26 @@
+
+return (
+  <Widget
+    src="provider"
+    blockHeight="final"
+    props={{
+      Template: {
+        Layout: {
+          src: "layout",
+          blockHeight: "final",
+        },
+        Components: {
+          Search: {
+            src: "search",
+            blockHeight: "final",
+          }
+        }
+      },
+    }}
+  />
+);
+
+
 const FileManagerContainer = styled.div`
   display: flex;
   height: 100vh;

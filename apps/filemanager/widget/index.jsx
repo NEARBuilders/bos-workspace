@@ -103,24 +103,115 @@ const FileInfo = styled.span`
   gap: 10px;
 `;
 
-function eFolder({ toggleExpand, isExpanded, key }) {
+function eFolder({ toggleExpand, isExpanded, key, path, data }) {
   return (
-    <FolderContainer onClick={toggleExpand}>
-      <ArrowIcon isExpanded={isExpanded} />
-      {key}
-    </FolderContainer>
+    <Widget
+      src="voyager.near/widget/item.menu"
+      props={{
+        passProps: {
+          delete: {
+            path,
+            data,
+          },
+        },
+        handler: {
+          delete: ({ path, data }) => {
+            function setLeavesToNull(obj) {
+              const newObj = {};
+
+              Object.keys(obj).forEach((key) => {
+                if (typeof obj[key] === "object" && obj[key] !== null) {
+                  newObj[key] = setLeavesToNull(obj[key]);
+                } else {
+                  newObj[key] = null;
+                }
+              });
+
+              return newObj;
+            }
+
+            function buildObjectWithPath(path, data) {
+              const pathComponents = path.split("/").slice(1); // Remove the first part of the path
+              let currentObj = {};
+              let pointer = currentObj;
+
+              pathComponents.forEach((component, i) => {
+                if (i === pathComponents.length - 1) {
+                  pointer[component] = setLeavesToNull(data);
+                } else {
+                  pointer[component] = {};
+                  pointer = pointer[component];
+                }
+              });
+
+              return currentObj;
+            }
+
+            const newData = buildObjectWithPath(path, data);
+            Social.set(newData);
+          },
+        },
+        Item: () => (
+          <FolderContainer
+            onClick={toggleExpand}
+            onDoubleClick={() => console.log("double click")} // open folder
+          >
+            <ArrowIcon isExpanded={isExpanded} />
+            {key}
+            {path}
+          </FolderContainer>
+        ),
+      }}
+    />
   );
 }
 
-function eFile({ key, data, type, size }) {
+function eFile({ key, path, data }) {
   return (
-    <FileContainer>
-      <span>{key}</span>
-      <FileInfo>
-        <span>{type}</span>
-        <span>{size}</span>
-      </FileInfo>
-    </FileContainer>
+    <Widget
+      src="voyager.near/widget/item.menu"
+      props={{
+        passProps: {
+          delete: {
+            path,
+            data,
+          },
+        },
+        handler: {
+          delete: ({ path }) => {
+            function buildObjectWithLastNull(path) {
+              const pathComponents = path.split('/').slice(1); // Remove the first part of the path
+              let currentObj = {};
+              let pointer = currentObj;
+            
+              pathComponents.forEach((component, i) => {
+                if (i === pathComponents.length - 1) {
+                  pointer[component] = null;
+                } else {
+                  pointer[component] = {};
+                  pointer = pointer[component];
+                }
+              });
+            
+              return currentObj;
+            }
+            
+            const result = buildObjectWithLastNull(path);
+            console.log(result);
+          },
+        },
+        Item: () => (
+          <FileContainer
+            onDoubleClick={() => console.log("double click")} // open file
+          >
+            <span>{key}</span>
+            <FileInfo>
+              <span>{path}</span>
+            </FileInfo>
+          </FileContainer>
+        ),
+      }}
+    />
   );
 }
 
@@ -140,13 +231,19 @@ return (
       <Header>
         <div>{state.selectedKey}</div>
         <ButtonRow>
-          <Button>delete</Button>
+          <Button>create</Button>
         </ButtonRow>
       </Header>
       <Content>
         <Widget
           src="voyager.near/widget/item"
-          props={{ data: state.selectedValue, level: 0, eFolder, eFile }}
+          props={{
+            data: state.selectedValue,
+            level: 0,
+            path: [state.accountId, state.selectedKey],
+            eFolder,
+            eFile,
+          }}
         />
       </Content>
     </MainContent>
