@@ -2,11 +2,17 @@ const { Layout, Components } = props;
 
 return (
   <Widget
-    src={Layout.src}
-    blockHeight={Layout.blockHeight}
+    src={"common.near/widget/List"}
+    blockHeight={"final"}
     props={{
-      items: ["item1", "item2", "item3"], 
-      Item: () => <Widget src={Components.Item.src} blockHeight={Components.Item.blockHeight} />,
+      items: [{ key: "item1" }, { key: "item2" }, { key: "item3" }],
+      Item: (p) => (
+        <Widget
+          src={"voyager2.near/widget/sidebar.item"}
+          blockHeight={"final"}
+          props={p}
+        />
+      ),
     }}
   />
 );

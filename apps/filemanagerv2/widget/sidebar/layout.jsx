@@ -5,7 +5,7 @@ return (
     src="common.near/widget/List"
     props={{
       items,
-      Item,
+      Item 
     }}
   />
 );

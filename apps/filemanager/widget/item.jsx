@@ -62,7 +62,7 @@ if (eFile === undefined) {
 
 return (
   <>
-    <div style={{ marginLeft: `${level * (padding ?? 20)}px`, width: "100%" }}>
+    <div style={{ paddingLeft: `${level * (padding ?? 20)}px`, width: "100%" }}>
       {Object.keys(data).map((key, index) => {
         const currentPath = [...path, key].join("/");
         return (

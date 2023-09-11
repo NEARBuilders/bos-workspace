@@ -1,18 +1,3 @@
-// const { layout, provider, components } = props;
-
-// function Component(key, props) {
-//   const { src, blockHeight } = components[key];
-//   return <Widget src={src} blockHeight={blockHeight} props={props} />;
-// }
-
-// return (
-//   <Widget
-//     src={layout.src}
-//     blockHeight={layout.blockHeight}
-//     props={{ Search: () => Component("Search", {}) }}
-//   />
-// );
-
 const FileManagerContainer = styled.div`
   display: flex;
   height: 100vh;
@@ -103,114 +88,120 @@ const FileInfo = styled.span`
   gap: 10px;
 `;
 
-function eFolder({ toggleExpand, isExpanded, key, path, data }) {
+function Menu({ handler, passProps, Item }) {
   return (
     <Widget
       src="voyager.near/widget/item.menu"
       props={{
-        passProps: {
-          delete: {
-            path,
-            data,
-          },
-        },
-        handler: {
-          delete: ({ path, data }) => {
-            function setLeavesToNull(obj) {
-              const newObj = {};
-
-              Object.keys(obj).forEach((key) => {
-                if (typeof obj[key] === "object" && obj[key] !== null) {
-                  newObj[key] = setLeavesToNull(obj[key]);
-                } else {
-                  newObj[key] = null;
-                }
-              });
-
-              return newObj;
-            }
-
-            function buildObjectWithPath(path, data) {
-              const pathComponents = path.split("/").slice(1); // Remove the first part of the path
-              let currentObj = {};
-              let pointer = currentObj;
-
-              pathComponents.forEach((component, i) => {
-                if (i === pathComponents.length - 1) {
-                  pointer[component] = setLeavesToNull(data);
-                } else {
-                  pointer[component] = {};
-                  pointer = pointer[component];
-                }
-              });
-
-              return currentObj;
-            }
-
-            const newData = buildObjectWithPath(path, data);
-            Social.set(newData);
-          },
-        },
-        Item: () => (
-          <FolderContainer
-            onClick={toggleExpand}
-            onDoubleClick={() => console.log("double click")} // open folder
-          >
-            <ArrowIcon isExpanded={isExpanded} />
-            {key}
-            {path}
-          </FolderContainer>
-        ),
+        passProps,
+        handler,
+        Item,
       }}
+      loading={<></>}
+    />
+  );
+}
+
+function deleteFile(path) {
+  function buildObjectWithLastNull(path) {
+    const pathComponents = path.split("/").slice(1); // Remove the first part of the path
+    let currentObj = {};
+    let pointer = currentObj;
+
+    pathComponents.forEach((component, i) => {
+      if (i === pathComponents.length - 1) {
+        pointer[component] = null;
+      } else {
+        pointer[component] = {};
+        pointer = pointer[component];
+      }
+    });
+
+    return currentObj;
+  }
+
+  const result = buildObjectWithLastNull(path);
+  Social.set(result);
+}
+
+function deleteFolder(path, data) {
+  function setLeavesToNull(obj) {
+    const newObj = {};
+
+    Object.keys(obj).forEach((key) => {
+      if (typeof obj[key] === "object" && obj[key] !== null) {
+        newObj[key] = setLeavesToNull(obj[key]);
+      } else {
+        newObj[key] = null;
+      }
+    });
+
+    return newObj;
+  }
+
+  function buildObjectWithPath(path, data) {
+    const pathComponents = path.split("/").slice(1); // Remove the first part of the path
+    let currentObj = {};
+    let pointer = currentObj;
+
+    pathComponents.forEach((component, i) => {
+      if (i === pathComponents.length - 1) {
+        pointer[component] = setLeavesToNull(data);
+      } else {
+        pointer[component] = {};
+        pointer = pointer[component];
+      }
+    });
+
+    return currentObj;
+  }
+
+  const newData = buildObjectWithPath(path, data);
+  Social.set(newData);
+}
+
+function eFolder({ toggleExpand, isExpanded, key, path, data }) {
+  return (
+    <Menu
+      passProps={{ delete: { path, data } }}
+      handler={{
+        delete: ({ path, data }) => {
+          deleteFolder(path, data);
+        },
+      }}
+      Item={() => (
+        <FolderContainer
+          onClick={toggleExpand}
+          onDoubleClick={() => console.log("double click")} // open folder
+        >
+          <ArrowIcon isExpanded={isExpanded} />
+          {key}
+          {path}
+        </FolderContainer>
+      )}
     />
   );
 }
 
 function eFile({ key, path, data }) {
   return (
-    <Widget
-      src="voyager.near/widget/item.menu"
-      props={{
-        passProps: {
-          delete: {
-            path,
-            data,
-          },
+    <Menu
+      passProps={{ delete: { path, data } }}
+      handler={{
+        delete: ({ path }) => {
+          deleteFile(path);
         },
-        handler: {
-          delete: ({ path }) => {
-            function buildObjectWithLastNull(path) {
-              const pathComponents = path.split('/').slice(1); // Remove the first part of the path
-              let currentObj = {};
-              let pointer = currentObj;
-            
-              pathComponents.forEach((component, i) => {
-                if (i === pathComponents.length - 1) {
-                  pointer[component] = null;
-                } else {
-                  pointer[component] = {};
-                  pointer = pointer[component];
-                }
-              });
-            
-              return currentObj;
-            }
-            
-            const result = buildObjectWithLastNull(path);
-            console.log(result);
-          },
-        },
-        Item: () => (
-          <FileContainer
-            onDoubleClick={() => console.log("double click")} // open file
-          >
-            <span>{key}</span>
-            <FileInfo>
-              <span>{path}</span>
-            </FileInfo>
-          </FileContainer>
-        ),
       }}
+      Item={() => (
+        <FileContainer
+          onDoubleClick={() => console.log("double click")} // open file
+        >
+          <span>{key}</span>
+          <FileInfo>
+            <span>{path}</span>
+          </FileInfo>
+        </FileContainer>
+      )}
     />
   );
 }

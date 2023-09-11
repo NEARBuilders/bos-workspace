@@ -13,8 +13,8 @@ const ListItem = ({ key, data }) => {
   return <div>{key} : {JSON.stringify(data)}</div>;
 }
 
-ListContainer = Container ? <Container /> : ListContainer;
-ListItem = Item ? <Item /> : ListItem;
+ListContainer = Container ? Container : ListContainer;
+ListItem = Item ? Item : ListItem;
 
 return (
   <ListContainer>
