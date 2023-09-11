@@ -14,19 +14,7 @@ const ButtonRow = styled.div`
   gap: 10px;
 `;
 
-const Button = styled.button`
-  padding: 5px 15px;
-  border: none;
-  border-radius: 4px;
-  background-color: #007bff;
-  color: #fff;
-  cursor: pointer;
-  transition: background-color 0.3s;
-
-  &:hover {
-    background-color: #0056b3;
-  }
-`;
+const Button = styled.button``;
 
 const path = props.path || "";
 const goBack = props.goBack || (() => {});
@@ -54,29 +42,34 @@ return (
       <Button onClick={() => setLayout("COLUMNS")}>
         <i className="bi bi-columns-gap"></i>
       </Button>
-      {/* Bootstrap Dropdown */}
-      <div className="dropdown show">
-        <Button
-          className="dropdown-toggle"
-          id="dropdownMenuButton"
-          data-toggle="dropdown"
-          aria-haspopup="true"
-          aria-expanded="false"
-        >
+      <DropdownMenu.Root>
+        <DropdownMenu.Trigger as={Button}>
           <i className="bi bi-three-dots-vertical"></i>
-        </Button>
-        <div className="dropdown-menu" aria-labelledby="dropdownMenuButton">
-          <a className="dropdown-item" href="#">
+        </DropdownMenu.Trigger>
+        <DropdownMenu.Content>
+          <DropdownMenu.Item
+            onSelect={() => {
+              console.log("hey 1")
+            }}
+          >
             Option 1
-          </a>
-          <a className="dropdown-item" href="#">
+          </DropdownMenu.Item>
+          <DropdownMenu.Item
+            onSelect={() => {
+              console.log("hey 2")
+            }}
+          >
             Option 2
-          </a>
-          <a className="dropdown-item" href="#">
+          </DropdownMenu.Item>
+          <DropdownMenu.Item
+            onSelect={() => {
+              console.log("hey 3")
+            }}
+          >
             Option 3
-          </a>
-        </div>
-      </div>
+          </DropdownMenu.Item>
+        </DropdownMenu.Content>
+      </DropdownMenu.Root>
     </ButtonRow>
   </Header>
 );
