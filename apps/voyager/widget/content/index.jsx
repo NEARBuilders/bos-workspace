@@ -106,33 +106,30 @@ function deleteFile(path) {
 
 function deleteFolder(path, data) {
   function setLeavesToNull(obj) {
-    const newObj = {};
-
-    Object.keys(obj).forEach((key) => {
+    Object.keys(obj).forEach(key => {
       if (typeof obj[key] === "object" && obj[key] !== null) {
-        newObj[key] = setLeavesToNull(obj[key]);
+        obj[key] = setLeavesToNull(obj[key]);
       } else {
-        newObj[key] = null;
+        obj[key] = null;
       }
     });
-
-    return newObj;
+    return obj;
   }
 
   function buildObjectWithPath(path, data) {
-    const pathComponents = path.split("/").slice(1); // Remove the first part of the path
+    const parts = path.split("/").slice(1);
+    const value = parts.reduce((current, part) => (current && current[part] ? current[part] : undefined), data);
     let currentObj = {};
     let pointer = currentObj;
 
-    pathComponents.forEach((component, i) => {
-      if (i === pathComponents.length - 1) {
-        pointer[component] = setLeavesToNull(data);
+    parts.forEach((component, i) => {
+      if (i === parts.length - 1) {
+        pointer[component] = setLeavesToNull(value);
       } else {
         pointer[component] = {};
         pointer = pointer[component];
       }
     });
-
     return currentObj;
   }
 
