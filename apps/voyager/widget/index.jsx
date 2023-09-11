@@ -11,7 +11,7 @@ const MainContent = styled.div`
   overflow: hidden;
 `;
 
-function Header({ goBack, goForward, setLayout}) {
+function Header({ path, goBack, goForward, setLayout}) {
   return (
     <Widget
       src="voyager3.near/widget/header.index"
@@ -25,13 +25,14 @@ function Header({ goBack, goForward, setLayout}) {
   );
 }
 
-function Content({ layout, path }) {
+function Content({ layout, path, setPath }) {
   return (
     <Widget
       src="voyager3.near/widget/content.index"
       props={{
         layout: layout,
         path: path,
+        setPath
       }}
     />
   );
