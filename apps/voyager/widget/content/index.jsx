@@ -77,20 +77,6 @@ const FileInfo = styled.span`
   gap: 10px;
 `;
 
-function Menu({ handler, passProps, Item }) {
-  return (
-    <Widget
-      src="voyager.near/widget/item.menu"
-      props={{
-        passProps,
-        handler,
-        Item,
-      }}
-      loading={<></>}
-    />
-  );
-}
-
 const { ContextMenu } = VM.require("efiz.near/widget/Module.ContextMenu");
 
 ContextMenu = ContextMenu || (() => <></>);
@@ -169,7 +155,7 @@ function RenderData({ data, layout }) {
           {Object.keys(dataList).map((key) => (
             <div key={key}>
               <Widget
-                src="voyager3.near/widget/item"
+                src="/*__@appAccount__*//widget/item"
                 props={{
                   path: key,
                   data: dataList[key],

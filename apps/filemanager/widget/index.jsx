@@ -91,7 +91,7 @@ const FileInfo = styled.span`
 function Menu({ handler, passProps, Item }) {
   return (
     <Widget
-      src="voyager.near/widget/item.menu"
+      src="/*__@appAccount__*//widget/item.menu"
       props={{
         passProps,
         handler,
@@ -210,11 +210,11 @@ return (
   <FileManagerContainer>
     <SidePanel>
       <Widget
-        src="voyager.near/widget/sidebar.search"
+        src="/*__@appAccount__*//widget/sidebar.search"
         props={{ setAccount: (v) => State.update({ accountId: v }) }}
       />
       <Widget
-        src="voyager.near/widget/sidebar.items"
+        src="/*__@appAccount__*//widget/sidebar.items"
         props={{ accountId: state.accountId, onSelect: setContent }}
       />
     </SidePanel>
@@ -227,7 +227,7 @@ return (
       </Header>
       <Content>
         <Widget
-          src="voyager.near/widget/item"
+          src="/*__@appAccount__*//widget/item"
           props={{
             data: state.selectedValue,
             level: 0,

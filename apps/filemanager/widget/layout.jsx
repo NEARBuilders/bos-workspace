@@ -26,7 +26,7 @@ return (
       </Header>
       <Content>
         <Widget
-          src="voyager.near/widget/item"
+          src="/*__@appAccount__*//widget/item"
           props={{ data: state.selectedValue, level: 0 }}
         />
       </Content>

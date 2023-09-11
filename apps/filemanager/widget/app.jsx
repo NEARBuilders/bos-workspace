@@ -73,9 +73,9 @@ const Button = styled.button`
   }
 `;
 
-return <Widget src="voyager.near/widget/provider" props={{
+return <Widget src="/*__@appAccount__*//widget/provider" props={{
   layout: {
-    src: "voyager.near/widget/layout",
+    src: "/*__@appAccount__*//widget/layout",
     blockHeight: "final",
     components: {
       FileManagerContainer: FileManagerContainer,
@@ -89,11 +89,11 @@ return <Widget src="voyager.near/widget/provider" props={{
   },
   providers: {
     Search: {
-      src: "voyager.near/widget/sidebar.search",
+      src: "/*__@appAccount__*//widget/sidebar.search",
       blockHeight: "final"
     },
     Items: {
-      src: "voyager.near/widget/sidebar.items",
+      src: "/*__@appAccount__*//widget/sidebar.items",
       blockHeight: "final"
     }
   }

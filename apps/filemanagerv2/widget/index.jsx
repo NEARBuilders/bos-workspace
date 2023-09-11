@@ -36,23 +36,23 @@ const Content = styled.div`
 
 return (
   <Widget
-    src="voyager2.near/widget/layout"
+    src="/*__@appAccount__*//widget/layout"
     blockHeight="final"
     props={{
       Container,
       SidePanel: () => (
         <SidePanel>
           <Widget
-            src="voyager2.near/widget/sidebar.provider"
+            src="/*__@appAccount__*//widget/sidebar.provider"
             blockHeight="final"
             props={{
               Layout: {
-                src: "voyager2.near/widget/sidebar.layout",
+                src: "/*__@appAccount__*//widget/sidebar.layout",
                 blockHeight: "final",
               },
               Components: {
                 Item: {
-                  src: "voyager2.near/widget/sidebar.item",
+                  src: "/*__@appAccount__*//widget/sidebar.item",
                   blockHeight: "final",
                 },
               },

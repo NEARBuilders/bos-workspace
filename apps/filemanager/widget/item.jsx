@@ -84,7 +84,7 @@ return (
                 />
                 {state.expandedKeys[key] && (
                   <Widget
-                    src="voyager.near/widget/item"
+                    src="/*__@appAccount__*//widget/item"
                     props={{
                       data: data[key],
                       level: level + 1,

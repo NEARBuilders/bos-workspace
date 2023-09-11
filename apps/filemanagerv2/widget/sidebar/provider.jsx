@@ -8,7 +8,7 @@ return (
       items: [{ key: "item1" }, { key: "item2" }, { key: "item3" }],
       Item: (p) => (
         <Widget
-          src={"voyager2.near/widget/sidebar.item"}
+          src={"/*__@appAccount__*//widget/sidebar.item"}
           blockHeight={"final"}
           props={p}
         />
