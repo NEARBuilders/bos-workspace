@@ -191,6 +191,14 @@ function RenderData({ data, layout }) {
                           deleteFile(path);
                         },
                       }}
+                      items={{
+                        delete: () => (
+                          <>
+                            <i className="menu__item__icon bi bi-x-lg" />
+                            Delete
+                          </>
+                        ),
+                      }}
                     />
                   ),
                   eFolder: ({ toggleExpand, isExpanded, key }) => (
@@ -220,6 +228,14 @@ function RenderData({ data, layout }) {
                           // TODO: This is broken, I think because of the adjusted data object.
                           deleteFolder(path, data);
                         },
+                      }}
+                      items={{
+                        delete: () => (
+                          <>
+                            <i className="menu__item__icon bi bi-x-lg" />
+                            Delete
+                          </>
+                        ),
                       }}
                     />
                   ),
