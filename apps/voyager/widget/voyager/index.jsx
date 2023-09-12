@@ -14,7 +14,7 @@ const MainContent = styled.div`
 function Header({ path, goBack, goForward, setLayout, togglePreview }) {
   return (
     <Widget
-      src="/*__@appAccount__*//widget/header.index"
+      src="/*__@appAccount__*//widget/voyager.header.index"
       props={{
         path,
         goBack,
@@ -36,7 +36,7 @@ function Content({
 }) {
   return (
     <Widget
-      src="/*__@appAccount__*//widget/content.index"
+      src="/*__@appAccount__*//widget/voyager.content.index"
       props={{
         layout,
         path,
@@ -52,7 +52,7 @@ function Content({
 function Sidebar({ setPath, setHistory }) {
   return (
     <Widget
-      src="/*__@appAccount__*//widget/sidebar.index"
+      src="/*__@appAccount__*//widget/voyager.sidebar.index"
       props={{
         path,
         setPath,
@@ -64,7 +64,7 @@ function Sidebar({ setPath, setHistory }) {
 
 return (
   <Widget
-    src="/*__@appAccount__*//widget/provider"
+    src="/*__@appAccount__*//widget/voyager.provider"
     props={{
       path: props.path,
       Children: (p) => (

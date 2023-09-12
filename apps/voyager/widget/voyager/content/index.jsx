@@ -250,7 +250,7 @@ function RenderData({ data, layout }) {
           {Object.keys(dataList).map((key) => (
             <div key={key}>
               <Widget
-                src="/*__@appAccount__*//widget/item"
+                src="/*__@appAccount__*//widget/voyager.item"
                 loading={<></>}
                 props={{
                   path: key,
@@ -357,37 +357,39 @@ function RenderData({ data, layout }) {
       );
 
     case "GRID":
-      const updatedPath = [path, key].join("/");
       return (
         <Grid>
-          {Object.keys(data).map((key) => (
-            <GridItem key={key}>
-              <ContextMenu
-                Item={() => (
-                  <IconDiv onClick={() => setPath(updatedPath)}>
-                    <i className={`${iconMap[key] || "bi bi-file"}`} />
-                    {key}
-                  </IconDiv>
-                )}
-                passProps={{
-                  delete: { path: updatedPath },
-                }}
-                handlers={{
-                  delete: ({ path }) => {
-                    deleteFile(path);
-                  },
-                }}
-                items={{
-                  delete: () => (
-                    <>
-                      <i className="menu__item__icon bi bi-x-lg" />
-                      Delete
-                    </>
-                  ),
-                }}
-              />
-            </GridItem>
-          ))}
+          {Object.keys(data).map((key) => {
+            const updatedPath = [path, key].join("/");
+            return (
+              <GridItem key={key}>
+                <ContextMenu
+                  Item={() => (
+                    <IconDiv onClick={() => setPath(updatedPath)}>
+                      <i className={`${iconMap[key] || "bi bi-file"}`} />
+                      {key}
+                    </IconDiv>
+                  )}
+                  passProps={{
+                    delete: { path: updatedPath },
+                  }}
+                  handlers={{
+                    delete: ({ path }) => {
+                      deleteFile(path);
+                    },
+                  }}
+                  items={{
+                    delete: () => (
+                      <>
+                        <i className="menu__item__icon bi bi-x-lg" />
+                        Delete
+                      </>
+                    ),
+                  }}
+                />
+              </GridItem>
+            );
+          })}
         </Grid>
       );
 
