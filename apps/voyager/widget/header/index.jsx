@@ -27,6 +27,7 @@ const Wrapper = styled.div`
   border: 1px solid #e8e8eb;
   background-color: #fff;
   gap: 1px;
+  z-index: 2000;
 
   .menu__item {
     padding: 3px;
@@ -58,6 +59,7 @@ const path = props.path || "";
 const goBack = props.goBack || (() => {});
 const goForward = props.goForward || (() => {});
 const setLayout = props.setLayout || (() => {});
+const togglePreview = props.togglePreview || (() => {});
 
 const { DropdownMenu } = VM.require("efiz.near/widget/Module.DropdownMenu");
 
@@ -83,6 +85,9 @@ return (
       </Button>
       <Button onClick={() => setLayout("COLUMNS")}>
         <i className="bi bi-columns-gap"></i>
+      </Button>
+      <Button onClick={togglePreview}>
+        <i className="bi bi-eye"></i>
       </Button>
       <DropdownMenu.Root>
         <DropdownMenu.Trigger as={Button}>

@@ -4,6 +4,16 @@ const Content = styled.div`
   background-color: #f9f9f9;
   width: 100%;
   overflow: auto;
+  // position: relative;
+`;
+
+const Overlay = styled.div`
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 50%;
+  background-color: #fff;
 `;
 
 const Grid = styled.div`
@@ -37,22 +47,24 @@ const layout = props.layout || "LIST";
 const setPath = props.setPath || (() => {});
 const path = props.path || context.accountId;
 const data = Social.getr(path, "final");
+const showPreview = props.showPreview || false;
+const setSelectedPath = props.setSelectedPath || (() => {});
+const selectedPath = props.selectedPath || "";
 
-if (!data) return <p>Loading...</p>;
+console.log(selectedPath);
+
+if (!data) {
+  return <p>Loading...</p>;
+}
 
 State.init({
   activePath: [],
+  selectedPath: "",
 });
 
 function setActivePath(v) {
   State.update({ activePath: v });
 }
-
-const FolderContainer = styled.span`
-  display: flex;
-  align-items: center;
-  cursor: pointer;
-`;
 
 const ArrowIcon = styled.span`
   display: inline-block;
@@ -69,19 +81,48 @@ const ItemContainer = styled.span`
   display: flex;
   justify-content: space-between;
   align-items: center;
+  cursor: pointer;
+  font-size: 18px;
 `;
 
 const ItemInfo = styled.span`
   display: flex;
   gap: 10px;
-  width: 200px; // Set width as per your requirement
-  justify-content: space-between; // Distributes the size, type, and date
+  width: 200px;
+  justify-content: space-between;
 `;
 
 const ItemDetails = styled.span`
   display: flex;
   gap: 4px;
   align-items: center;
+`;
+
+const IconDiv = styled.div`
+  background-color: white;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 5em;
+  height: 5em;
+  cursor: pointer;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+
+  &:hover {
+    transform: scale(1.05);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+  }
+
+  &:active {
+    transform: scale(0.95);
+    background-color: #f0f0f0;
+  }
 `;
 
 const { ContextMenu } = VM.require("efiz.near/widget/Module.ContextMenu");
@@ -146,11 +187,59 @@ function deleteFolder(path, data) {
   Social.set(newData);
 }
 
-function RenderData({ data, layout }) {
-  const handleColumnClick = (key) => {
-    setActivePath([...state.activePath, key]);
-  };
+function calculateSize(data) {
+  const str = typeof data === "object" ? JSON.stringify(data) : data;
+  let sizeInBytes = 0;
 
+  for (let i = 0; i < str.length; i++) {
+    const charCode = str.charCodeAt(i);
+    if (charCode <= 0x7f) {
+      sizeInBytes += 1;
+    } else if (charCode <= 0x7ff) {
+      sizeInBytes += 2;
+    } else if (charCode <= 0xffff) {
+      sizeInBytes += 3;
+    } else {
+      sizeInBytes += 4;
+    }
+  }
+
+  if (sizeInBytes < 1024) {
+    return sizeInBytes + " Bytes";
+  } else if (sizeInBytes < 1024 * 1024) {
+    return (sizeInBytes / 1024).toFixed(2) + " KB";
+  } else {
+    return (sizeInBytes / (1024 * 1024)).toFixed(2) + " MB";
+  }
+}
+
+function determineType(path, data) {
+  const parts = path.split("/");
+  if (parts.length === 1) {
+    return "account";
+  } else {
+    const v = parts[1];
+    return v;
+  }
+}
+
+const iconMap = {
+  nametag: "bi bi-person-badge",
+  profile: "bi bi-person-circle",
+  index: "bi bi-list-ol",
+  graph: "bi bi-graph-up",
+  widget: "bi bi-layout-text-sidebar-reverse",
+  post: "bi bi-file-post",
+  thing: "bi bi-box",
+  type: "bi bi-type",
+  settings: "bi bi-gear",
+};
+
+const handleColumnClick = (key) => {
+  setActivePath([...state.activePath, key]);
+};
+
+function RenderData({ data, layout }) {
   switch (layout) {
     case "LIST":
       const dataList =
@@ -162,83 +251,104 @@ function RenderData({ data, layout }) {
             <div key={key}>
               <Widget
                 src="/*__@appAccount__*//widget/item"
+                loading={<></>}
                 props={{
                   path: key,
                   data: dataList[key],
-                  eFile: ({ key, data }) => (
-                    <ContextMenu
-                      Item={() => (
-                        // TODO: Honestly, eFile and eFolder should be the same component.
-                        <ItemContainer
-                          onDoubleClick={() => setPath([path, key].join("/"))} // open file
-                        >
-                          <ItemDetails>
-                            <i className="bi bi-file"></i>
-                            <span>{key.split("/").pop()}</span>{" "}
-                          </ItemDetails>
-                          <ItemInfo>
-                            <span>Size:</span>
-                            <span>Type:</span>
-                            <span>Date:</span>
-                          </ItemInfo>
-                        </ItemContainer>
-                      )}
-                      passProps={{
-                        delete: { path: [path, key].join("/"), data },
-                      }}
-                      handlers={{
-                        delete: ({ path }) => {
-                          deleteFile(path);
-                        },
-                      }}
-                      items={{
-                        delete: () => (
-                          <>
-                            <i className="menu__item__icon bi bi-x-lg" />
-                            Delete
-                          </>
-                        ),
-                      }}
-                    />
-                  ),
-                  eFolder: ({ toggleExpand, isExpanded, key }) => (
-                    <ContextMenu
-                      Item={() => (
-                        <ItemContainer
-                          onClick={toggleExpand}
-                          onDoubleClick={() => setPath([path, key].join("/"))} // open folder
-                        >
-                          <ItemDetails>
-                            <ArrowIcon isExpanded={isExpanded} />
-                            <i class="bi bi-folder"></i>
-                            <span>{key.split("/").pop()}</span>{" "}
-                          </ItemDetails>
-                          <ItemInfo>
-                            <span>Size: {/* your size value here */}</span>
-                            <span>Type: Folder</span>
-                            <span>Date: {/* your date value here */}</span>
-                          </ItemInfo>
-                        </ItemContainer>
-                      )}
-                      passProps={{
-                        delete: { path: [path, key].join("/"), data },
-                      }}
-                      handlers={{
-                        delete: ({ path, data }) => {
-                          // TODO: This is broken, I think because of the adjusted data object.
-                          deleteFolder(path, data);
-                        },
-                      }}
-                      items={{
-                        delete: () => (
-                          <>
-                            <i className="menu__item__icon bi bi-x-lg" />
-                            Delete
-                          </>
-                        ),
-                      }}
-                    />
-                  ),
+                  level: 0,
+                  eFile: ({ key, data, level }) => {
+                    const updatedPath = [path, key].join("/");
+                    return (
+                      <ContextMenu
+                        Item={() => (
+                          // TODO: Honestly, eFile and eFolder should be the same component.
+                          <ItemContainer
+                            onDoubleClick={() => setPath(updatedPath)} // open file
+                            onClick={() => setSelectedPath(updatedPath)}
+                            style={{
+                              marginLeft: level * 20,
+                              backgroundColor:
+                                selectedPath === updatedPath
+                                  ? "#f0f0f0"
+                                  : "transparent",
+                            }}
+                          >
+                            <ItemDetails>
+                              <i className="bi bi-file"></i>
+                              <span>{key.split("/").pop()}</span>{" "}
+                            </ItemDetails>
+                            <ItemInfo>
+                              <span>{calculateSize(data)}</span>
+                              <span>{determineType(updatedPath, data)}</span>
+                              <span />
+                            </ItemInfo>
+                          </ItemContainer>
+                        )}
+                        passProps={{
+                          delete: { path: updatedPath, data },
+                        }}
+                        handlers={{
+                          delete: ({ path }) => {
+                            deleteFile(path);
+                          },
+                        }}
+                        items={{
+                          delete: () => (
+                            <>
+                              <i className="menu__item__icon bi bi-x-lg" />
+                              Delete
+                            </>
+                          ),
+                        }}
+                      />
+                    );
+                  },
+                  eFolder: ({ toggleExpand, isExpanded, key, level }) => {
+                    const updatedPath = [path, key].join("/");
+                    return (
+                      <ContextMenu
+                        Item={() => (
+                          <ItemContainer
+                            onDoubleClick={() => setPath(updatedPath)} // open folder
+                            onClick={() => {
+                              toggleExpand();
+                            }}
+                            style={{
+                              marginLeft: level * 20,
+                            }}
+                          >
+                            <ItemDetails>
+                              <ArrowIcon isExpanded={isExpanded} />
+                              <i className="bi bi-folder"></i>
+                              <span>{key.split("/").pop()}</span>{" "}
+                            </ItemDetails>
+                            <ItemInfo>
+                              <span>--</span>
+                              <span>Folder</span>
+                              <span />
+                            </ItemInfo>
+                          </ItemContainer>
+                        )}
+                        passProps={{
+                          delete: { path: updatedPath, data },
+                        }}
+                        handlers={{
+                          delete: ({ path, data }) => {
+                            // TODO: This is broken, I think because of the adjusted data object.
+                            deleteFolder(path, data);
+                          },
+                        }}
+                        items={{
+                          delete: () => (
+                            <>
+                              <i className="menu__item__icon bi bi-x-lg" />
+                              Delete
+                            </>
+                          ),
+                        }}
+                      />
+                    );
+                  },
                 }}
               />
             </div>
@@ -247,29 +357,56 @@ function RenderData({ data, layout }) {
       );
 
     case "GRID":
+      const updatedPath = [path, key].join("/");
       return (
         <Grid>
           {Object.keys(data).map((key) => (
-            <GridItem key={key}>{key}</GridItem>
+            <GridItem key={key}>
+              <ContextMenu
+                Item={() => (
+                  <IconDiv onClick={() => setPath(updatedPath)}>
+                    <i className={`${iconMap[key] || "bi bi-file"}`} />
+                    {key}
+                  </IconDiv>
+                )}
+                passProps={{
+                  delete: { path: updatedPath },
+                }}
+                handlers={{
+                  delete: ({ path }) => {
+                    deleteFile(path);
+                  },
+                }}
+                items={{
+                  delete: () => (
+                    <>
+                      <i className="menu__item__icon bi bi-x-lg" />
+                      Delete
+                    </>
+                  ),
+                }}
+              />
+            </GridItem>
           ))}
         </Grid>
       );
 
     case "COLUMNS":
       return (
-        <Columns>
-          {state.activePath.map((pathKey, idx) => (
-            <Column key={idx}>
-              {Object.keys(
-                getNestedData(data, state.activePath.slice(0, idx + 1))
-              ).map((key) => (
-                <div key={key} onClick={() => handleColumnClick(key)}>
-                  {key}
-                </div>
-              ))}
-            </Column>
-          ))}
-        </Columns>
+        <p>TBD</p>
+        // <Columns>
+        //   {state.activePath.map((pathKey, idx) => (
+        //     <Column key={idx}>
+        //       {Object.keys(
+        //         getNestedData(data, state.activePath.slice(0, idx + 1))
+        //       ).map((key) => (
+        //         <div key={key} onClick={() => handleColumnClick(key)}>
+        //           {key}
+        //         </div>
+        //       ))}
+        //     </Column>
+        //   ))}
+        // </Columns>
       );
 
     default:
@@ -280,8 +417,16 @@ function RenderData({ data, layout }) {
 function getNestedData(data, pathArray) {
   return pathArray.reduce((currentData, key) => currentData[key] || {}, data);
 }
+
 return (
   <Content>
     <RenderData layout={layout} data={data} />
+    {showPreview && (
+      <Overlay>
+        <div key={selectedPath}>
+          <p>lol it's way to slow to allow preview rn</p>
+        </div>
+      </Overlay>
+    )}
   </Content>
 );

@@ -11,7 +11,7 @@ const MainContent = styled.div`
   overflow: hidden;
 `;
 
-function Header({ path, goBack, goForward, setLayout}) {
+function Header({ path, goBack, goForward, setLayout, togglePreview }) {
   return (
     <Widget
       src="/*__@appAccount__*//widget/header.index"
@@ -20,19 +20,30 @@ function Header({ path, goBack, goForward, setLayout}) {
         goBack,
         goForward,
         setLayout,
+        togglePreview,
       }}
     />
   );
 }
 
-function Content({ layout, path, setPath }) {
+function Content({
+  layout,
+  path,
+  setPath,
+  showPreview,
+  selectedPath,
+  setSelectedPath,
+}) {
   return (
     <Widget
       src="/*__@appAccount__*//widget/content.index"
       props={{
-        layout: layout,
-        path: path,
-        setPath
+        layout,
+        path,
+        setPath,
+        showPreview,
+        selectedPath,
+        setSelectedPath,
       }}
     />
   );
@@ -43,6 +54,7 @@ function Sidebar({ setPath, setHistory }) {
     <Widget
       src="/*__@appAccount__*//widget/sidebar.index"
       props={{
+        path,
         setPath,
         setHistory,
       }}
@@ -54,6 +66,7 @@ return (
   <Widget
     src="/*__@appAccount__*//widget/provider"
     props={{
+      path: props.path,
       Children: (p) => (
         <Container>
           <Sidebar {...p} />

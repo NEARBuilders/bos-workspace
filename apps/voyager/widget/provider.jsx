@@ -7,12 +7,25 @@ State.init({
   path,
   history: [path],
   currentHistoryIndex: 0,
+  showPreview: false,
+  selectedPath: "",
 });
+
+function isNearAccount(str) {
+  return typeof str === "string" && str.endsWith(".near");
+}
 
 function setPath(v) {
   const updatedHistory = state.history
     .slice(0, state.currentHistoryIndex + 1)
     .concat(v);
+
+  const parts = v.split("/");
+  const lastPart = parts[parts.length - 1];
+  if (isNearAccount(lastPart)) {
+    v = lastPart;
+  }
+
   State.update({
     path: v,
     history: updatedHistory,
@@ -42,12 +55,20 @@ function goForward() {
   }
 }
 
+function setSelectedPath(v) {
+  State.update({ selectedPath: v });
+}
+
 function setHistory(v) {
   State.update({ history: v });
 }
 
 function setLayout(v) {
   State.update({ layout: v });
+}
+
+function togglePreview() {
+  State.update({ showPreview: !state.showPreview });
 }
 
 const Children = props.Children;
@@ -57,6 +78,10 @@ return (
     setPath={setPath}
     setHistory={setHistory}
     setLayout={setLayout}
+    showPreview={state.showPreview}
+    togglePreview={togglePreview}
+    selectedPath={state.selectedPath}
+    setSelectedPath={setSelectedPath}
     path={state.path}
     layout={state.layout}
     goBack={goBack}

@@ -1,14 +1,3 @@
-/**
- * Recursive Item
- * This is designed to be a plug-and-play component for displaying a tree of data.
- *
- * props:
- * - data: object
- * - level: number (default 0)
- * - eFolder: function ({ toggleExpand, isExpanded, key }) => ReactElement (default [+] or [-] key)
- * - eFile: function ({ key, data }) => ReactElement (default key: data)
- * - margin: number (default 20)
- */
 
 State.init({
   expandedKeys: {},
@@ -23,28 +12,7 @@ function toggleExpand(key) {
   });
 }
 
-function getBackgroundColor(counter) {
-  return counter % 2 === 0 ? "#f7f7f7" : "#e7e7e7"; // Light gray for even, slightly darker gray for odd
-}
-
-const { data, level, path, padding, eFolder, eFile, counter } = props;
-
-if (level === undefined) {
-  level = 0;
-}
-if (data === undefined) {
-  data = {};
-}
-
-if (path === undefined) {
-  path = [];
-}
-
-if (counter === undefined) {
-  counter = 0;
-}
-
-function RecursiveItem({ data, path, eFolder, eFile }) {
+function RecursiveItem({ data, path, eFolder, eFile, level }) {
   const item = data;
 
   const defaultFolder = ({ toggleExpand, isExpanded, key }) => (
@@ -61,12 +29,13 @@ function RecursiveItem({ data, path, eFolder, eFile }) {
   if (typeof item === "object") {
     const isExpanded = !!state.expandedKeys[path];
     return (
-      <div>
+      <div style={{ marginLeft: level * 20}}>
         <eFolder
           key={path}
           isExpanded={isExpanded}
           toggleExpand={() => toggleExpand(path)}
           path={path}
+          level={level}
         />
         {isExpanded && (
           <div key={path}>
@@ -77,6 +46,7 @@ function RecursiveItem({ data, path, eFolder, eFile }) {
                   path={[path, key].join("/")}
                   eFolder={eFolder}
                   eFile={eFile}
+                  level={level + 1}
                 />
               </div>
             ))}
@@ -85,7 +55,7 @@ function RecursiveItem({ data, path, eFolder, eFile }) {
       </div>
     );
   } else {
-    return <eFile key={path} data={item} path={path} />;
+    return <eFile key={path} data={item} path={path} level={level} />;
   }
 }
 
