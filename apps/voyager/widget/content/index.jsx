@@ -65,31 +65,37 @@ const ArrowIcon = styled.span`
   margin-right: 5px;
 `;
 
-// Styled components for eFile
-const FileContainer = styled.span`
+const ItemContainer = styled.span`
   display: flex;
   justify-content: space-between;
   align-items: center;
 `;
 
-const FileInfo = styled.span`
+const ItemInfo = styled.span`
   display: flex;
   gap: 10px;
+  width: 200px; // Set width as per your requirement
+  justify-content: space-between; // Distributes the size, type, and date
+`;
+
+const ItemDetails = styled.span`
+  display: flex;
+  gap: 4px;
+  align-items: center;
 `;
 
 const { ContextMenu } = VM.require("efiz.near/widget/Module.ContextMenu");
 
 ContextMenu = ContextMenu || (() => <></>);
 
-
 function deleteFile(path) {
   function buildObjectWithLastNull(path) {
-    const pathComponents = path.split("/").slice(1); // Remove the first part of the path
+    const parts = path.split("/").slice(1); // Remove the first part of the path
     let currentObj = {};
     let pointer = currentObj;
 
-    pathComponents.forEach((component, i) => {
-      if (i === pathComponents.length - 1) {
+    parts.forEach((component, i) => {
+      if (i === parts.length - 1) {
         pointer[component] = null;
       } else {
         pointer[component] = {};
@@ -106,7 +112,7 @@ function deleteFile(path) {
 
 function deleteFolder(path, data) {
   function setLeavesToNull(obj) {
-    Object.keys(obj).forEach(key => {
+    Object.keys(obj).forEach((key) => {
       if (typeof obj[key] === "object" && obj[key] !== null) {
         obj[key] = setLeavesToNull(obj[key]);
       } else {
@@ -118,7 +124,10 @@ function deleteFolder(path, data) {
 
   function buildObjectWithPath(path, data) {
     const parts = path.split("/").slice(1);
-    const value = parts.reduce((current, part) => (current && current[part] ? current[part] : undefined), data);
+    const value = parts.reduce(
+      (current, part) => (current && current[part] ? current[part] : undefined),
+      data
+    );
     let currentObj = {};
     let pointer = currentObj;
 
@@ -146,7 +155,7 @@ function RenderData({ data, layout }) {
     case "LIST":
       const dataList =
         state.activePath.length === 0 ? data : getNestedData(data, activePath);
-        
+
       return (
         <>
           {Object.keys(dataList).map((key) => (
@@ -159,16 +168,24 @@ function RenderData({ data, layout }) {
                   eFile: ({ key, data }) => (
                     <ContextMenu
                       Item={() => (
-                        <FileContainer
-                          onDoubleClick={() => setPath([path, key].join("/"))} // open folder
+                        // TODO: Honestly, eFile and eFolder should be the same component.
+                        <ItemContainer
+                          onDoubleClick={() => setPath([path, key].join("/"))} // open file
                         >
-                          <span>{key}</span>
-                          <FileInfo>
-                            <span>{path}</span>
-                          </FileInfo>
-                        </FileContainer>
+                          <ItemDetails>
+                            <i className="bi bi-file"></i>
+                            <span>{key.split("/").pop()}</span>{" "}
+                          </ItemDetails>
+                          <ItemInfo>
+                            <span>Size:</span>
+                            <span>Type:</span>
+                            <span>Date:</span>
+                          </ItemInfo>
+                        </ItemContainer>
                       )}
-                      passProps={{ delete: { path: [path, key].join("/"), data } }}
+                      passProps={{
+                        delete: { path: [path, key].join("/"), data },
+                      }}
                       handlers={{
                         delete: ({ path }) => {
                           deleteFile(path);
@@ -179,19 +196,28 @@ function RenderData({ data, layout }) {
                   eFolder: ({ toggleExpand, isExpanded, key }) => (
                     <ContextMenu
                       Item={() => (
-                        <FolderContainer
+                        <ItemContainer
                           onClick={toggleExpand}
                           onDoubleClick={() => setPath([path, key].join("/"))} // open folder
                         >
-                          <ArrowIcon isExpanded={isExpanded} />
-                          {key}
-                          {path}
-                        </FolderContainer>
+                          <ItemDetails>
+                            <ArrowIcon isExpanded={isExpanded} />
+                            <i class="bi bi-folder"></i>
+                            <span>{key.split("/").pop()}</span>{" "}
+                          </ItemDetails>
+                          <ItemInfo>
+                            <span>Size: {/* your size value here */}</span>
+                            <span>Type: Folder</span>
+                            <span>Date: {/* your date value here */}</span>
+                          </ItemInfo>
+                        </ItemContainer>
                       )}
-                      passProps={{ delete: { path: [path, key].join("/"), data } }}
+                      passProps={{
+                        delete: { path: [path, key].join("/"), data },
+                      }}
                       handlers={{
                         delete: ({ path, data }) => {
-                          // TODO: This is broken, I think because of the adjusted data object. 
+                          // TODO: This is broken, I think because of the adjusted data object.
                           deleteFolder(path, data);
                         },
                       }}
