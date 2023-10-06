@@ -175,6 +175,7 @@ function generateDataJson(appFolder) {
   });
 
   const dataPath = path.join(`./${distFolder}`, appFolder, "data.json");
+
   if (!fs.existsSync(dataPath)) {
     fs.mkdirSync(path.dirname(dataPath), { recursive: true });
   }
@@ -202,9 +203,14 @@ function generateDevJson(appFolder) {
     let widgetPath = file
       .replace(`./${distFolder}/${appFolder}/src/`, "")
       .replace(path.extname(file), "");
-    let widgetKey = `${appConfig.appAccount}/widget/${widgetPath
-      .split(path.sep)
-      .join(".")}`;
+
+    const windowsWidgetPath = widgetPath.replaceAll("/", ".");
+    const linuxWidgetPath = widgetPath.split(path.sep).join(".");
+
+    let widgetKey = `${appConfig.appAccount}/widget/${
+      process.platform === "win32" ? windowsWidgetPath : linuxWidgetPath
+    }`;
+    console.log(widgetKey);
     devJson.components[widgetKey] = { code: fileContent };
   });
 

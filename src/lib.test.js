@@ -1,5 +1,6 @@
 const mockFs = require("mock-fs");
 const fs = require("fs");
+const path = require("path");
 const DIST_FOLDER = ".__test_dist__";
 process.env.DIST_FOLDER = DIST_FOLDER;
 
@@ -156,7 +157,7 @@ describe("generateDistFolder", () => {
     const spyc = jest.spyOn(fs, "copyFileSync");
     const spym = jest.spyOn(fs, "mkdirSync");
     generateDistFolder("testAppFolder");
-    expect(spym).toHaveBeenCalledWith(DIST_FOLDER + "/testAppFolder", {
+    expect(spym).toHaveBeenCalledWith(path.join(DIST_FOLDER, "testAppFolder"), {
       recursive: true,
     });
     expect(spyc.mock.calls).toEqual([
@@ -176,7 +177,9 @@ describe("generateDataJson", () => {
   it("generates data.json file correctly", () => {
     const spy = jest.spyOn(fs, "writeFileSync");
     generateDataJson("testAppFolder");
-    expect(spy.mock.calls[0][0]).toBe(DIST_FOLDER + "/testAppFolder/data.json");
+    expect(spy.mock.calls[0][0]).toBe(
+      path.join(DIST_FOLDER, "testAppFolder", "data.json")
+    );
     expect(spy.mock.calls[0][1].replace(/\s+/g, "")).toBe(
       '{"hello":"Hello,World!","test":"{}"}'
     );
@@ -235,7 +238,7 @@ describe("build", () => {
     const spym = jest.spyOn(fs, "mkdirSync");
 
     await build();
-    expect(spym).toHaveBeenCalledWith(DIST_FOLDER + "/testAppFolder", {
+    expect(spym).toHaveBeenCalledWith(path.join(DIST_FOLDER, "testAppFolder"), {
       recursive: true,
     });
     expect(spyc).toHaveBeenCalledWith(
@@ -247,7 +250,7 @@ describe("build", () => {
       'console.log("testAlias");<Widget src="nui.near/widget/index" />'
     );
     expect(spyw.mock.calls[spyw.mock.calls.length - 1][0]).toBe(
-      DIST_FOLDER + "/testAppFolder/data.json"
+      path.join(DIST_FOLDER, "/testAppFolder/data.json")
     );
     expect(
       spyw.mock.calls[spyw.mock.calls.length - 1][1].replace(/\s+/g, "")
