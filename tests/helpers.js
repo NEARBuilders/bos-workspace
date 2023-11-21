@@ -15,6 +15,7 @@ const folders = {
       "test.js":
         'console.log("/*__@replace:test__*/");<Widget src="/*__@replace:nui__*//widget/index" />',
       "skip.js": '/*__@skip__*/console.log("Hello");/*__@replace:nui__*/',
+    "test.jsonc": '/*__@noStringify__*/{"metadata":{"name":"every video","description":"A hub for every video indexed across the BOS.","image":{"ipfs_cid":"bafkreihi3qh72njb3ejg7t2mbxuho2vk447kzkvpjtmulsb2njd6m2cfgi"},"tags":{"app":"","video":"","livepeer":"","everything":""}}}',
     },
     "test.jsonc": "{}",
     "ignore.jsonc": "/*__@ignore__*/{}",

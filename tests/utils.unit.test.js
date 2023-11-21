@@ -26,11 +26,12 @@ describe("for_rfile function", () => {
     const fn = jest.fn();
     const fld = path.join(".", "apps", "testAppFolder");
     for_rfile(fld, ["js", "jsonc"], fn);
-    expect(fn).toHaveBeenCalledTimes(4);
+    expect(fn).toHaveBeenCalledTimes(5);
     expect(fn).toHaveBeenCalledWith(path.join(fld, "test.jsonc"));
     expect(fn).toHaveBeenCalledWith(path.join(fld, "ignore.jsonc"));
     expect(fn).toHaveBeenCalledWith(path.join(fld, "widget", "skip.js"));
     expect(fn).toHaveBeenCalledWith(path.join(fld, "widget", "test.js"));
+    expect(fn).toHaveBeenCalledWith(path.join(fld, "widget", "test.jsonc"));
   });
 });
 
