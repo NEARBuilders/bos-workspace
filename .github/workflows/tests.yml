@@ -1,12 +1,7 @@
 name: Run Tests
 
 on:
-  push:
-    branches:
-      - main
-  pull_request:
-    branches:
-      - main
+  - push
 
 jobs:
   test:
@@ -14,16 +9,20 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
+      - name: Checkout
+        id: checkout
+        uses: actions/checkout@v4
 
-      - name: Use Node.js
-        uses: actions/setup-node@v2
+      - name: Setup Node.js
+        id: setup-node
+        uses: actions/setup-node@v4
         with:
-          node-version: "16" # Adjust according to your needs
+          node-version: 20
+          cache: yarn 
 
       - name: Install Dependencies
-        run: yarn install
+        id: install
+        run: yarn install --frozen-lockfile
 
       - name: Execute Test Tools
         run: yarn test
