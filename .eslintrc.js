@@ -21,4 +21,5 @@ module.exports = {
     ecmaVersion: "latest",
   },
   rules: {},
+  ignorePatterns: ["examples/*"],
 };
