@@ -1,11 +1,9 @@
-name: Run Tests
-
+name: Publish Package to npmjs
 on:
-  - push
-
+  release:
+    types: [published]
 jobs:
-  test:
-    name: Execute Tests
+  publish:
     runs-on: ubuntu-latest
 
     steps:
@@ -24,5 +22,8 @@ jobs:
         id: install
         run: yarn install --frozen-lockfile
 
-      - name: Execute Test Tools
-        run: yarn test
+      - name: Publish to npm
+        id: publish
+        run: npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}

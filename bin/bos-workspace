@@ -1,0 +1,10 @@
+#!/usr/bin/env node
+
+"use strict";
+
+const { run_cli } = require("..");
+
+run_cli({}).catch((error) => {
+  console.error(error);
+  process.exitCode = 1;
+});
