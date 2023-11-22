@@ -26,23 +26,23 @@ function Viewer({ widgetSrc, code }) {
       Array.from(searchParams.entries()).reduce((props, [key, value]) => {
         props[key] = value;
         return props;
-      }, {})
+      }, {}),
     );
   }, [location]);
 
   let src;
 
-  if (!code) { // prioritize code if provided
+  if (!code) {
+    // prioritize code if provided
     src = widgetSrc || location.pathname;
     if (src) {
-      src = src.substring(src.lastIndexOf('/', src.indexOf('.near')) + 1);
+      src = src.substring(src.lastIndexOf("/", src.indexOf(".near")) + 1);
     } else {
-      src = 'devhub.near/widget/app';
+      src = "devhub.near/widget/app";
     }
   }
 
-  const { components: redirectMap} = useRedirectMap();
-
+  const { components: redirectMap } = useRedirectMap();
 
   return (
     <Widget
@@ -60,7 +60,7 @@ function App(props) {
   useEffect(() => {
     initNear &&
       initNear({
-        networkId: 'mainnet',
+        networkId: "mainnet",
         customElements: {
           Link: (props) => {
             if (!props.to && props.href) {
