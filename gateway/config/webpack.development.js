@@ -54,8 +54,8 @@ module.exports = () => ({
       disableDotRule: true,
     },
     client: {
-        overlay: false
-    }
+      overlay: false,
+    },
   },
   plugins: [new HotModuleReplacementPlugin()],
 });

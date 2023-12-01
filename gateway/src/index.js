@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { createRoot } from 'react-dom/client';
+import { createRoot } from "react-dom/client";
 import { Widget } from "near-social-vm";
 import "bootstrap-icons/font/bootstrap-icons.css";
 import "react-bootstrap-typeahead/css/Typeahead.css";
@@ -56,29 +56,29 @@ function Viewer({ widgetSrc, code }) {
 }
 
 function Home() {
-    const { components: redirectMap } = useRedirectMap();
+  const { components: redirectMap } = useRedirectMap();
 
-    return (
-        <div className="container">
-            <div className="row mt-3 mb-2">
-                <span>Your widgets:</span>
-            </div>
-            <div className="row mb-2">
-                <ul className="list-group">
-                {Object.keys(redirectMap).map((key) => (
-                    <li className="list-group-item">
-                    <Link to={key}>{key}</Link>
-                    </li>
-                ))}
-                </ul>
-            </div>
-        </div>
-    );
+  return (
+    <div className="container">
+      <div className="row mt-3 mb-2">
+        <span>Your widgets:</span>
+      </div>
+      <div className="row mb-2">
+        <ul className="list-group">
+          {Object.keys(redirectMap).map((key) => (
+            <li className="list-group-item">
+              <Link to={key}>{key}</Link>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </div>
+  );
 }
 
 function App(props) {
   const { initNear } = useInitNear();
-    const [ready, setReady] = useState(false);
+  const [ready, setReady] = useState(false);
 
   useEffect(() => {
     initNear &&
@@ -99,31 +99,29 @@ function App(props) {
         config: {
           defaultFinality: undefined,
         },
-    });
-      setReady(true)
+      });
+    setReady(true);
   }, [initNear]);
 
-    if (!ready) {
-        console.log('not ready');
-        return null;
-    }
+  if (!ready) {
+    console.log("not ready");
+    return null;
+  }
 
   return (
     <Router>
       <Routes>
-      <Route
-        path="/"
-        element={<Home />}
-      />
+        <Route path="/" element={<Home />} />
         <Route
           path="*"
-          element={<Viewer widgetSrc={props.widgetSrc} code={props.code}></Viewer>} 
-      />
+          element={
+            <Viewer widgetSrc={props.widgetSrc} code={props.code}></Viewer>
+          }
+        />
       </Routes>
     </Router>
   );
 }
 
-
-const root = createRoot(document.getElementById('root'));
+const root = createRoot(document.getElementById("root"));
 root.render(<App />);
