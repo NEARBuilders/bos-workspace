@@ -53,6 +53,9 @@ module.exports = () => ({
     historyApiFallback: {
       disableDotRule: true,
     },
+    client: {
+        overlay: false
+    }
   },
   plugins: [new HotModuleReplacementPlugin()],
 });
