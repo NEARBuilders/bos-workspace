@@ -5,6 +5,6 @@
 const { run_cli } = require("..");
 
 run_cli({}).catch((error) => {
-  console.error(error);
-  process.exitCode = 1;
+    console.error(error);
+    process.exitCode = 1;
 });
