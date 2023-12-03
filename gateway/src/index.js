@@ -8,14 +8,15 @@ import "bootstrap/dist/js/bootstrap.bundle";
 import "index.scss";
 import useRedirectMap from "./useRedirectMap";
 import {
-    BrowserRouter as Router,
     Link,
     Route,
     Routes,
     useLocation,
+    BrowserRouter,
 } from "react-router-dom";
 import { sanitizeUrl } from "@braintree/sanitize-url";
 import { useInitNear } from "near-social-vm";
+import { useHashRouterLegacy } from "./useHashRouterLegacy";
 
 function Viewer({ widgetSrc, code }) {
     const [widgetProps, setWidgetProps] = useState({});
@@ -77,6 +78,8 @@ function Home() {
 }
 
 function App(props) {
+    useHashRouterLegacy();
+
     const { initNear } = useInitNear();
     const [ready, setReady] = useState(false);
 
@@ -109,22 +112,20 @@ function App(props) {
     }
 
     return (
-        <Router>
-            <Routes>
-                <Route path="/" element={<Home />} />
-                <Route
-                    path="*"
-                    element={
-                        <Viewer
-                            widgetSrc={props.widgetSrc}
-                            code={props.code}
-                        ></Viewer>
-                    }
-                />
-            </Routes>
-        </Router>
+        <Routes>
+            <Route path="/" element={<Home />} />
+            <Route
+                path="*"
+                element={
+                    <Viewer
+                        widgetSrc={props.widgetSrc}
+                        code={props.code}
+                    ></Viewer>
+                }
+            />
+        </Routes>
     );
 }
 
 const root = createRoot(document.getElementById("root"));
-root.render(<App />);
+root.render(<BrowserRouter><App /></BrowserRouter>);
