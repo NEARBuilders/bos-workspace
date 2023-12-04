@@ -14,9 +14,9 @@ import {
     useLocation,
     BrowserRouter,
 } from "react-router-dom";
-import { sanitizeUrl } from "@braintree/sanitize-url";
-import { useInitNear } from "near-social-vm";
 import { useHashRouterLegacy } from "./useHashRouterLegacy";
+import { useAuth } from "./useAuth";
+import { NavigationWrapper } from "./navigation/NavigationWrapper";
 
 function Viewer({ widgetSrc, code }) {
     const [widgetProps, setWidgetProps] = useState({});
@@ -47,12 +47,24 @@ function Viewer({ widgetSrc, code }) {
     const { components: redirectMap } = useRedirectMap();
 
     return (
-        <Widget
-            src={src}
-            code={code}
-            props={widgetProps}
-            config={{ redirectMap }}
-        />
+        <div className="container-xl">
+            <div className="row">
+                <div
+                    className="position-relative"
+                    style={{
+                        "--body-top-padding": "24px",
+                        paddingTop: "var(--body-top-padding)",
+                    }}
+                >
+                    <Widget
+                        src={src}
+                        code={code}
+                        props={widgetProps}
+                        config={{ redirectMap }}
+                    />
+                </div>
+            </div>
+        </div>
     );
 }
 
@@ -80,50 +92,28 @@ function Home() {
 function App(props) {
     useHashRouterLegacy();
 
-    const { initNear } = useInitNear();
-    const [ready, setReady] = useState(false);
+    const passProps = useAuth();
+    const {
+        EthersProviderContext,
+        ethersProviderContext,
+    } = passProps;
 
-    useEffect(() => {
-        initNear &&
-            initNear({
-                networkId: "mainnet",
-                customElements: {
-                    Link: (props) => {
-                        if (!props.to && props.href) {
-                            props.to = props.href;
-                            delete props.href;
-                        }
-                        if (props.to) {
-                            props.to = sanitizeUrl(props.to);
-                        }
-                        return <Link {...props} />;
-                    },
-                },
-                config: {
-                    defaultFinality: undefined,
-                },
-            });
-        setReady(true);
-    }, [initNear]);
-
-    if (!ready) {
-        console.log("not ready");
-        return null;
-    }
 
     return (
-        <Routes>
-            <Route path="/" element={<Home />} />
-            <Route
-                path="*"
-                element={
-                    <Viewer
-                        widgetSrc={props.widgetSrc}
-                        code={props.code}
-                    ></Viewer>
-                }
-            />
-        </Routes>
+        <EthersProviderContext.Provider value={ethersProviderContext}>
+            <Routes>
+                <Route path="/" element={<Home />} />
+                <Route
+                    path="*"
+                    element={
+                        <>
+                            <NavigationWrapper {...passProps} />
+                            <Viewer {...passProps} />
+                        </>
+                    }
+                />
+            </Routes>
+        </EthersProviderContext.Provider>
     );
 }
 

@@ -22,7 +22,22 @@
         "react-dom": "^18.2.0",
         "react-router-dom": "^6.20.0",
         "socket.io-client": "^4.7.2",
-        "styled-components": "^5.3.6"
+        "styled-components": "^5.3.6",
+
+        "@near-wallet-selector/core": "^8.5.0",
+        "@near-wallet-selector/here-wallet": "^8.5.0",
+        "@near-wallet-selector/meteor-wallet": "^8.5.0",
+        "@near-wallet-selector/modal-ui": "^8.5.0",
+        "@near-wallet-selector/my-near-wallet": "^8.5.0",
+        "@near-wallet-selector/near-wallet": "^8.5.0",
+        "@near-wallet-selector/neth": "^8.5.0",
+        "@near-wallet-selector/nightly": "^8.5.0",
+        "@near-wallet-selector/sender": "^8.5.0",
+        "@web3-onboard/core": "^2.20.2",
+        "@web3-onboard/injected-wallets": "^2.10.1",
+        "@web3-onboard/ledger": "^2.4.6",
+        "@web3-onboard/react": "^2.8.7",
+        "@web3-onboard/walletconnect": "^2.3.9"
     },
     "scripts": {
         "serve": "webpack serve",
