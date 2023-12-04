@@ -93,11 +93,7 @@ function App(props) {
     useHashRouterLegacy();
 
     const passProps = useAuth();
-    const {
-        EthersProviderContext,
-        ethersProviderContext,
-    } = passProps;
-
+    const { EthersProviderContext, ethersProviderContext } = passProps;
 
     return (
         <EthersProviderContext.Provider value={ethersProviderContext}>
@@ -118,4 +114,8 @@ function App(props) {
 }
 
 const root = createRoot(document.getElementById("root"));
-root.render(<BrowserRouter><App /></BrowserRouter>);
+root.render(
+    <BrowserRouter>
+        <App />
+    </BrowserRouter>,
+);

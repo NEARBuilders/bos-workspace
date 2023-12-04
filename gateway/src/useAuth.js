@@ -75,14 +75,13 @@ export function useAuth() {
             });
     }, [initNear]);
 
-
     useEffect(() => {
         if (!near) {
             return;
         }
         near.selector.then((selector) => {
             setWalletModal(
-                setupModal(selector, { contractId: near.config.contractName })
+                setupModal(selector, { contractId: near.config.contractName }),
             );
         });
     }, [near]);
@@ -93,7 +92,7 @@ export function useAuth() {
             walletModal.show();
             return false;
         },
-        [walletModal]
+        [walletModal],
     );
 
     const logOut = useCallback(async () => {
@@ -109,7 +108,7 @@ export function useAuth() {
 
     const refreshAllowance = useCallback(async () => {
         alert(
-            "You're out of access key allowance. Need sign in again to refresh it"
+            "You're out of access key allowance. Need sign in again to refresh it",
         );
         await logOut();
         requestSignIn();
@@ -128,8 +127,10 @@ export function useAuth() {
     useEffect(() => {
         setAvailableStorage(
             account.storageBalance
-                ? Big(account.storageBalance.available).div(utils.StorageCostPerByte)
-                : Big(0)
+                ? Big(account.storageBalance.available).div(
+                      utils.StorageCostPerByte,
+                  )
+                : Big(0),
         );
     }, [account]);
 
@@ -142,7 +143,7 @@ export function useAuth() {
         logOut,
         requestSignIn,
         ethersProviderContext,
-        EthersProviderContext
+        EthersProviderContext,
     };
 
     return passProps;
@@ -162,17 +163,17 @@ export async function getSocialKeyPair(accountId) {
         const hereKeystore = ls.get("herewallet:keystore");
         if (hereKeystore) {
             return nearAPI.KeyPair.fromString(
-                hereKeystore[NetworkId].accounts[accountId]
+                hereKeystore[NetworkId].accounts[accountId],
             );
         }
-    } catch { }
+    } catch {}
 
     try {
         const meteorKey = ls.get(`_meteor_wallet${accountId}:${NetworkId}`);
         if (meteorKey) {
             return nearAPI.KeyPair.fromString(meteorKey);
         }
-    } catch { }
+    } catch {}
 
     return null;
 }
