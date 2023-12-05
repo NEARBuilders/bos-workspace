@@ -35,7 +35,7 @@ on:
 jobs:
   deploy-widgets:
     runs-on: ubuntu-latest
-    name: Deploy widgets to social.near (mainnet)
+    name: Deploy Widgets
     env:
       BOS_DEPLOY_ENV: ${{ inputs.deploy-env }}
       BOS_APP_NAME: ${{ inputs.app-name }}
@@ -48,14 +48,14 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
 
+      - name: Install bos-cli-rs
+        run: |
+          curl --proto '=https' --tlsv1.2 -LsSf https://github.com/FroVolod/bos-cli-rs/releases/download/v${{ inputs.cli-version }}/bos-cli-v${{ inputs.cli-version }}-installer.sh | sh
+
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '18'
-
-      - name: Install near-social CLI
-        run: |
-          curl --proto '=https' --tlsv1.2 -LsSf https://github.com/FroVolod/bos-cli-rs/releases/download/v${{ inputs.cli-version }}/bos-cli-v${{ inputs.cli-version }}-installer.sh | sh
          
       - name: Install bos-workspace globally
         run: |
