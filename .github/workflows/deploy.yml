@@ -48,14 +48,19 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
 
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
       - name: Install near-social CLI
         run: |
           curl --proto '=https' --tlsv1.2 -LsSf https://github.com/FroVolod/bos-cli-rs/releases/download/v${{ inputs.cli-version }}/bos-cli-v${{ inputs.cli-version }}-installer.sh | sh
-
-      - name: Install bos-workspace
+         
+      - name: Install bos-workspace globally
         run: |
-          npm install bos-workspace
-      
+          npm install -g bos-workspace
+  
       - name: Build the workspaces
         run: |
           bos-workspace build
