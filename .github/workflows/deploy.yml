@@ -50,7 +50,7 @@ jobs:
 
       - name: Install bos-cli-rs
         run: |
-          curl --proto '=https' --tlsv1.2 -LsSf https://github.com/FroVolod/bos-cli-rs/releases/download/v${{ inputs.cli-version }}/bos-cli-v${{ inputs.cli-version }}-installer.sh | sh
+          curl --proto '=https' --tlsv1.2 -LsSf https://github.com/FroVolod/bos-cli-rs/releases/download/v${{ inputs.cli-version }}/bos-cli-installer.sh | sh
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
