@@ -70,18 +70,36 @@ function Viewer({ widgetSrc, code }) {
 
 function Home() {
   const { components: redirectMap } = useRedirectMap();
+  const widgets = {};
+  Object.keys(redirectMap).forEach((key) => {
+    const parts = key.split("/widget/");
+    if (!widgets[parts[0]]) {
+      widgets[parts[0]] = [];
+    }
+    widgets[parts[0]].push(parts[1]);
+  });
 
   return (
     <div className="container">
       <div className="row mt-3 mb-2">
-        <span>Your widgets:</span>
+        <span>Your local widgets:</span>
       </div>
       <div className="row mb-2">
         <ul className="list-group">
-          {Object.keys(redirectMap).map((key) => (
-            <li className="list-group-item">
-              <Link to={key}>{key}</Link>
-            </li>
+          {Object.keys(widgets).length === 0 && (
+            <li className="list-group-item">No widgets found</li>
+          )}
+          {Object.keys(widgets).map((acc) => (
+            <details className="list-group-item" key={acc}>
+              <summary className="cursor-pointer">{acc}</summary>
+              <ul>
+                {widgets[acc].map((key) => (
+                  <li key={key}>
+                    <Link to={`${acc}/widget/${key}`}>{`${acc}/widget/${key}`}</Link>
+                  </li>
+                ))}
+              </ul>
+            </details>
           ))}
         </ul>
       </div>
