@@ -23,10 +23,10 @@ Then, create a new folder with the following structure:
   - (any folder structure)
 ```
 
--   The `apps` folder is where you store your apps. Each app has its own folder, and each app folder has a `bos.config.json` file.
--   The `apps/{appname}/widget` folder is where you store your widgets. You can have any folder structure inside the `widget` folder.
--   The `jsonc` files under `apps/{appname}` folder are used to create a data.json, that is used to store data under SocialDB.
--   The `modules` folder is where you store your modules. You can have any folder structure inside the `modules` folder.
+- The `apps` folder is where you store your apps. Each app has its own folder, and each app folder has a `bos.config.json` file.
+- The `apps/{appname}/widget` folder is where you store your widgets. You can have any folder structure inside the `widget` folder.
+- The `jsonc` files under `apps/{appname}` folder are used to create a data.json, that is used to store data under SocialDB.
+- The `modules` folder is where you store your modules. You can have any folder structure inside the `modules` folder.
 
 ### Commands
 
@@ -73,8 +73,8 @@ For example:
 
 Replacements:
 
--   `/*__@replace:something__*/` to `abc`
--   `<Widget src="/*__@replace:nui__*//widget/Button" />` to `<Widget src="nui.sking.near/widget/Button" />`
+- `/*__@replace:something__*/` to `abc`
+- `<Widget src="/*__@replace:nui__*//widget/Button" />` to `<Widget src="nui.sking.near/widget/Button" />`
 
 ### 3. **Module Importing**
 
@@ -105,15 +105,15 @@ The `data.json` file will appear as follows:
 
 ```json
 {
-    "something": "unchanged content of something.txt",
-    "types": {
-        "ui": {
-            "imageType": "Stringified JSON content of imageType.jsonc"
-        }
-    },
-    "widget": {
-        "Button.metadata": "Stringified JSON content of Button.metadata.jsonc"
+  "something": "unchanged content of something.txt",
+  "types": {
+    "ui": {
+      "imageType": "Stringified JSON content of imageType.jsonc"
     }
+  },
+  "widget": {
+    "Button.metadata": "Stringified JSON content of Button.metadata.jsonc"
+  }
 }
 ```
 

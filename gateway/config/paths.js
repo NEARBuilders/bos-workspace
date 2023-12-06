@@ -6,8 +6,8 @@ const publicPath = path.resolve(__dirname, "../public");
 const nodeModulesPath = path.resolve(__dirname, "../node_modules");
 
 module.exports = {
-    srcPath,
-    distPath,
-    publicPath,
-    nodeModulesPath,
+  srcPath,
+  distPath,
+  publicPath,
+  nodeModulesPath,
 };

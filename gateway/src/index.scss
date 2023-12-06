@@ -1,70 +1,70 @@
 :root {
-    --slate-dark-1: #151718;
-    --slate-dark-5: #2b2f31;
-    --slate-dark-6: #313538;
-    --slate-dark-8: #4c5155;
-    --slate-dark-9: #697177;
-    --slate-dark-11: #9ba1a6;
-    --slate-dark-12: #ecedee;
-    --blue-light-9: #0091ff;
+  --slate-dark-1: #151718;
+  --slate-dark-5: #2b2f31;
+  --slate-dark-6: #313538;
+  --slate-dark-8: #4c5155;
+  --slate-dark-9: #697177;
+  --slate-dark-11: #9ba1a6;
+  --slate-dark-12: #ecedee;
+  --blue-light-9: #0091ff;
 
-    --font-weight-medium: 500;
-    --font-weight-bold: 600;
+  --font-weight-medium: 500;
+  --font-weight-bold: 600;
 
-    /* For web3 onboard */
-    --account-center-z-index: 999;
-    --account-center-position-top: 64px;
-    --account-center-position-right: -10px;
+  /* For web3 onboard */
+  --account-center-z-index: 999;
+  --account-center-position-top: 64px;
+  --account-center-position-right: -10px;
 }
 
 @import "bootstrap";
 
 body {
-    overflow-y: scroll;
+  overflow-y: scroll;
 }
 
 body,
 html {
-    -webkit-font-smoothing: antialiased;
+  -webkit-font-smoothing: antialiased;
 }
 
 .pointer {
-    cursor: pointer;
+  cursor: pointer;
 }
 
 .btn-success,
 .btn-primary {
-    .text-muted {
-        color: #fff !important;
-    }
+  .text-muted {
+    color: #fff !important;
+  }
 }
 
 .outline-none {
-    outline: 0 !important;
+  outline: 0 !important;
 }
 
 a {
+  text-decoration: none;
+  &:hover {
+    text-decoration: underline;
+  }
+  &.btn {
     text-decoration: none;
-    &:hover {
-        text-decoration: underline;
-    }
-    &.btn {
-        text-decoration: none;
-    }
+  }
 }
 
 .sidebar-items {
-    & > div {
-        border-right: 1px solid #e5e5e5;
-        text-align: center;
-        min-height: 4rem;
-        max-height: 4rem;
-        display: flex;
-    }
+  & > div {
+    border-right: 1px solid #e5e5e5;
+    text-align: center;
+    min-height: 4rem;
+    max-height: 4rem;
+    display: flex;
+  }
 
-    & > div:not(.apps) {
-        min-width: 4rem;
-        align-items: center !important;
-        justify-content: center !important;
-    }
+  & > div:not(.apps) {
+    min-width: 4rem;
+    align-items: center !important;
+    justify-content: center !important;
+  }
 }
