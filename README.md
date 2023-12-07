@@ -90,14 +90,14 @@ The build script will create a `data.json` file based on the `jsonc` and `txt` f
 For instance, consider the following structure:
 
 ```js
-- apps
-- {appname}
-    - something.txt
-    - types
-    - ui
-        - imageType.jsonc
-    - widget
-    - Button.metadata.jsonc
+-apps -
+  { appname } -
+  something.txt -
+  types -
+  ui -
+  imageType.jsonc -
+  widget -
+  Button.metadata.jsonc;
 ```
 
 The `data.json` file will appear as follows:
