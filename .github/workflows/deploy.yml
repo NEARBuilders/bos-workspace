@@ -70,10 +70,11 @@ jobs:
 
       - name: Build the workspaces
         run: |
-          bos-workspace build
+          cd $BOS_WORKSPACE_DIRECTORY
+          npm run build
 
       - name: Deploy widgets
         run: |
           pwd
-          cd $BOS_WORKSPACE_DIRECTORY/build/$BOS_APP_NAME
+          cd ./build/$BOS_APP_NAME
           bos components deploy "$BOS_DEPLOY_ACCOUNT_ID" sign-as "$BOS_SIGNER_ACCOUNT_ID" network-config "$BOS_DEPLOY_ENV" sign-with-plaintext-private-key --signer-public-key "$BOS_SIGNER_PUBLIC_KEY" --signer-private-key "$BOS_SIGNER_PRIVATE_KEY" send
