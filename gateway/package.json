@@ -1,7 +1,6 @@
 {
   "name": "bos-workspace-gateway",
   "version": "0.0.0",
-  "packageManager": "npm",
   "dependencies": {
     "@near-wallet-selector/core": "^8.5.0",
     "@near-wallet-selector/here-wallet": "^8.5.0",
