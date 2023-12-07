@@ -12,7 +12,7 @@ npm install -g bos-workspace
 
 Then, create a new folder with the following structure:
 
-```
+```js
 - apps
   - {appname}
     - bos.config.json
@@ -49,7 +49,6 @@ Commands:
 ```
 
 > If the gateway can't fetch local components, try disabling brave shields or your adblock.
-
 > If the commands don't work, try again using Node >=16
 
 ## Key Features
@@ -90,7 +89,7 @@ The build script will create a `data.json` file based on the `jsonc` and `txt` f
 
 For instance, consider the following structure:
 
-```
+```js
 - apps
 - {appname}
     - something.txt
@@ -152,7 +151,7 @@ jobs:
       signer-private-key: ${{ secrets.SIGNER_PRIVATE_KEY }}
 ```
 
-Adjust the workflow as needed, then configure your variables + secrets on Github Settings -> Actions -> secrets & variables. Use [near-cli-rs](https://github.com/near/near-cli-rs) for generating keypairs.
+Adjust the workflow as needed, then configure your variables + secrets on GitHub Settings -> Actions -> secrets & variables. Use [near-cli-rs](https://github.com/near/near-cli-rs) for generating keypairs.
 
 ### Workflow Inputs
 
