@@ -16,8 +16,8 @@ jobs:
         uses: actions/setup-node@v2
         with:
           node-version: 16
-          cache: yarn 
-          registry-url: 'https://registry.npmjs.org'
+          cache: yarn
+          registry-url: "https://registry.npmjs.org"
 
       - name: Install Dependencies
         id: install
