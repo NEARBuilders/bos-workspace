@@ -95,7 +95,9 @@ function Home() {
               <ul>
                 {widgets[acc].map((key) => (
                   <li key={key}>
-                    <Link to={`${acc}/widget/${key}`}>{`${acc}/widget/${key}`}</Link>
+                    <Link
+                      to={`${acc}/widget/${key}`}
+                    >{`${acc}/widget/${key}`}</Link>
                   </li>
                 ))}
               </ul>
