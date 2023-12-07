@@ -1,23 +1,24 @@
-import React, { useState, useEffect, useCallback } from "react";
-import "@near-wallet-selector/modal-ui/styles.css";
-import { Link } from "react-router-dom";
 import { setupWalletSelector } from "@near-wallet-selector/core";
-import { setupNearWallet } from "@near-wallet-selector/near-wallet";
-import { setupMyNearWallet } from "@near-wallet-selector/my-near-wallet";
-import { setupSender } from "@near-wallet-selector/sender";
 import { setupHereWallet } from "@near-wallet-selector/here-wallet";
 import { setupMeteorWallet } from "@near-wallet-selector/meteor-wallet";
+import { setupModal } from "@near-wallet-selector/modal-ui";
+import "@near-wallet-selector/modal-ui/styles.css";
+import { setupMyNearWallet } from "@near-wallet-selector/my-near-wallet";
+import { setupNearWallet } from "@near-wallet-selector/near-wallet";
 import { setupNeth } from "@near-wallet-selector/neth";
 import { setupNightly } from "@near-wallet-selector/nightly";
-import { setupModal } from "@near-wallet-selector/modal-ui";
+import { setupSender } from "@near-wallet-selector/sender";
+import Big from "big.js";
+import { isValidAttribute } from "dompurify";
 import {
+  EthersProviderContext,
   useAccount,
   useInitNear,
   useNear,
   utils,
-  EthersProviderContext,
 } from "near-social-vm";
-import Big from "big.js";
+import React, { useCallback, useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { useEthersProviderContext } from "./useWeb3";
 
 export const refreshAllowanceObj = {};
@@ -64,7 +65,9 @@ export function useAuth() {
               delete props.href;
             }
             if (props.to) {
-              props.to = sanitizeUrl(props.to);
+              props.to = isValidAttribute("a", "href", props.to)
+                ? props.to
+                : "about:blank";
             }
             return <Link {...props} />;
           },
@@ -81,7 +84,7 @@ export function useAuth() {
     }
     near.selector.then((selector) => {
       setWalletModal(
-        setupModal(selector, { contractId: near.config.contractName }),
+        setupModal(selector, { contractId: near.config.contractName })
       );
     });
   }, [near]);
@@ -92,7 +95,7 @@ export function useAuth() {
       walletModal.show();
       return false;
     },
-    [walletModal],
+    [walletModal]
   );
 
   const logOut = useCallback(async () => {
@@ -108,7 +111,7 @@ export function useAuth() {
 
   const refreshAllowance = useCallback(async () => {
     alert(
-      "You're out of access key allowance. Need sign in again to refresh it",
+      "You're out of access key allowance. Need sign in again to refresh it"
     );
     await logOut();
     requestSignIn();
@@ -128,7 +131,7 @@ export function useAuth() {
     setAvailableStorage(
       account.storageBalance
         ? Big(account.storageBalance.available).div(utils.StorageCostPerByte)
-        : Big(0),
+        : Big(0)
     );
   }, [account]);
 
@@ -161,7 +164,7 @@ export async function getSocialKeyPair(accountId) {
     const hereKeystore = ls.get("herewallet:keystore");
     if (hereKeystore) {
       return nearAPI.KeyPair.fromString(
-        hereKeystore[NetworkId].accounts[accountId],
+        hereKeystore[NetworkId].accounts[accountId]
       );
     }
   } catch {}
