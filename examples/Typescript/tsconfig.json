@@ -7,8 +7,6 @@
     "types": ["@types/react", "near-social-vm-types", "./global.d.ts"],
     "strict": true,
     "noImplicitAny": true,
-    "lib": [
-      "esnext",
-    ]
+    "lib": ["esnext"]
   }
 }
