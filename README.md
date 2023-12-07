@@ -125,8 +125,6 @@ The jsonc files will be passed through JSON.stringify before being stored in the
 If you want to skip the JSON.stringify operation and keep the structure, add the following comment at the beginning of the file:
 `/*__@noStringify__*/`
 
-
-
 To use the [reusable workflow for deploying your apps](./.gitignore/workflows/deploy.yml) This workspace comes with a reusable workflow for deploying an app.
 
 Here's the cleaned-up documentation in Markdown:
@@ -156,7 +154,6 @@ jobs:
 
 Adjust the workflow as needed, then configure your variables + secrets on Github Settings -> Actions -> secrets & variables. Use [near-cli-rs](https://github.com/near/near-cli-rs) for generating keypairs.
 
-
 ### Workflow Inputs
 
 The workflow accepts the following inputs:
@@ -174,4 +171,3 @@ The workflow accepts the following inputs:
 - `signer-public-key` (required): Public key for signing transactions in the format: `ed25519:<public_key>`.
 
 - `signer-private-key` (required): Private key for signing transactions in the format: `ed25519:<private_key>`.
-
