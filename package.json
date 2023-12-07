@@ -32,7 +32,10 @@
     "jest": "^29.7.0",
     "mock-fs": "^5.2.0",
     "near-cli-rs": "^0.4.3",
-    "prettier": "^3.1.0"
+    "nypm": "^0.3.3",
+    "prettier": "^3.1.0",
+    "sass": "^1.69.5",
+    "socket.io": "^4.7.2"
   },
   "devDependencies": {
     "eslint": "^8.53.0"

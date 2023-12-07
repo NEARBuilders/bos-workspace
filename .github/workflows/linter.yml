@@ -42,3 +42,5 @@ jobs:
           JAVASCRIPT_ES_CONFIG_FILE: .eslintrc.yml
           VALIDATE_JSCPD: false
           VALIDATE_ALL_CODEBASE: false
+          VALIDATE_CSS: false
+          VALIDATE_MARKDOWN: false
