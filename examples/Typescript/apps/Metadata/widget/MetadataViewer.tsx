@@ -40,8 +40,8 @@ interface LinktreeElements {
   [key: string]: LinktreeElement;
 }
 
-export default function MetadataViewer(props: Metadata, context: BosContext) {
-  const { name, description, image, linktree, tags } = props;
+function MetadataViewer(metadata: Metadata) {
+  const { name, description, image, linktree, tags } = metadata;
 
   const links = Object.entries(linktree ?? {});
   const linktreeElements: LinktreeElements = {
@@ -140,3 +140,5 @@ export default function MetadataViewer(props: Metadata, context: BosContext) {
     </div>
   );
 }
+
+export default MetadataViewer;
