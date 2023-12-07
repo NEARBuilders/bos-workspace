@@ -151,8 +151,7 @@ jobs:
       deploy-account-address: ${{ vars.DEPLOY_ACCOUNT_ID }} // should match bos.config.json (TODO fix this)
       signer-account-address: ${{ vars.SIGNER_ACCOUNT_ID }} // account to sign with
       signer-public-key: ${{ vars.SIGNER_PUBLIC_KEY }}
-    secrets:
-      SIGNER_PRIVATE_KEY: ${{ secrets.SIGNER_PRIVATE_KEY }}
+      signer-private-key: ${{ secrets.SIGNER_PRIVATE_KEY }}
 ```
 
 Adjust the workflow as needed, then configure your variables + secrets on Github Settings -> Actions -> secrets & variables. Use [near-cli-rs](https://github.com/near/near-cli-rs) for generating keypairs.
@@ -174,8 +173,5 @@ The workflow accepts the following inputs:
 
 - `signer-public-key` (required): Public key for signing transactions in the format: `ed25519:<public_key>`.
 
-### GitHub Secrets
+- `signer-private-key` (required): Private key for signing transactions in the format: `ed25519:<private_key>`.
 
-You need to set the following GitHub Secrets in your repository:
-
-- `SIGNER_PRIVATE_KEY`: Private key in `ed25519:<private_key>` format for signing transactions.

@@ -28,10 +28,11 @@ on:
         required: true
         description: "Public key for signing transactions in the format: `ed25519:<public_key>`"
         type: string
-    secrets:
-      SIGNER_PRIVATE_KEY:
-        description: "Private key in `ed25519:<private_key>` format for signing transaction"
+      signer-private-key:
         required: true
+        description: "Private key in `ed25519:<private_key>` format for signing transaction"
+        type: string
+
 jobs:
   deploy-widgets:
     runs-on: ubuntu-latest
@@ -42,7 +43,7 @@ jobs:
       BOS_DEPLOY_ACCOUNT_ID: ${{ inputs.deploy-account-address }}
       BOS_SIGNER_ACCOUNT_ID: ${{ inputs.signer-account-address }}
       BOS_SIGNER_PUBLIC_KEY: ${{ inputs.signer-public-key }}
-      BOS_SIGNER_PRIVATE_KEY: ${{ secrets.SIGNER_PRIVATE_KEY }}
+      BOS_SIGNER_PRIVATE_KEY: ${{ inputs.signer-private-key }}
 
     steps:
       - name: Checkout repository
@@ -55,12 +56,12 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
-         
+          node-version: "18"
+
       - name: Install bos-workspace globally
         run: |
           npm install -g bos-workspace
-  
+
       - name: Build the workspaces
         run: |
           bos-workspace build
