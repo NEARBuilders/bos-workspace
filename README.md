@@ -124,3 +124,58 @@ To exclude files from the `data.json` file, add the `/*__@ignore__*/` comment to
 The jsonc files will be passed through JSON.stringify before being stored in the `data.json` file, the build script will also remove all the comments and spaces from the jsonc files.
 If you want to skip the JSON.stringify operation and keep the structure, add the following comment at the beginning of the file:
 `/*__@noStringify__*/`
+
+
+
+To use the [reusable workflow for deploying your apps](./.gitignore/workflows/deploy.yml) This workspace comes with a reusable workflow for deploying an app.
+
+Here's the cleaned-up documentation in Markdown:
+
+## Deploying Widgets through GitHub Actions
+
+To deploy widgets on push to branch, create a GitHub Actions workflow file in your repository, e.g., `.github/workflows/deploy-embeds-mainnet.yml`, and configure it as follows:
+
+```yaml
+name: Deploy 'AppName' App Components to Mainnet
+
+on:
+  push:
+    branches: [main] // branch for trigger
+
+jobs:
+  deploy-mainnet:
+    uses: NEARBuilders/bos-workspace/.github/workflows/deploy.yml@main
+    with:
+      deploy-env: "mainnet"  // environemnt to deploy to
+      app-name: "embeds" // app name with bos.config.json
+      deploy-account-address: ${{ vars.DEPLOY_ACCOUNT_ID }} // should match bos.config.json (TODO fix this)
+      signer-account-address: ${{ vars.SIGNER_ACCOUNT_ID }} // account to sign with
+      signer-public-key: ${{ vars.SIGNER_PUBLIC_KEY }}
+    secrets:
+      SIGNER_PRIVATE_KEY: ${{ secrets.SIGNER_PRIVATE_KEY }}
+```
+
+Adjust the workflow as needed, then configure your variables + secrets on Github Settings -> Actions -> secrets & variables. Use [near-cli-rs](https://github.com/near/near-cli-rs) for generating keypairs.
+
+
+### Workflow Inputs
+
+The workflow accepts the following inputs:
+
+- `cli-version` (optional): Version of BOS CLI to use for deployment (e.g., 0.3.0). Default: "0.3.6"
+
+- `deploy-env` (optional): Environment to deploy component code to (e.g., mainnet, testnet). Default: "mainnet"
+
+- `app-name` (required): Workspace app name to deploy (from the /apps directory).
+
+- `deploy-account-address` (required): Account under which component code should be deployed.
+
+- `signer-account-address` (required): Account used for signing the deploy transaction, frequently the same as `deploy-account-address`.
+
+- `signer-public-key` (required): Public key for signing transactions in the format: `ed25519:<public_key>`.
+
+### GitHub Secrets
+
+You need to set the following GitHub Secrets in your repository:
+
+- `SIGNER_PRIVATE_KEY`: Private key in `ed25519:<private_key>` format for signing transactions.
