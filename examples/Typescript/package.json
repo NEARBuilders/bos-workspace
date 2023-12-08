@@ -1,0 +1,17 @@
+{
+  "name": "bos-workspace-typescript-example",
+  "version": "0.0.0",
+  "packageManager": "npm",
+  "type": "module",
+  "devDependencies": {
+    "@types/react": "^18.2.42",
+    "@typescript-eslint/eslint-plugin": "^6.5.0",
+    "eslint": "^8.48.0",
+    "near-social-vm-types": "^1.0.0",
+    "tsc-files": "^1.1.4"
+  },
+  "scripts": {
+    "dev": "../../bin/bos-workspace dev",
+    "build": "../../bin/bos-workspace build"
+  }
+}
