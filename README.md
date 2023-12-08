@@ -1,32 +1,32 @@
 # bos-workspace (ALPHA)
 
-bos-workspace is a toolset to help ease the development of bOS widgets. It works like a monorepo, allowing you to develop multiple bos apps in the same time. It also provides a build script to help with the development process.
+🚧 **Warning: This library is in alpha and may undergo significant changes.** 🚧
 
-## Introduction
+## Getting Started
 
-To use bos-workspace, simple install it:
+To use bos-workspace, install it globally or in your existing workspace:
 
-```bash
-npm install -g bos-workspace
+```cmd
+> npm install bos-workspace
 ```
 
-Then, create a new folder with the following structure:
+Or download and run [create-bos-app](https://github.com/archetype-org/create-bos-app).  ( [integrate create-bos-app #41](https://github.com/NEARBuilders/bos-workspace/issues/41) )
 
-```js
-- apps
-  - {appname}
-    - bos.config.json
-    - widget
-        - (your widgets codes with any folder structure)
-    - (other folders or files)
-- modules
-  - (any folder structure)
+```cmd
+> npm install create-bos-app
+> create-bos-app
 ```
 
-- The `apps` folder is where you store your apps. Each app has its own folder, and each app folder has a `bos.config.json` file.
-- The `apps/{appname}/widget` folder is where you store your widgets. You can have any folder structure inside the `widget` folder.
-- The `jsonc` files under `apps/{appname}` folder are used to create a data.json, that is used to store data under SocialDB.
-- The `modules` folder is where you store your modules. You can have any folder structure inside the `modules` folder.
+## Features
+
+  - [x] Alias Mapping
+  - [x] Gateway for local development (without needing flags)
+  - [x] Hot Reload
+  - [x] Typescript support
+  - [x] Deploy widgets via Github Action
+  - [x] Manage multiple apps configured with different root accountIds
+  - [x] Support for flags on other gateways
+
 
 ### Commands
 
