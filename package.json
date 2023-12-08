@@ -29,7 +29,7 @@
     "test": "jest",
     "format": "prettier --write .",
     "lint": "eslint .",
-    "prepare": "npm run build-gateway --foreground-scripts"
+    "prepublishOnly": "npm run build-gateway"
   },
   "dependencies": {
     "bos-cli": "^0.3.6",
