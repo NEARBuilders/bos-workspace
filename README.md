@@ -2,6 +2,8 @@
 
 🚧 **Warning: This library is in alpha and may undergo significant changes.** 🚧
 
+![bos-workspace](./docs/assets/bos-workspace.gif)
+
 ## Getting Started
 
 To use bos-workspace, install it globally or in your existing workspace:
