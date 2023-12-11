@@ -62,9 +62,9 @@ Usage: bos-workspace dev [options]
 
 Options:
   -p, --port <port>        Port to run the server on (default: 8080)
-  --no-gateway             Disable the gateway (default: false)
-  --no-hot                 Disable hot reloading (default: false)
-  --no-open                Disable opening the browser (default: false)
+  -no-gateway             Disable the gateway (default: false)
+  -no-hot                 Disable hot reloading (default: false)
+  -no-open                Disable opening the browser (default: false)
 ```
 
 To start the development server with specific options, such as exposing components to port 8081 and not booting a local gateway, you can use the following command:
