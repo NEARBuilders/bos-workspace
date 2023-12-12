@@ -53,6 +53,64 @@ Commands:
 > If the gateway can't fetch local components, try disabling brave shields or your adblock.
 > If the commands don't work, try again using Node >=16
 
+#### Command: `dev`
+
+Run the development server with various options:
+
+```bash
+Usage: bos-workspace dev [options]
+
+Options:
+  -p, --port <port>        Port to run the server on (default: 8080)
+  -no-gateway             Disable the gateway (default: false)
+  -no-hot                 Disable hot reloading (default: false)
+  -no-open                Disable opening the browser (default: false)
+```
+
+To start the development server with specific options, such as exposing components to port 8081 and not booting a local gateway, you can use the following command:
+
+```bash
+bos-workspace dev --port 8081 --no-gateway
+```
+
+#### Command: `build`
+
+Build the project:
+
+```bash
+Usage: bos-workspace build
+```
+
+This will output valid widget code to the `/build` directory.
+
+#### Command: `deploy`
+
+Deploy the project with the option to specify an app name (must be name of the folder in /apps directory):
+
+```bash
+Usage: bos-workspace deploy [app name]
+```
+
+To deploy the project for a specific app such as apps/my-app, use the following command:
+
+```bash
+bos-workspace deploy my-app
+```
+
+#### Command: `upload`
+
+Upload data to SocialDB with the option to specify an app name (must be name of the folder in /apps directory):
+
+```bash
+Usage: bos-workspace upload [app name]
+```
+
+To upload data to SocialDB for a specific app such as apps/my-app, use the following command:
+
+```bash
+bos-workspace upload my-app
+```
+
 ## Key Features
 
 ### 1. **App Configuration**
