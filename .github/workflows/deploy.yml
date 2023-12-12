@@ -71,7 +71,7 @@ jobs:
       - name: Build the workspaces
         run: |
           cd "$BOS_WORKSPACE_DIRECTORY"
-          npm run build
+          bos-workspace build
 
       - name: Deploy widgets
         run: |
