@@ -35,3 +35,8 @@ export interface Log {
     file?: string;
   }
 };
+
+export interface TranspileJSOptions {
+  compileTypeScript?: boolean;
+  format?: boolean;
+};

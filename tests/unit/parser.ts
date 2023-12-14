@@ -5,7 +5,9 @@ import {
   replaceImportsAlias,
   replaceImportsIPFS,
   extractConfigComments,
-  replaceImports
+  replaceImports,
+  format,
+  transpileJS,
 } from "@/lib/parser";
 
 describe('transpileTypescript', () => {
@@ -340,3 +342,68 @@ describe('extractConfigComments', () => {
   });
 });
 
+describe('format', () => {
+  it('should format the code without affecting its functionality', async () => {
+    const code = `VM.require("hello/near");return<div>{"bye"}</div>;`;
+    const result = await format(code);
+    expect(result.code.replace(/\s/g, '')).toEqual(code);
+  })
+});
+
+
+describe('transpileJS', () => {
+  it('should compile typescript, respect the config comments, and replace imports', async () => {
+    const cases = [
+      {
+        input: {
+          code: `// @skip
+            let account = "@{config/account}";
+            let module = "@{module/db}";
+            let alias = "@{alias/util}";
+            let ipfs = "@{ipfs/xyz}";
+            type MyType = {
+              hello: string;
+            }
+
+            return <div></div>;
+          `,
+          importParams: {
+            config: {
+              account: "user.near",
+            },
+            modules: ["module/db"],
+            aliases: { "util": "utility" },
+            ipfsMap: { "xyz": "bafkreihdwdcef3tkddpljak234nlasjd93j4asdhfas3" },
+            ipfsGateway: "https://ipfs.org/",
+          },
+          opts: {
+            compileTypeScript: true,
+            format: true,
+          }
+        },
+        output: {
+          code: `let account = "@{config/account}";
+let module = "@{module/db}";
+let alias = "@{alias/util}";
+let ipfs = "@{ipfs/xyz}";
+
+return <div></div>;`,
+          logs: [
+            {
+              message: "Skipping compilation because of @skip comment",
+              level: "info",
+              source: {
+                line: 0,
+              }
+            }
+          ]
+        }
+      }
+    ];
+
+    for (const c of cases) {
+      const result = await transpileJS(c.input.code, c.input.importParams, c.input.opts);
+      expect(result).toEqual(c.output);
+    }
+  })
+});
