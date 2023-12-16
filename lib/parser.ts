@@ -1,4 +1,5 @@
-import { AccountID, Aliases, Code, ConfigComment, IPFSMap, Log, Modules, SimpleConfig, TranspileJSOptions, TranspileOptions } from "./types";
+import { AccountID, Aliases, Code, ConfigComment, IPFSMap, Log, Modules, TranspileJSOptions } from "./types";
+import { BaseConfig } from "@/lib/config";
 
 interface Output {
   code: Code,
@@ -12,7 +13,7 @@ export async function transpileTypescript(code: Code, tsConfig?: any): Promise<O
   };
 }
 
-export async function replaceImportsConfig(code: Code, config: SimpleConfig): Promise<Output> {
+export async function replaceImportsConfig(code: Code, config: BaseConfig): Promise<Output> {
   return {
     code: code,
     logs: [],
@@ -32,7 +33,7 @@ export async function replaceImportsAlias(code: Code, aliases: Aliases): Promise
 };
 
 interface ReplaceImportsParams {
-  config: SimpleConfig,
+  config: BaseConfig,
   modules: Modules,
   ipfsMap: IPFSMap,
   ipfsGateway: string,

@@ -1,15 +1,13 @@
 import Joi from 'joi';
 import { readJson } from '@/lib/utils/fs';
 
-interface AccountConfig {
-  deploy?: string;
-  signer?: string;
-  dev?: string;
-}
-
-interface BaseConfig {
+export interface BaseConfig {
   account?: string;
-  accounts?: AccountConfig;
+  accounts?: {
+    deploy?: string;
+    signer?: string;
+    dev?: string;
+  };
   ipfs: {
     gateway: string | null;
     uploadApi: string | null;
@@ -80,7 +78,7 @@ export async function readConfig(srcOrJson: string | object, network: keyof Netw
   delete config.overrides;
 
   if (overrides) {
-    return { ...config, ...overrides };
+    return fillInAccounts({ ...config, ...overrides });
   }
 
   return fillInAccounts(config);

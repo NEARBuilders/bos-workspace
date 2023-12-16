@@ -2,19 +2,6 @@ export type Code = string;
 export type Network = 'testnet' | 'mainnet';
 export type AccountID = string;
 
-export interface SimpleConfig {
-  account?: AccountID;
-  accounts?: Record<'deploy' | 'signer' | 'dev', AccountID>;
-};
-
-export interface ConfigByNetwork {
-  network?: Network;
-  testnet?: SimpleConfig;
-  mainnet?: SimpleConfig;
-};
-
-export type Config = SimpleConfig | ConfigByNetwork;
-
 export type Modules = Array<string>;
 
 export type IPFSMap = Record<string, string>;
