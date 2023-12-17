@@ -3,6 +3,21 @@ import { Options as SucraseOptions, transform as transformTs } from "sucrase";
 import { AccountID, Aliases, Code, ConfigComment, IPFSMap, Log, Modules } from "./types";
 import { BaseConfig } from "@/lib/config";
 
+const SYNTAX = {
+  keyword: '@',
+  separator: '/',
+  wrapper: '{}',
+
+  /* 
+   * Examples: 
+   * - const hello = "Hello, @{alias/name}!";
+   * - const modules = VM.require(`@{module/utils/name}`);
+   * - const ipfs = <img src="@{ipfs/brand/logo.svg}" />
+   * - const config = "by @{config/accounts/signer}";
+   */
+};
+
+
 interface Output {
   code: Code,
   logs: Array<Log>,
@@ -59,26 +74,95 @@ export async function transpileTypescript(code: Code, tsConfig?: any): Promise<O
   }
 }
 
-export async function replaceImportsConfig(code: Code, config: BaseConfig): Promise<Output> {
+const wrap = (code: Code, scope: string = "") => {
+  return `${SYNTAX.keyword}${SYNTAX.wrapper[0]}${scope}${SYNTAX.separator}${code}${SYNTAX.wrapper[1]}`;
+};
+
+export function evalConfig(path: string[], config: BaseConfig): Output {
+  if (path[0] === 'account') {
+    path = ['accounts', 'deploy'];
+  }
+
+  let notFound = false;
+  let value = path.reduce((obj: any, key: string) => {
+    if (!obj || !obj.hasOwnProperty(key)) {
+      notFound = true;
+      return undefined;
+    }
+    return obj[key];
+  }, config);
+
+  const logs: Log[] = [];
+
+  if (notFound) {
+    value = wrap(path.join(SYNTAX.separator), "config");
+    logs.push({
+      message: `Config value not found: ${value}`,
+      level: 'warn',
+    });
+  }
+
   return {
-    code: code,
-    logs: [],
+    code: value,
+    logs: logs,
   };
 };
 
-export async function replaceImportsModule(code: Code, modules: Modules, account: AccountID): Promise<Output> {
-  return { code: code, logs: [] };
+export function evalModule(path: string[], modules: Modules, account: AccountID): Output {
+  const module_path = path.join('.');
+  const logs: Log[] = [];
+  if (!modules.includes(module_path)) {
+    logs.push({
+      message: `Imported module not found locally: ${wrap(path.join(SYNTAX.separator), "module")}`,
+      level: 'warn',
+    });
+  }
+  const value = account + "/widget/" + path.join('.') + ".module";
+  return {
+    code: value,
+    logs: logs,
+  }
 }
 
-export async function replaceImportsIPFS(code: Code, ipfsMap: IPFSMap, ipfsGateway: string): Promise<Output> {
-  return { code: code, logs: [] };
+export function evalIPFS(path: string[], ipfsMap: IPFSMap, ipfsGateway: string): Output {
+  const logs: Log[] = [];
+  const ipfs_path = path.join(SYNTAX.separator);
+
+  let value = ipfsGateway.replace(/\/$/, '') + "/" + ipfsMap?.[ipfs_path];
+
+  if (!ipfsMap.hasOwnProperty(ipfs_path)) {
+    value = wrap(ipfs_path, "ipfs");
+    logs.push({
+      message: `IPFS file or mapping not found: ${value}`,
+      level: 'warn',
+    });
+  }
+
+  return {
+    code: value,
+    logs: logs,
+  }
 };
 
-export async function replaceImportsAlias(code: Code, aliases: Aliases): Promise<Output> {
-  return { code: code, logs: [] };
+export function evalAlias(path: string[], aliases: Aliases): Output {
+  const logs: Log[] = [];
+  const alias_path = path.join(SYNTAX.separator);
+  let value = aliases?.[alias_path];
+  if (!aliases.hasOwnProperty(alias_path)) {
+    value = wrap(alias_path, "alias");
+    logs.push({
+      message: `Imported alias not found: ${value}`,
+      level: 'warn',
+    });
+  }
+  return {
+    code: value,
+    logs: logs,
+  }
 };
 
-interface ReplaceImportsParams {
+
+interface EvalCustomSyntaxParams {
   config: BaseConfig,
   modules: Modules,
   ipfsMap: IPFSMap,
@@ -86,8 +170,45 @@ interface ReplaceImportsParams {
   aliases: Aliases,
 };
 
-export async function replaceImports(code: Code, params: ReplaceImportsParams): Promise<Output> {
-  return { code: code, logs: [] };
+export function evalCustomSyntax(code: Code, params: EvalCustomSyntaxParams): Output {
+  const logs: Array<Log> = [];
+  const regex = new RegExp(`${SYNTAX.keyword}${SYNTAX.wrapper[0]}([^${SYNTAX.wrapper[1]}]+)${SYNTAX.wrapper[1]}`, 'g');
+
+  code = code.replace(regex, (_match, expression) => {
+    expression = expression.split(SYNTAX.separator);
+    const keyword = expression[0];
+    const path = expression.slice(1);
+
+
+    let evl: Output;
+    switch (keyword) {
+      case 'config':
+        evl = evalConfig(path, params.config);
+        break;
+      case 'module':
+        evl = evalModule(path, params.modules, params.config.accounts?.deploy ?? "");
+        break;
+      case 'ipfs':
+        evl = evalIPFS(path, params.ipfsMap, params.ipfsGateway);
+        break;
+      case 'alias':
+        evl = evalAlias(path, params.aliases);
+        break;
+      default:
+        evl = {
+          code: path,
+          logs: [
+            {
+              message: `Unknown keyword: ${keyword}`,
+              level: 'warn',
+            }
+          ]
+        };
+    };
+    logs.push(...evl.logs);
+    return evl.code;
+  });
+  return { code: code, logs: logs };
 }
 
 export async function extractConfigComments(code: Code): Promise<Output & { configs: ConfigComment[] }> {
@@ -106,7 +227,7 @@ export async function format(code: Code): Promise<Output> {
   }
 };
 
-export async function transpileJS(code: Code, importParams: ReplaceImportsParams, opts?: TranspileJSOptions): Promise<Output> {
+export async function transpileJS(code: Code, importParams: EvalCustomSyntaxParams, opts?: TranspileJSOptions): Promise<Output> {
   let output_code = code;
   let logs: Array<Log> = [];
   const ecc_res = await extractConfigComments(code);
@@ -134,7 +255,7 @@ export async function transpileJS(code: Code, importParams: ReplaceImportsParams
     };
   }
 
-  const ri_res = await replaceImports(output_code, importParams);
+  const ri_res = await evalCustomSyntax(output_code, importParams);
   output_code = ri_res.code;
   logs = logs.concat(ri_res.logs);
 
