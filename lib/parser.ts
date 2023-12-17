@@ -1,4 +1,8 @@
 import { Options as SucraseOptions, transform as transformTs } from "sucrase";
+// @ts-ignore
+import parseComments from "multilang-extract-comments";
+// @ts-ignore
+import { format as beautify } from "prettier";
 
 import { AccountID, Aliases, Code, ConfigComment, IPFSMap, Log, Modules } from "./types";
 import { BaseConfig } from "@/lib/config";
@@ -212,17 +216,43 @@ export function evalCustomSyntax(code: Code, params: EvalCustomSyntaxParams): Ou
 }
 
 export async function extractConfigComments(code: Code): Promise<Output & { configs: ConfigComment[] }> {
-  const codeWithoutConfigComments = code;
+  const comments = parseComments(code);
+  const lines = code.split('\n');
+  let codeWithoutConfigComments: string = '';
+
+  const configs = Object.keys(comments).map(key => {
+    const comment = comments[key];
+    const match = comment.content.match(/@(\w+)(\(.*\))?/);
+    if (match) {
+      // Remove the lines with config comments
+      for (let i = comment.begin; i <= comment.end; i++) {
+        lines[i - 1] = ''; // Replace the line with an empty string
+      }
+
+      return {
+        name: match[1],
+        value: match[2] ? match[2].slice(1, -1) : undefined,
+        begin: comment.begin,
+        end: comment.end,
+      };
+    }
+    return null;
+  }).filter(Boolean) as ConfigComment[];
+
+  codeWithoutConfigComments = lines.filter(line => line !== '').join('\n');
+
   return {
+    configs,
     code: codeWithoutConfigComments,
-    configs: [],
     logs: [],
   };
 }
 
 export async function format(code: Code): Promise<Output> {
   return {
-    code: code,
+    code: await beautify(code, {
+      parser: "babel",
+    }),
     logs: [],
   }
 };
@@ -246,7 +276,7 @@ export async function transpileJS(code: Code, importParams: EvalCustomSyntaxPara
       message: 'Skipping compilation because of @skip comment',
       level: 'info',
       source: {
-        line: config_comments.find(c => c.name === 'skip')?.line,
+        line: config_comments.find(c => c.name === 'skip')?.begin,
       }
     });
     return {
@@ -255,7 +285,7 @@ export async function transpileJS(code: Code, importParams: EvalCustomSyntaxPara
     };
   }
 
-  const ri_res = await evalCustomSyntax(output_code, importParams);
+  const ri_res = evalCustomSyntax(output_code, importParams);
   output_code = ri_res.code;
   logs = logs.concat(ri_res.logs);
 

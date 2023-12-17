@@ -11,7 +11,8 @@ export type Aliases = Record<string, string>;
 export interface ConfigComment {
   name: 'skip';
   value?: string;
-  line: number;
+  begin: number;
+  end: number;
 };
 
 export interface Log {

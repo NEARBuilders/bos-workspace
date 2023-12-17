@@ -267,7 +267,8 @@ describe('extractConfigComments', () => {
           {
             name: "skip",
             value: undefined,
-            line: 0,
+            begin: 1,
+            end: 1,
           }
         ]
       },
@@ -277,7 +278,8 @@ describe('extractConfigComments', () => {
           {
             name: "skip",
             value: undefined,
-            line: 0,
+            begin: 1,
+            end: 1,
           }
         ]
       },
@@ -287,7 +289,8 @@ describe('extractConfigComments', () => {
           {
             name: "skip",
             value: "'reason'",
-            line: 0,
+            begin: 1,
+            end: 1,
           }
         ]
       },
@@ -300,7 +303,8 @@ describe('extractConfigComments', () => {
           {
             name: "skip",
             value: "'reason'",
-            line: 2,
+            begin: 3,
+            end: 3,
           }
         ]
       }
@@ -326,7 +330,7 @@ describe('transpileJS', () => {
     const cases = [
       {
         input: {
-          code: `// @skip
+          code: `
             let account = "@{config/account}";
             let module = "@{module/db}";
             let alias = "@{alias/util}";
@@ -335,13 +339,15 @@ describe('transpileJS', () => {
               hello: string;
             }
 
-            return <div></div>;
+            export default <div></div>;
           `,
           importParams: {
             config: {
-              account: "user.near",
+              accounts: {
+                deploy: "jest.near",
+              }
             },
-            modules: ["module/db"],
+            modules: ["db"],
             aliases: { "util": "utility" },
             ipfsMap: { "xyz": "bafkreihdwdcef3tkddpljak234nlasjd93j4asdhfas3" },
             ipfsGateway: "https://ipfs.org/",
@@ -352,21 +358,14 @@ describe('transpileJS', () => {
           }
         },
         output: {
-          code: `let account = "@{config/account}";
-let module = "@{module/db}";
-let alias = "@{alias/util}";
-let ipfs = "@{ipfs/xyz}";
+          code: `let account = "jest.near";
+let module = "jest.near/widget/db.module";
+let alias = "utility";
+let ipfs = "https://ipfs.org/bafkreihdwdcef3tkddpljak234nlasjd93j4asdhfas3";
 
-return <div></div>;`,
-          logs: [
-            {
-              message: "Skipping compilation because of @skip comment",
-              level: "info",
-              source: {
-                line: 0,
-              }
-            }
-          ]
+return <div></div>;
+`,
+          logs: []
         }
       }
     ];
@@ -375,5 +374,48 @@ return <div></div>;`,
       const result = await transpileJS(c.input.code, c.input.importParams, c.input.opts);
       expect(result).toEqual(c.output);
     }
+  })
+  it("should skip transpilation if there is @skip comment", async () => {
+    const input = {
+      code: `
+      // @skip
+      let account = "@{config/account}";
+      let module = "@{module/db}";  
+      return <div></div>;
+  `,
+      importParams: {
+        config: {
+          accounts: {
+            deploy: "jest.near",
+          }
+        },
+        modules: ["db"],
+        aliases: { "util": "utility" },
+        ipfsMap: { "xyz": "bafkreihdwdcef3tkddpljak234nlasjd93j4asdhfas3" },
+        ipfsGateway: "https://ipfs.org/",
+      },
+      opts: {
+        compileTypeScript: false,
+        format: true,
+      }
+    };
+    const output = {
+      code: `      let account = "@{config/account}";
+      let module = "@{module/db}";
+      return <div></div>;
+`,
+      logs: [
+        {
+          message: "Skipping compilation because of @skip comment",
+          level: "info",
+          source: {
+            line: 2,
+          }
+        }
+      ]
+    }
+    const result = await transpileJS(input.code, input.importParams, input.opts);
+    expect(result.code.replace(/\s/g, '')).toEqual(output.code.replace(/\s/g, ''));
+    expect(result.logs).toEqual(output.logs);
   })
 });
