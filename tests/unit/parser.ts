@@ -11,11 +11,30 @@ import {
 } from "@/lib/parser";
 
 describe('transpileTypescript', () => {
-  it('should transpile TypeScript code to JavaScript', async () => {
-    const tsCode = `let x: number = 10;`;
-    const expectedJsCode = `let x = 10;`;
+  it('should transpile TypeScript widget to JavaScript', async () => {
+    const tsCode = `let x: number = 10; function b(){ return "hello"; } export default b;`;
+    const expected = { code: `let x = 10; function b(){ return "hello"; } return b(props);`, logs: [] };
     const result = await transpileTypescript(tsCode);
-    expect(result).toEqual(expectedJsCode);
+    expect(result).toEqual(expected);
+  });
+  it('should transpile TypeScript module to JavaScript', async () => {
+    const tsCode = `let x: number = 10; function b(){ return "hello"; } export default { b };`;
+    const expected = { code: `let x = 10; function b(){ return "hello"; } return { b };`, logs: [] };
+    const result = await transpileTypescript(tsCode);
+    expect(result).toEqual(expected);
+  });
+  it('should return an error if no default export is found', async () => {
+    const tsCode = `let x: number = 10; function b(){ return "hello"; } export { b };`;
+    const expected = {
+      code: `let x = 10; function b(){ return "hello"; } export { b };`, logs: [
+        {
+          message: "No default export found",
+          level: "warn",
+        }
+      ]
+    };
+    const result = await transpileTypescript(tsCode);
+    expect(result).toEqual(expected);
   });
 });
 
@@ -92,9 +111,6 @@ describe('replaceImportsConfig', () => {
       const result = await replaceImportsConfig(c.input.code, c.input.config);
       expect(result).toEqual(c.output);
     }
-  });
-  it('should throw if the imported config is not found', async () => {
-
   });
 });
 

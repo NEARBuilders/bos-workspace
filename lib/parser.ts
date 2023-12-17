@@ -1,4 +1,6 @@
-import { AccountID, Aliases, Code, ConfigComment, IPFSMap, Log, Modules, TranspileJSOptions } from "./types";
+import { Options as SucraseOptions, transform as transformTs } from "sucrase";
+
+import { AccountID, Aliases, Code, ConfigComment, IPFSMap, Log, Modules } from "./types";
 import { BaseConfig } from "@/lib/config";
 
 interface Output {
@@ -6,11 +8,55 @@ interface Output {
   logs: Array<Log>,
 };
 
+export interface TranspileJSOptions {
+  compileTypeScript?: boolean;
+  format?: boolean;
+};
+
 export async function transpileTypescript(code: Code, tsConfig?: any): Promise<Output> {
-  return {
-    code: code,
-    logs: [],
+  let transpiledCode = code, logs: Log[] = [];
+
+  const sucraseOptions: SucraseOptions = {
+    transforms: ["typescript", "jsx"],
+    jsxRuntime: "preserve",
+    enableLegacyBabel5ModuleInterop: true, // Preserve CommonJS import/export statements
+    disableESTransforms: true,
+    ...(tsConfig && tsConfig.compilerOptions),
   };
+
+  try {
+    transpiledCode = transformTs(code, sucraseOptions).code;
+  } catch (e: any) {
+    logs.push({
+      message: e.message || "Something went wrong while transpiling TypeScript",
+      level: "error",
+    });
+  }
+
+  // if no default export is found, add error
+  if (!transpiledCode.match(/export\s+default\s/g)) {
+    logs.push({
+      message: "No default export found",
+      level: "warn",
+    });
+  }
+
+  // replace the "export default x;" with "return x(props);"
+  transpiledCode = transpiledCode.replace(
+    /export\s+default\s+(\w+);/,
+    "return $1(props);",
+  );
+
+  // replace the "export default *" with "return *"
+  transpiledCode = transpiledCode.replace(
+    /export\s+default\s+/,
+    "return ",
+  );
+
+  return {
+    code: transpiledCode,
+    logs: logs,
+  }
 }
 
 export async function replaceImportsConfig(code: Code, config: BaseConfig): Promise<Output> {

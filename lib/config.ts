@@ -8,12 +8,12 @@ export interface BaseConfig {
     signer?: string;
     dev?: string;
   };
-  ipfs: {
-    gateway: string | null;
-    uploadApi: string | null;
-    uploadApiHeaders: Record<string, string>;
+  ipfs?: {
+    gateway?: string;
+    uploadApi?: string;
+    uploadApiHeaders?: Record<string, string>;
   };
-  format: boolean;
+  format?: boolean;
 }
 
 interface NetworkConfig {
