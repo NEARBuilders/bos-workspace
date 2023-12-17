@@ -166,7 +166,7 @@ export function evalAlias(path: string[], aliases: Aliases): Output {
 };
 
 
-interface EvalCustomSyntaxParams {
+export interface EvalCustomSyntaxParams {
   config: BaseConfig,
   modules: Modules,
   ipfsMap: IPFSMap,
@@ -249,11 +249,23 @@ export async function extractConfigComments(code: Code): Promise<Output & { conf
 }
 
 export async function format(code: Code): Promise<Output> {
-  return {
-    code: await beautify(code, {
+  const logs: Array<Log> = [];
+  let new_code = code;
+  try {
+    beautify(code, {
       parser: "babel",
-    }),
-    logs: [],
+    });
+  } catch (e: any) {
+    logs.push({
+      message: e.message || "Something went wrong while formatting",
+      level: "error",
+    });
+  }
+
+
+  return {
+    code: new_code,
+    logs: logs,
   }
 };
 

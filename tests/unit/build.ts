@@ -44,10 +44,10 @@ const app_example_1_output = {
     "logo.svg": "QmHash",
   }),
   "/build/widget/hello.utils.module.js": "const hello = (name) => `Hello, ${name}!`; export { hello };",
-  "/build/widget/index.js": "return Hello;",
-  "/build/widget/module.js": "VM.require('test.near/widget/hello.utils.module}'); return hello('world');",
-  "/build/widget/config.js": "return <h1>test.neartest.near</h1>;",
-  "/build/widget/alias.js": "return <h1>Hello world!</h1>;",
+  "/build/widget/index.jsx": "return Hello;",
+  "/build/widget/module.jsx": "VM.require('test.near/widget/hello.utils.module}'); return hello('world');",
+  "/build/widget/config.jsx": "return <h1>test.neartest.near</h1>;",
+  "/build/widget/alias.jsx": "return <h1>Hello world!</h1>;",
   "/build/widget/ipfs.tsx": "return <img height='100' src='https://testipfs/ipfs/QmHash' />;",
   "/build/data.json": JSON.stringify({
     "test.near": {
@@ -76,6 +76,6 @@ describe('build', () => {
 
   it('should build correctly', async () => {
     await buildApp('/app_example_1', '/build');
-    expect(vol.toJSON('/app_example_1')).toEqual(app_example_1_output);
+    expect(vol.toJSON('/build')).toEqual(app_example_1_output);
   })
 })
