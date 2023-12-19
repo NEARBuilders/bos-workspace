@@ -60,7 +60,7 @@ const app_example_1_output = {
         }
       }
     }
-  }, null, 2),
+  }, null, 2) + "\n",
 };
 
 const unmockedFetch = global.fetch;

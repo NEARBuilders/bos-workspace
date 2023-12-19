@@ -1,0 +1,15 @@
+{
+  accounts: {
+    deploy: "deploy.near",
+    signer: "signer.near",
+    dev: "dev.near"
+  },
+  format: true,
+  overrides: {
+    testnet: {
+      account: "testing.testnet",
+      format: false,
+      aliasesSrc: ["src/aliases.testnet.json"]
+    }
+  }
+}

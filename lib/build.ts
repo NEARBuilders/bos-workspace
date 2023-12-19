@@ -98,7 +98,7 @@ export async function buildApp(src: string, dest: string, network: string = "mai
     await outputFile(new_file_path, new_file.code);
   }
 
-  await updateData(src, dest);
+  await updateData(src, dest, config.accounts!.deploy!);
 
   return {
     logs
@@ -140,5 +140,46 @@ async function updateIpfs(pwd: string, dest: string, options: UploadToIPFSOption
   return newIpfsMap;
 };
 
-async function updateData(pwd: string, dest: string): Promise<void> {
+// TODO: This is bad, delete it, code it again under data.ts and TEST it.
+async function updateData(pwd: string, dest: string, account: string): Promise<void> {
+  const data = {};
+  // all files in /data/
+  await loopThroughFiles(path.join(pwd, "data"), async (file: string) => {
+    const ext = path.extname(file);
+    if (ext !== ".json" && ext !== ".jsonc" && ext !== ".txt") return;
+    const content = await readFile(file);
+    const keys: string[] = path.relative(path.join(pwd, "data"), file).replace(ext, "").split(path.sep);
+    const obj = keys.reduceRight((acc: any, key) => {
+      return {
+        [key]: acc,
+      }
+    }, content.toString());
+    Object.assign(data, obj);
+  });
+  // all metadata from /widget/ and /module/
+  await loopThroughFiles(path.join(pwd, "widget"), async (file: string) => {
+    const ext = path.extname(file);
+    if (ext !== ".jsonc" && ext !== ".json") return;
+    if (!path.basename(file).endsWith(".metadata" + ext)) return;
+    const content = await readJson(file);
+    const keys: string[] = path.relative(path.join(pwd, "widget"), file).replace(".metadata" + ext, "").split(path.sep);
+    const obj = keys.reduceRight(((acc: any, key: any) => {
+      return {
+        widget: {
+          [key]: {
+            "metadata": acc,
+          }
+        }
+      }
+    }), content);
+    Object.assign(data, obj);
+  });
+  //
+  const final_data = {
+    [account]: data,
+  };
+  await writeJson(path.join(pwd, "data.json"), final_data, {
+    spaces: 2,
+  })
+  await copy(path.join(pwd, "data.json"), path.join(dest, "data.json"));
 }
