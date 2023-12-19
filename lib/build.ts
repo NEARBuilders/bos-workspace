@@ -8,18 +8,23 @@
 // - generates data.json
 
 import { readConfig } from "@/lib/config";
-import { loopThroughFiles, outputFile, readFile, readJson } from "@/lib/utils/fs";
+import { writeJson, copy, loopThroughFiles, outputFile, readFile, readJson } from "@/lib/utils/fs";
 import path from "path";
 import { transpileJS, EvalCustomSyntaxParams } from "@/lib/parser";
+import { Log } from "./types";
+import { UploadToIPFSOptions, uploadToIPFS } from "./ipfs";
 
 // return a list of files that were written
-export async function buildApp(src: string, dest: string, network: string = "mainnet"): Promise<string[]> {
+export async function buildApp(src: string, dest: string, network: string = "mainnet"): Promise<any> {
   const config = await readConfig(path.join(src, "bos.config.json"), network as any);
   const aliases = await readJson(path.join(src, "aliases.json")).catch(() => ({}));
 
-  await updateIpfs();
-  const ipfsMap = await readJson(path.join(src, "ipfs.json")).catch(() => ({}));
-
+  const ipfsMap = await updateIpfs(src, dest, {
+    uploadAPI: {
+      url: config.ipfs!.uploadApi!,
+      headers: config.ipfs!.uploadApiHeaders!,
+    }
+  });
 
   const modules: string[] = [];
   const widgets: string[] = [];
@@ -40,11 +45,13 @@ export async function buildApp(src: string, dest: string, network: string = "mai
 
   const params: EvalCustomSyntaxParams = {
     config,
-    modules: modules.map(file => path.relative(path.join(src, "module"), file)),
+    modules: modules.map(file => path.relative(path.join(src, "module"), file.replace(path.extname(file), ""))),
     ipfsMap,
     ipfsGateway: config.ipfs!.gateway as string,
     aliases,
   };
+
+  const logs: Log[] = [];
 
   for (const file of modules) {
     const content = (await readFile(file)).toString();
@@ -52,14 +59,21 @@ export async function buildApp(src: string, dest: string, network: string = "mai
       compileTypeScript: file.endsWith(".ts") || file.endsWith(".tsx"),
       format: true,
     });
+    const new_logs: Log[] = new_file.logs.map((v) => {
+      return {
+        ...v,
+        file: file,
+      }
+    });
+    logs.push(...new_logs);
     // write to dest
-    let new_file_name = path.basename(file);
+    let new_file_name = path.relative(path.join(src, "module"), file).replace("/", ".");
     new_file_name = new_file_name.substring(0, new_file_name.length - path.extname(file).length);
     new_file_name += ".module.js";
 
     const new_file_path = path.join(dest, "widget", new_file_name);
 
-    outputFile(new_file_path, new_file.code);
+    await outputFile(new_file_path, new_file.code);
   }
 
   for (const file of widgets) {
@@ -68,22 +82,63 @@ export async function buildApp(src: string, dest: string, network: string = "mai
       compileTypeScript: file.endsWith(".ts") || file.endsWith(".tsx"),
       format: true,
     });
+    const new_logs: Log[] = new_file.logs.map((v) => {
+      return {
+        ...v,
+        file: file,
+      }
+    });
+    logs.push(...new_logs);
     // write to dest
     let new_file_name = path.basename(file);
     new_file_name = new_file_name.substring(0, new_file_name.length - path.extname(file).length);
     new_file_name += ".jsx";
 
     const new_file_path = path.join(dest, "widget", new_file_name);
-    outputFile(new_file_path, new_file.code);
+    await outputFile(new_file_path, new_file.code);
   }
 
-  await updateData();
+  await updateData(src, dest);
 
-  return [];
+  return {
+    logs
+  }
 }
 
-async function updateIpfs() {
+async function updateIpfs(pwd: string, dest: string, options: UploadToIPFSOptions): Promise<{
+  [key: string]: string
+}> {
+  const ipfsMap = (await readJson(path.join(pwd, "ipfs.json")).catch(() => ({}))) || {};
+
+  // 2. read all files in /ipfs/
+  const ipfsFiles: string[] = [];
+  await loopThroughFiles(path.join(pwd, "ipfs"), async (file: string) => {
+    ipfsFiles.push(path.relative(path.join(pwd, "ipfs"), file));
+  });
+
+  // 3. upload the changed files to ipfs
+  const ipfsUploads: { [key: string]: string } = {};
+  for (const file of ipfsFiles) {
+    if (!ipfsMap[file]) {
+      // upload
+      const cid = await uploadToIPFS(path.join(pwd, "ipfs", file), options);
+      ipfsUploads[file] = cid;
+    }
+  }
+
+  // 4. update ipfs.json
+  const newIpfsMap = { ...ipfsMap };
+  for (const file of Object.keys(ipfsUploads)) {
+    newIpfsMap[file] = ipfsUploads[file];
+  };
+
+  await writeJson(path.join(pwd, "ipfs.json"), newIpfsMap, {
+    spaces: 2,
+  })
+  await copy(path.join(pwd, "ipfs.json"), path.join(dest, "ipfs.json"));
+
+  return newIpfsMap;
 };
 
-async function updateData() {
-};
+async function updateData(pwd: string, dest: string): Promise<void> {
+}

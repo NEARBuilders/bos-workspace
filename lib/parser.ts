@@ -52,24 +52,25 @@ export async function transpileTypescript(code: Code, tsConfig?: any): Promise<O
     });
   }
 
-  // if no default export is found, add error
-  if (!transpiledCode.match(/export\s+default\s/g)) {
+  // if no "export default *" is found, add error
+  if (!transpiledCode.match(/export default .+/)) {
+    console.log("ttt", transpiledCode);
     logs.push({
       message: "No default export found",
       level: "warn",
     });
   }
 
-  // replace the "export default x;" with "return x(props);"
+  // replace the "export default x" with "return x(props)" if x is a js variable
   transpiledCode = transpiledCode.replace(
-    /export\s+default\s+(\w+);/,
-    "return $1(props);",
+    /export default ([a-zA-Z_$][a-zA-Z_$0-9]*)(?=\s|;|$)/g,
+    "return $1(props)"
   );
 
-  // replace the "export default *" with "return *"
+  // otherwise replace the "export default *" with "return *"
   transpiledCode = transpiledCode.replace(
-    /export\s+default\s+/,
-    "return ",
+    /export default /g,
+    "return "
   );
 
   return {
@@ -113,7 +114,7 @@ export function evalConfig(path: string[], config: BaseConfig): Output {
 };
 
 export function evalModule(path: string[], modules: Modules, account: AccountID): Output {
-  const module_path = path.join('.');
+  const module_path = path.join('/');
   const logs: Log[] = [];
   if (!modules.includes(module_path)) {
     logs.push({
