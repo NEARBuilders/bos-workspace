@@ -14,6 +14,7 @@ export interface BaseConfig {
     uploadApiHeaders?: Record<string, string>;
   };
   format?: boolean;
+  aliases?: string[];
 }
 
 interface NetworkConfig {
@@ -32,7 +33,8 @@ export const DEFAULT_CONFIG = {
     gateway: "https://ipfs.near.social/ipfs",
     uploadApi: "https://ipfs.near.social/add",
     uploadApiHeaders: {},
-  }
+  },
+  aliases: ["./aliases.json"],
 };
 
 // Base configuration schema
@@ -51,6 +53,7 @@ const baseConfigSchema = Joi.object({
     uploadApiHeaders: Joi.object().default(DEFAULT_CONFIG.ipfs.uploadApiHeaders),
   }).default(DEFAULT_CONFIG.ipfs),
   format: Joi.boolean().default(DEFAULT_CONFIG.format),
+  aliases: Joi.array().items(Joi.string()).default(DEFAULT_CONFIG.aliases),
 });
 
 const networkConfigSchema = Joi.object({

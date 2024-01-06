@@ -8,7 +8,7 @@ import { generateData } from "@/lib/data";
 
 // - reads all the files in src 
 //   - check for bos.config.js
-//   - check for aliases.json
+//   - check for aliases
 //   - check for ipfs.json
 // - uploads the changed /ipfs/ files to ipfs
 // - generate ipfs.json files
@@ -17,7 +17,12 @@ import { generateData } from "@/lib/data";
 // return a list of files that were written
 export async function buildApp(src: string, dest: string, network: string = "mainnet"): Promise<any> {
   const config = await readConfig(path.join(src, "bos.config.json"), network as any);
-  const aliases = await readJson(path.join(src, "aliases.json")).catch(() => ({}));
+  const aliasesSrcs = config.aliases || [path.join(src, "aliases.json")];
+  const aliases = {};
+  for (const aliasesSrc of aliasesSrcs) {
+    const new_aliases = await readJson(aliasesSrc).catch(() => ({}));
+    Object.assign(aliases, new_aliases);
+  }
 
   const ipfsMap = await updateIpfs(src, dest, {
     uploadAPI: {

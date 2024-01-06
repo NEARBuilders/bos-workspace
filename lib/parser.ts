@@ -207,15 +207,7 @@ export function evalCustomSyntax(code: Code, params: EvalCustomSyntaxParams): Ou
         evl = evalAlias(path, params.aliases);
         break;
       default:
-        evl = {
-          code: path,
-          logs: [
-            {
-              message: `Unknown keyword: ${keyword}`,
-              level: 'warn',
-            }
-          ]
-        };
+        evl = evalAlias(expression, params.aliases);
     };
     logs.push(...evl.logs);
     return evl.code;

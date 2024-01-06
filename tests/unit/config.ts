@@ -21,6 +21,7 @@ describe('readConfig', () => {
         signer: "signer.near"
       },
       format: true,
+      aliases: ["./aliases.anywhere.json"],
     })
     expect(config).toEqual({
       ...DEFAULT_CONFIG,
@@ -31,6 +32,7 @@ describe('readConfig', () => {
         dev: "account.near"
       },
       format: true,
+      aliases: ["./aliases.anywhere.json"],
     })
   })
 
@@ -51,7 +53,8 @@ describe('readConfig', () => {
           format: false,
           ipfs: {
             gateway: "http://testnetgateway/ipfs"
-          }
+          },
+          aliases: ["./aliases.testnet.json"],
         }
       }
     }, "testnet");
@@ -68,7 +71,8 @@ describe('readConfig', () => {
         gateway: "http://testnetgateway/ipfs",
         uploadApi: DEFAULT_CONFIG.ipfs.uploadApi,
         uploadApiHeaders: DEFAULT_CONFIG.ipfs.uploadApiHeaders,
-      }
+      },
+      aliases: ["./aliases.testnet.json"],
     })
   });
 
