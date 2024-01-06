@@ -31,24 +31,30 @@ const app_example_1 = {
   "./widget/ipfs.tsx": "export default <img height='100' src='@{ipfs/logo.svg}' />;",
   "./data/thing/data.json": JSON.stringify({
     "type": "efiz.near/type/thing",
-  })
+  }),
+  "./data/thing/datastring.jsonc": JSON.stringify({
+    name: "Thing",
+  }),
 };
 
 const app_example_1_output = {
   "/build/ipfs.json": JSON.stringify({
     "logo.svg": "QmHash",
   }, null, 2) + "\n",
-  "/build/widget/hello.utils.module.js": "const hello = (name) => `Hello, ${name}!`; return { hello };",
-  "/build/widget/index.jsx": " const hello = 'hi'; return hello(props);",
-  "/build/widget/module.jsx": "VM.require('test.near/widget/hello.utils.module'); return hello('world');",
-  "/build/widget/config.jsx": "return <h1>test.neartest.near</h1>;",
-  "/build/widget/alias.jsx": "return <h1>Hello world!</h1>;",
-  "/build/widget/ipfs.jsx": "return <img height='100' src='https://testipfs/ipfs/QmHash' />;",
+  "/build/widget/hello.utils.module.js": "const hello = (name) => `Hello, ${name}!`;\nreturn { hello };\n",
+  "/build/widget/index.jsx": "const hello = \"hi\";\nreturn hello(props);\n",
+  "/build/widget/module.jsx": "VM.require(\"test.near/widget/hello.utils.module\");\nreturn hello(\"world\");\n",
+  "/build/widget/config.jsx": "return <h1>test.neartest.near</h1>;\n",
+  "/build/widget/alias.jsx": "return <h1>Hello world!</h1>;\n",
+  "/build/widget/ipfs.jsx": "return <img height=\"100\" src=\"https://testipfs/ipfs/QmHash\" />;\n",
   "/build/data.json": JSON.stringify({
     "test.near": {
       thing: {
-        data: JSON.stringify({
+        data: {
           "type": "efiz.near/type/thing",
+        },
+        datastring: JSON.stringify({
+          name: "Thing",
         })
       },
       widget: {

@@ -337,8 +337,7 @@ describe('transpileJS', () => {
           code: `
             let account = "@{config/account}";
             let module = "@{module/db}";
-            let alias = "@{alias/util}";
-            let ipfs = "@{ipfs/xyz}";
+            let alias = "@{alias/util}";let ipfs = "@{ipfs/xyz}";
             type MyType = {
               hello: string;
             }

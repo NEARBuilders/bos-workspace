@@ -55,7 +55,6 @@ export async function transpileTypescript(code: Code, tsConfig?: any): Promise<O
 
   // if no "export default *" is found, add error
   if (!transpiledCode.match(/export default .+/)) {
-    console.log("ttt", transpiledCode);
     logs.push({
       message: "No default export found",
       level: "warn",
@@ -254,7 +253,7 @@ export async function format(code: Code): Promise<Output> {
   const logs: Array<Log> = [];
   let new_code = code;
   try {
-    beautify(code, {
+    new_code = beautify(code, {
       parser: "babel",
     });
   } catch (e: any) {
@@ -279,6 +278,7 @@ export async function transpileJS(code: Code, importParams: EvalCustomSyntaxPara
   logs = logs.concat(ecc_res.logs);
   output_code = ecc_res.code;
   const config_comments = ecc_res.configs;
+
 
   if (opts?.compileTypeScript) {
     const tt_res = await transpileTypescript(output_code);

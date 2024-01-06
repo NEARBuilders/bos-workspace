@@ -1,4 +1,5 @@
 import { copy, loopThroughFiles, readFile, readJson, writeJson } from "@/lib/utils/fs"
+import { mergeDeep } from "@/lib/utils/objects";
 import path from "path";
 
 export async function generateData(pwd: string, dest: string, account: string): Promise<object> {
@@ -18,7 +19,7 @@ export async function generateData(pwd: string, dest: string, account: string): 
       // if the file is a jsonc, keep it as string
       // if the file is a txt, keep it as string
       ext === ".json" ? JSON.parse(content.toString()) : content.toString());
-    Object.assign(data, obj);
+    mergeDeep(data, obj);
   });
   // all metadata from /widget/ 
   await loopThroughFiles(path.join(pwd, "widget"), async (file: string) => {
@@ -29,9 +30,8 @@ export async function generateData(pwd: string, dest: string, account: string): 
     const keys: string[] = path.relative(path.join(pwd, "widget"), file).replace(".metadata" + ext, "").split(path.sep);
     // the widget path should become the key but replace / with .
     const widget_path = keys.join(".").replace(/\\/g, ".");
-    Object.assign(data, {
+    mergeDeep(data, {
       widget: {
-        ...(data.widget ? data.widget : {}),
         [widget_path]: { metadata: content, }
       }
     });
@@ -44,9 +44,8 @@ export async function generateData(pwd: string, dest: string, account: string): 
     const content = await readJson(file);
     const keys: string[] = path.relative(path.join(pwd, "module"), file).replace(".metadata" + ext, "").split(path.sep);
     const widget_path = keys.join(".").replace(/\\/g, ".");
-    Object.assign(data, {
+    mergeDeep(data, {
       widget: {
-        ...(data.widget ? data.widget : {}),
         [widget_path]: { metadata: content, }
       }
     });
