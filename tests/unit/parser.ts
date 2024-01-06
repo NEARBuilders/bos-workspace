@@ -68,7 +68,7 @@ describe('evalConfig', () => {
     const result = evalConfig(["accounts", "deploy"], {});
     expect(result.logs).toEqual([
       {
-        message: "Config value not found: @{config/accounts/deploy}",
+        message: "Config value not found: ${config/accounts/deploy}",
         level: "warn",
       }
     ])
@@ -98,7 +98,7 @@ describe('evalModule', () => {
       code: "jest.near/widget/folder.file.module",
       logs: [
         {
-          message: "Imported module not found locally: @{module/folder/file}",
+          message: "Imported module not found locally: ${module/folder/file}",
           level: "warn",
         }
       ]
@@ -133,10 +133,10 @@ describe('evalIPFS', () => {
   it('should return logs for missing IPFS links', async () => {
     const input = "abc.svg".split('/');
     const output = {
-      code: "@{ipfs/abc.svg}",
+      code: "${ipfs/abc.svg}",
       logs: [
         {
-          message: "IPFS file or mapping not found: @{ipfs/abc.svg}",
+          message: "IPFS file or mapping not found: ${ipfs/abc.svg}",
           level: "warn",
         }
       ]
@@ -151,7 +151,7 @@ describe('evalAlias', () => {
     const inputs = [
       "util".split('/'),
       "util/abc/h".split('/'),
-      "Util.abc@xyz".split('/'),
+      "Util.abc$xyz".split('/'),
     ];
     const outputs = [
       "val1",
@@ -162,7 +162,7 @@ describe('evalAlias', () => {
       const result = evalAlias(inputs[i], {
         "util": "val1",
         "util/abc/h": "val2",
-        "Util.abc@xyz": "val3",
+        "Util.abc$xyz": "val3",
       });
       expect(result.code).toEqual(outputs[i]);
     }
@@ -170,10 +170,10 @@ describe('evalAlias', () => {
   it('should return logs for missing aliases', async () => {
     const input = "util".split('/');
     const output = {
-      code: "@{alias/util}",
+      code: "${alias/util}",
       logs: [
         {
-          message: "Imported alias not found: @{alias/util}",
+          message: "Imported alias not found: ${alias/util}",
           level: "warn",
         }
       ]
@@ -186,12 +186,12 @@ describe('evalAlias', () => {
 describe('evalCustomSyntax', () => {
   it('should return code with replaced imports', async () => {
     const code = `
-      let config = "@{config/account}";
-      let module = "@{module/db}";
-      let alias = "@{alias/util}";
-      let ipfs = "@{ipfs/xyz}";
-      let other = "@{other/abc}";
-      let other1 = "@{REPL_HELLO}";
+      let config = "\${config/account}";
+      let module = "\${module/db}";
+      let alias = "\${alias/util}";
+      let ipfs = "\${ipfs/xyz}";
+      let other = "\${other/abc}";
+      let other1 = "\${REPL_HELLO}";
     `;
 
     const config = { accounts: { deploy: "user.near" } };
@@ -217,10 +217,10 @@ describe('evalCustomSyntax', () => {
   });
   it('should return logs for missing imports', async () => {
     const code = `
-      let config = "@{config/account/deploy}";
-      let module = "@{module/db}";
-      let alias = "@{alias/util}";
-      let ipfs = "@{ipfs/xyz}";
+      let config = "\${config/account/deploy}";
+      let module = "\${module/db}";
+      let alias = "\${alias/util}";
+      let ipfs = "\${ipfs/xyz}";
     `;
 
     const config = {};
@@ -231,26 +231,26 @@ describe('evalCustomSyntax', () => {
 
     const expectedOutput = {
       code: `
-      let config = "@{config/accounts/deploy}";
+      let config = "\${config/accounts/deploy}";
       let module = "/widget/db.module";
-      let alias = "@{alias/util}";
-      let ipfs = "@{ipfs/xyz}";
+      let alias = "\${alias/util}";
+      let ipfs = "\${ipfs/xyz}";
     `,
       logs: [
         {
-          message: "Config value not found: @{config/accounts/deploy}",
+          message: "Config value not found: ${config/accounts/deploy}",
           level: "warn",
         },
         {
-          message: "Imported module not found locally: @{module/db}",
+          message: "Imported module not found locally: ${module/db}",
           level: "warn",
         },
         {
-          message: "Imported alias not found: @{alias/util}",
+          message: "Imported alias not found: ${alias/util}",
           level: "warn",
         },
         {
-          message: "IPFS file or mapping not found: @{ipfs/xyz}",
+          message: "IPFS file or mapping not found: ${ipfs/xyz}",
           level: "warn",
         },
       ]
@@ -335,9 +335,9 @@ describe('transpileJS', () => {
       {
         input: {
           code: `
-            let account = "@{config/account}";
-            let module = "@{module/db}";
-            let alias = "@{alias/util}";let ipfs = "@{ipfs/xyz}";
+            let account = "\${config/account}";
+            let module = "\${module/db}";
+            let alias = "\${alias/util}";let ipfs = "\${ipfs/xyz}";
             type MyType = {
               hello: string;
             }
@@ -382,8 +382,8 @@ return <div></div>;
     const input = {
       code: `
       // @skip
-      let account = "@{config/account}";
-      let module = "@{module/db}";  
+      let account = "\${config/account}";
+      let module = "\${module/db}";  
       return <div></div>;
   `,
       importParams: {
@@ -403,8 +403,8 @@ return <div></div>;
       }
     };
     const output = {
-      code: `      let account = "@{config/account}";
-      let module = "@{module/db}";
+      code: `      let account = "\${config/account}";
+      let module = "\${module/db}";
       return <div></div>;
 `,
       logs: [

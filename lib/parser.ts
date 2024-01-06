@@ -8,7 +8,7 @@ import { AccountID, Aliases, Code, ConfigComment, IPFSMap, Log, Modules } from "
 import { BaseConfig } from "@/lib/config";
 
 const SYNTAX = {
-  keyword: '@',
+  keyword: '$',
   separator: '/',
   wrapper: '{}',
 
@@ -183,10 +183,13 @@ export interface EvalCustomSyntaxParams {
 // Replace all the custom syntax keywords with the actual values
 export function evalCustomSyntax(code: Code, params: EvalCustomSyntaxParams): Output {
   const logs: Array<Log> = [];
-  const regex = new RegExp(`${SYNTAX.keyword}${SYNTAX.wrapper[0]}([^${SYNTAX.wrapper[1]}]+)${SYNTAX.wrapper[1]}`, 'g');
+  function escapeRegExp(string: any) {
+    return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // Escape special characters
+  }
+  const regex = new RegExp(`${escapeRegExp(SYNTAX.keyword)}${escapeRegExp(SYNTAX.wrapper[0])}([^${escapeRegExp(SYNTAX.wrapper[1])}]+)${escapeRegExp(SYNTAX.wrapper[1])}`, 'g');
 
   code = code.replace(regex, (_match, expression) => {
-    expression = expression.split(SYNTAX.separator);
+    expression = expression.split(SYNTAX.separator).map((e: string) => e.trim());
     const keyword = expression[0];
     const path = expression.slice(1);
 

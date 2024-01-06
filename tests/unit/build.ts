@@ -25,10 +25,10 @@ const app_example_1 = {
     name: "Hello",
     description: "Hello world widget",
   }),
-  "./widget/module.tsx": "VM.require('@{module/hello/utils}'); export default hello('world');",
-  "./widget/config.jsx": "return <h1>@{config/account}@{config/account/deploy}</h1>;",
-  "./widget/alias.tsx": "export default <h1>Hello @{alias/name}!</h1>;",
-  "./widget/ipfs.tsx": "export default <img height='100' src='@{ipfs/logo.svg}' />;",
+  "./widget/module.tsx": "VM.require('${module/hello/utils}'); export default hello('world');",
+  "./widget/config.jsx": "return <h1>${config/account}${config / account / deploy}</h1>;",
+  "./widget/alias.tsx": "export default <h1>Hello ${alias/name}!</h1>;",
+  "./widget/ipfs.tsx": "export default <img height='100' src='${ipfs/logo.svg}' />;",
   "./data/thing/data.json": JSON.stringify({
     "type": "efiz.near/type/thing",
   }),
@@ -41,7 +41,7 @@ const app_example_1_output = {
   "/build/ipfs.json": JSON.stringify({
     "logo.svg": "QmHash",
   }, null, 2) + "\n",
-  "/build/widget/hello.utils.module.js": "const hello = (name) => `Hello, ${name}!`;\nreturn { hello };\n",
+  "/build/widget/hello.utils.module.js": "const hello = (name) => `Hello, world!`;\nreturn { hello };\n",
   "/build/widget/index.jsx": "const hello = \"hi\";\nreturn hello(props);\n",
   "/build/widget/module.jsx": "VM.require(\"test.near/widget/hello.utils.module\");\nreturn hello(\"world\");\n",
   "/build/widget/config.jsx": "return <h1>test.neartest.near</h1>;\n",
