@@ -1,5 +1,5 @@
 import { readJson } from '@/lib/utils/fs';
-import { generateData, getData, getMetadata } from '@/lib/data';
+import { generateData } from '@/lib/data';
 
 import { vol, } from 'memfs';
 jest.mock('fs', () => require('memfs').fs);
@@ -28,8 +28,20 @@ const app_example_1 = {
   "./data/text.txt": "hello world",
 };
 
-const expectedDataFolder = {
-  data: {
+const expectedData = {
+  "hello.near": {
+    widget: {
+      because: {
+        metadata: {
+          name: "Hello",
+        }
+      },
+      "hello.index": {
+        metadata: {
+          name: "Hello",
+        }
+      }
+    },
     stringified: "{\"should\":\"be saved as string json\"}",
     text: "hello world",
     thing: {
@@ -48,20 +60,6 @@ const expectedDataFolder = {
     }
   }
 };
-const expectedDataJson = {
-  widget: {
-    because: {
-      metadata: {
-        name: "Hello",
-      }
-    },
-    "hello.index": {
-      metadata: {
-        name: "Hello",
-      }
-    }
-  }
-};
 
 describe("generateData", () => {
   beforeEach(() => {
@@ -70,36 +68,8 @@ describe("generateData", () => {
   })
 
   it("generates data.json properly", async () => {
-    // const data = await generateData("/app_example_1");
-    // expect(readJson(data)).toEqual(Object.assign({}, expectedDataJson, expectedDataFolder));
+    await generateData("/app_example_1", "/build", "hello.near");
+    expect(await readJson("/app_example_1/data.json")).toEqual(expectedData);
   })
 })
 
-describe("getMetadata", () => {
-  beforeEach(() => {
-    vol.reset();
-    vol.fromJSON(app_example_1, '/app_example_1');
-  })
-  it("it returns the metadata from /module/ and /widget/", async () => {
-    const metadataModules: any = await getMetadata("/app_example_1/module");
-    const metadataWidgets: any = await getMetadata("/app_example_1/widget");
-    const output = {
-      widget: {
-        ...metadataModules.widget,
-        ...metadataWidgets.widget,
-      }
-    }
-    expect(output).toEqual(expectedDataJson);
-  })
-})
-
-describe("getData", () => {
-  beforeEach(() => {
-    vol.reset();
-    vol.fromJSON(app_example_1, '/app_example_1');
-  })
-  it("it returns the data from /data/", async () => {
-    const data = await getData("/data");
-    expect(data).toEqual(expectedDataFolder);
-  })
-})

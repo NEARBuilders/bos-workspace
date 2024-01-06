@@ -1,3 +1,11 @@
+import path from "path";
+import { readConfig } from "@/lib/config";
+import { writeJson, copy, loopThroughFiles, outputFile, readFile, readJson } from "@/lib/utils/fs";
+import { transpileJS, EvalCustomSyntaxParams } from "@/lib/parser";
+import { Log } from "@/lib/types";
+import { UploadToIPFSOptions, uploadToIPFS } from "@/lib/ipfs";
+import { generateData } from "@/lib/data";
+
 // - reads all the files in src 
 //   - check for bos.config.js
 //   - check for aliases.json
@@ -6,14 +14,6 @@
 // - generate ipfs.json files
 // - transpiles the js/jsx/ts/tsx files in /module/ and /widget/
 // - generates data.json
-
-import { readConfig } from "@/lib/config";
-import { writeJson, copy, loopThroughFiles, outputFile, readFile, readJson } from "@/lib/utils/fs";
-import path from "path";
-import { transpileJS, EvalCustomSyntaxParams } from "@/lib/parser";
-import { Log } from "./types";
-import { UploadToIPFSOptions, uploadToIPFS } from "./ipfs";
-
 // return a list of files that were written
 export async function buildApp(src: string, dest: string, network: string = "mainnet"): Promise<any> {
   const config = await readConfig(path.join(src, "bos.config.json"), network as any);
@@ -98,7 +98,7 @@ export async function buildApp(src: string, dest: string, network: string = "mai
     await outputFile(new_file_path, new_file.code);
   }
 
-  await updateData(src, dest, config.accounts!.deploy!);
+  await generateData(src, dest, config.accounts!.deploy!);
 
   return {
     logs
@@ -140,46 +140,3 @@ async function updateIpfs(pwd: string, dest: string, options: UploadToIPFSOption
   return newIpfsMap;
 };
 
-// TODO: This is bad, delete it, code it again under data.ts and TEST it.
-async function updateData(pwd: string, dest: string, account: string): Promise<void> {
-  const data = {};
-  // all files in /data/
-  await loopThroughFiles(path.join(pwd, "data"), async (file: string) => {
-    const ext = path.extname(file);
-    if (ext !== ".json" && ext !== ".jsonc" && ext !== ".txt") return;
-    const content = await readFile(file);
-    const keys: string[] = path.relative(path.join(pwd, "data"), file).replace(ext, "").split(path.sep);
-    const obj = keys.reduceRight((acc: any, key) => {
-      return {
-        [key]: acc,
-      }
-    }, content.toString());
-    Object.assign(data, obj);
-  });
-  // all metadata from /widget/ and /module/
-  await loopThroughFiles(path.join(pwd, "widget"), async (file: string) => {
-    const ext = path.extname(file);
-    if (ext !== ".jsonc" && ext !== ".json") return;
-    if (!path.basename(file).endsWith(".metadata" + ext)) return;
-    const content = await readJson(file);
-    const keys: string[] = path.relative(path.join(pwd, "widget"), file).replace(".metadata" + ext, "").split(path.sep);
-    const obj = keys.reduceRight(((acc: any, key: any) => {
-      return {
-        widget: {
-          [key]: {
-            "metadata": acc,
-          }
-        }
-      }
-    }), content);
-    Object.assign(data, obj);
-  });
-  //
-  const final_data = {
-    [account]: data,
-  };
-  await writeJson(path.join(pwd, "data.json"), final_data, {
-    spaces: 2,
-  })
-  await copy(path.join(pwd, "data.json"), path.join(dest, "data.json"));
-}

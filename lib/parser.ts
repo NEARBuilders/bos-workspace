@@ -32,6 +32,7 @@ export interface TranspileJSOptions {
   format?: boolean;
 };
 
+// Transform TypeScript to JavaScript
 export async function transpileTypescript(code: Code, tsConfig?: any): Promise<Output> {
   let transpiledCode = code, logs: Log[] = [];
 
@@ -79,10 +80,12 @@ export async function transpileTypescript(code: Code, tsConfig?: any): Promise<O
   }
 }
 
+// Wrap a text with the custom syntax (e.g. @{config/accounts/signer})
 const wrap = (code: Code, scope: string = "") => {
   return `${SYNTAX.keyword}${SYNTAX.wrapper[0]}${scope}${SYNTAX.separator}${code}${SYNTAX.wrapper[1]}`;
 };
 
+// Replace the config keywords with the actual values
 export function evalConfig(path: string[], config: BaseConfig): Output {
   if (path[0] === 'account') {
     path = ['accounts', 'deploy'];
@@ -113,6 +116,7 @@ export function evalConfig(path: string[], config: BaseConfig): Output {
   };
 };
 
+// Replace the module keywords with the module widget path
 export function evalModule(path: string[], modules: Modules, account: AccountID): Output {
   const module_path = path.join('/');
   const logs: Log[] = [];
@@ -129,6 +133,7 @@ export function evalModule(path: string[], modules: Modules, account: AccountID)
   }
 }
 
+// Replace the IPFS keywords with the IPFS path
 export function evalIPFS(path: string[], ipfsMap: IPFSMap, ipfsGateway: string): Output {
   const logs: Log[] = [];
   const ipfs_path = path.join(SYNTAX.separator);
@@ -149,6 +154,7 @@ export function evalIPFS(path: string[], ipfsMap: IPFSMap, ipfsGateway: string):
   }
 };
 
+// Replace the alias keywords with the alias value
 export function evalAlias(path: string[], aliases: Aliases): Output {
   const logs: Log[] = [];
   const alias_path = path.join(SYNTAX.separator);
@@ -175,6 +181,7 @@ export interface EvalCustomSyntaxParams {
   aliases: Aliases,
 };
 
+// Replace all the custom syntax keywords with the actual values
 export function evalCustomSyntax(code: Code, params: EvalCustomSyntaxParams): Output {
   const logs: Array<Log> = [];
   const regex = new RegExp(`${SYNTAX.keyword}${SYNTAX.wrapper[0]}([^${SYNTAX.wrapper[1]}]+)${SYNTAX.wrapper[1]}`, 'g');
@@ -216,6 +223,7 @@ export function evalCustomSyntax(code: Code, params: EvalCustomSyntaxParams): Ou
   return { code: code, logs: logs };
 }
 
+// Get the config comments from the code and remove them (e.g. @skip)
 export async function extractConfigComments(code: Code): Promise<Output & { configs: ConfigComment[] }> {
   const comments = parseComments(code);
   const lines = code.split('\n');
@@ -249,6 +257,7 @@ export async function extractConfigComments(code: Code): Promise<Output & { conf
   };
 }
 
+// Take a code and format it
 export async function format(code: Code): Promise<Output> {
   const logs: Array<Log> = [];
   let new_code = code;
@@ -270,6 +279,7 @@ export async function format(code: Code): Promise<Output> {
   }
 };
 
+// All in one function to transpile code into widget code
 export async function transpileJS(code: Code, importParams: EvalCustomSyntaxParams, opts?: TranspileJSOptions): Promise<Output> {
   let output_code = code;
   let logs: Array<Log> = [];
