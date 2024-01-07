@@ -16,11 +16,14 @@ import { generateData } from "@/lib/data";
 // - generates data.json
 // return a list of files that were written
 export async function buildApp(src: string, dest: string, network: string = "mainnet"): Promise<any> {
-  const loading = log.loading(`Building app ${src}`, LogLevels.BUILD);
+  const fullSrc = path.resolve(src)
+  const loading = log.loading(`[${fullSrc}] Building app`, LogLevels.BUILD);
 
   const logs: Log[] = [];
 
-  const config = await log.wait(readConfig(path.join(src, "bos.config.json"), network as any), "Reading bos.config.json", undefined, "Failed to read config file", LogLevels.BUILD);
+  const config = await log.wait(readConfig(path.join(src, "bos.config.json"), network as any), "Reading bos.config.json", undefined, "Failed to read config file", LogLevels.BUILD).catch(() => {
+    loading.error(`[${fullSrc}] App failed to build`);
+  })
 
   const aliasesSrcs = config?.aliases || [path.join(src, "aliases.json")];
   const aliases = {}
@@ -136,7 +139,7 @@ export async function buildApp(src: string, dest: string, network: string = "mai
     LogLevels.BUILD,
   );
 
-  loading.finish(`Built app ${src}`);
+  loading.finish(`[${fullSrc}] App built successfully`);
 
   return {
     logs

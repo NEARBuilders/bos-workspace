@@ -2,6 +2,9 @@ import { readJsonSync } from "fs-extra";
 import { Command } from "commander";
 import { LogLevel, Logger } from "@/lib/logger";
 import { buildApp } from "@/lib/build";
+import { buildWorkspace } from "./workspace";
+import { initProject } from "@/lib/init";
+import path from "path";
 
 const program = new Command();
 
@@ -10,6 +13,7 @@ const [name, description, version] = [
   "Build decentralized apps",
   "0.0.1",
 ];
+
 
 async function run() {
   program.name(name).description(description).version(version);
@@ -29,16 +33,53 @@ async function run() {
   program
     .command("build")
     .description("Build the project")
-    .argument("[path]", "path to the app")
-    .argument("[dest]", "destination path", "./dest")
+    .argument("[src]", "path to the app source code", ".")
+    .argument("[dest]", "destination path")
     .option("-n, --network <network>", "network to build for", "mainnet")
     .option("-l, --loglevel <loglevel>", "log level (ERROR, WARN, INFO, DEV, BUILD, DEBUG)", "BUILD")
     .action(async (src, dest, opts) => {
+      dest = dest || path.join(src, "dist")
       global.log = new Logger(LogLevel[opts.loglevel.toUpperCase() as keyof typeof LogLevel]);
       await buildApp(src, dest, opts.network).catch((e: Error) => {
         log.error(e.stack || e.message);
       })
     });
+
+  program
+    .command("workspace")
+    .alias("ws")
+    .description("Work with multiple apps")
+    .argument("[command]", "command to run")
+    .argument("[src]", "path to the workspace", ".")
+    .argument("[dest]", "destination path", "./dest")
+    .option("-n, --network <network>", "network to build for", "mainnet")
+    .option("-l, --loglevel <loglevel>", "log level (ERROR, WARN, INFO, DEV, BUILD, DEBUG)")
+    .action(async (command, src, dest, opts) => {
+      dest = dest || path.join(src, "dist")
+      if (command === "build") {
+        global.log = new Logger(LogLevel?.[opts?.loglevel?.toUpperCase() as keyof typeof LogLevel] || LogLevel.BUILD);
+        await buildWorkspace(src, dest, opts.network).catch((e: Error) => {
+          log.error(e.stack || e.message);
+        });
+      } else if (command === "dev") {
+        // TODO
+      } else {
+        log.error(`Unknown command: workspace ${command}`);
+      }
+    });
+
+  program
+    .command("init")
+    .description("Initialize a new project")
+    .argument("[path]", "where to init the project")
+    .option("-t, --template <template>", "template to use (js-single, js-multi)", "js-single")
+    .action(async (path, opts) => {
+      if (!path) {
+        log.error(`[path] argument is required`);
+        log.log(`Usage example: init ./example\n`);
+      }
+      await initProject(path, opts.template);
+    })
 
   program
     .command("deploy")
