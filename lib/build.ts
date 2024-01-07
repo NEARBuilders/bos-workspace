@@ -16,8 +16,13 @@ import { generateData } from "@/lib/data";
 // - generates data.json
 // return a list of files that were written
 export async function buildApp(src: string, dest: string, network: string = "mainnet"): Promise<any> {
-  const config = await readConfig(path.join(src, "bos.config.json"), network as any);
-  const aliasesSrcs = config.aliases || [path.join(src, "aliases.json")];
+  const loading = log.loading(`Building app ${src}`, LogLevels.BUILD);
+
+  const logs: Log[] = [];
+
+  const config = await log.wait(readConfig(path.join(src, "bos.config.json"), network as any), "Reading bos.config.json", undefined, "Failed to read config file", LogLevels.BUILD);
+
+  const aliasesSrcs = config?.aliases || [path.join(src, "aliases.json")];
   const aliases = {}
   for (const aliasesSrc of aliasesSrcs) {
     const aliasesData = await readJson(path.join(src, aliasesSrc)).catch(() => ({}));
@@ -56,54 +61,82 @@ export async function buildApp(src: string, dest: string, network: string = "mai
     aliases,
   };
 
-  const logs: Log[] = [];
+  const loadingModules = log.loading(`Transpiling ${modules.length} modules`, LogLevels.BUILD);
+  try {
+    for (const file of modules) {
+      const content = (await readFile(file)).toString();
+      const new_file = await transpileJS(content, params, {
+        compileTypeScript: file.endsWith(".ts") || file.endsWith(".tsx"),
+        format: true,
+      });
+      const new_logs: Log[] = new_file.logs.map((v) => {
+        return {
+          ...v,
+          source: {
+            line: v.source?.line,
+            file: path.relative(path.join(src), file),
+          }
+        }
+      });
+      logs.push(...new_logs);
+      // write to dest
+      let new_file_name = path.relative(path.join(src, "module"), file).replace("/", ".");
+      new_file_name = new_file_name.substring(0, new_file_name.length - path.extname(file).length);
+      new_file_name += ".module.js";
 
-  for (const file of modules) {
-    const content = (await readFile(file)).toString();
-    const new_file = await transpileJS(content, params, {
-      compileTypeScript: file.endsWith(".ts") || file.endsWith(".tsx"),
-      format: true,
-    });
-    const new_logs: Log[] = new_file.logs.map((v) => {
-      return {
-        ...v,
-        file: file,
-      }
-    });
-    logs.push(...new_logs);
-    // write to dest
-    let new_file_name = path.relative(path.join(src, "module"), file).replace("/", ".");
-    new_file_name = new_file_name.substring(0, new_file_name.length - path.extname(file).length);
-    new_file_name += ".module.js";
+      const new_file_path = path.join(dest, "widget", new_file_name);
 
-    const new_file_path = path.join(dest, "widget", new_file_name);
-
-    await outputFile(new_file_path, new_file.code);
+      await outputFile(new_file_path, new_file.code);
+    }
+    loadingModules.finish(`Transpiled ${modules.length} modules`);
+  } catch (e) {
+    loadingModules.error(`Failed to transpile modules`);
+    throw e;
   }
 
-  for (const file of widgets) {
-    const content = (await readFile(file)).toString();
-    const new_file = await transpileJS(content, params, {
-      compileTypeScript: file.endsWith(".ts") || file.endsWith(".tsx"),
-      format: true,
-    });
-    const new_logs: Log[] = new_file.logs.map((v) => {
-      return {
-        ...v,
-        file: file,
-      }
-    });
-    logs.push(...new_logs);
-    // write to dest
-    let new_file_name = path.basename(file);
-    new_file_name = new_file_name.substring(0, new_file_name.length - path.extname(file).length);
-    new_file_name += ".jsx";
+  const loadingWidgets = log.loading(`Transpiling ${widgets.length} widgets`, LogLevels.BUILD);
+  try {
+    for (const file of widgets) {
+      const content = (await readFile(file)).toString();
+      const new_file = await transpileJS(content, params, {
+        compileTypeScript: file.endsWith(".ts") || file.endsWith(".tsx"),
+        format: true,
+      });
+      const new_logs: Log[] = new_file.logs.map((v) => {
+        return {
+          ...v,
+          source: {
+            line: v.source?.line,
+            file: path.relative(path.join(src), file),
+          }
+        }
+      });
+      new_logs.forEach(log.send);
 
-    const new_file_path = path.join(dest, "widget", new_file_name);
-    await outputFile(new_file_path, new_file.code);
+      logs.push(...new_logs);
+      // write to dest
+      let new_file_name = path.basename(file);
+      new_file_name = new_file_name.substring(0, new_file_name.length - path.extname(file).length);
+      new_file_name += ".jsx";
+
+      const new_file_path = path.join(dest, "widget", new_file_name);
+      await outputFile(new_file_path, new_file.code);
+    }
+    loadingWidgets.finish(`Transpiled ${widgets.length} widgets`);
+  } catch (e) {
+    loadingWidgets.error(`Failed to transpile widgets`);
+    throw e;
   }
 
-  await generateData(src, dest, config.accounts!.deploy!);
+  await log.wait(
+    generateData(src, dest, config.accounts!.deploy!),
+    "Generating data.json",
+    "Generated data.json",
+    "Failed to generate data.json",
+    LogLevels.BUILD,
+  );
+
+  loading.finish(`Built app ${src}`);
 
   return {
     logs
