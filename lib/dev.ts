@@ -3,7 +3,7 @@ import { buildApp } from "./build";
 import { BaseConfig, readConfig } from "./config";
 import { loopThroughFiles, readFile } from "./utils/fs";
 import { Network } from "./types";
-import { watch, existsSync, writeJson, readJsonSync, readJson } from "fs-extra";
+import { existsSync, writeJson, readJson } from "fs-extra";
 import express from "express";
 import http from "http";
 import { Server as IoServer } from "socket.io";
@@ -13,7 +13,7 @@ import { Gaze } from "gaze";
 const DEV_DIST_FOLDER = path.join(".bos", "build");
 
 // the gateway dist path in node_modules
-const GATEWAY_PATH = path.join(__dirname, "..", "gateway", "dist");
+const GATEWAY_PATH = path.join(__dirname, "../..", "gateway", "dist");
 
 type DevOptions = {
   port?: number;
@@ -184,8 +184,12 @@ function startServer(opts: DevOptions, devJsonPath: string) {
       process.exit(1);
     });
 
-  if (opts.NoHot && io) {
-    io.on("connection", () => {
+  if (!opts.NoHot && io) {
+    io.on("connection", (socket) => {
+      log.info(`Socket connected: ${socket.id}`, LogLevels.DEV);
+      socket.on("disconnect", () => {
+        log.info(`Socket disconnected: ${socket.id}`, LogLevels.DEV);
+      })
       readJson(devJsonPath).then((devJson: DevJson) => {
         io?.emit("fileChange", devJson);
       })
