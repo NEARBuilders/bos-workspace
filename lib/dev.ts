@@ -3,7 +3,7 @@ import { buildApp } from "./build";
 import { BaseConfig, readConfig } from "./config";
 import { loopThroughFiles, readFile } from "./utils/fs";
 import { Network } from "./types";
-import { watch, existsSync } from "fs-extra";
+import { watch, existsSync, writeJson, readJsonSync, readJson } from "fs-extra";
 import express from "express";
 import http from "http";
 import { Server as IoServer } from "socket.io";
@@ -26,11 +26,15 @@ type DevOptions = {
 export async function dev(src: string, opts: DevOptions) {
   let config = await readConfig(path.join(src, "bos.config.json"), opts.network);
   const dist = path.join(src, DEV_DIST_FOLDER);
+  const distDevJson = path.join(dist, "bos-loader.json");
 
   // 1. build app for the first time
-  await generateApp(src, dist, config, opts);
+  await generateApp(src, dist, config, opts, distDevJson);
 
-  // 2. watch for changes in the src folder, rebuild app on changes
+  // 2. Start the server
+  const { io } = startServer(opts, distDevJson);
+
+  // 3. watch for changes in the src folder, rebuild app on changes
   const gaze = new Gaze([path.join(src, "widget/**/*"), path.join(src, "module/**/*"), path.join(src, "ipfs/**/*"), path.join(src, "bos.config.json"), path.join(src, "aliases.json")], { debounceDelay: 100 });
 
   // @ts-ignore
@@ -39,20 +43,26 @@ export async function dev(src: string, opts: DevOptions) {
       config = await readConfig(path.join(src, "bos.config.json"), opts.network);
     }
     log.info(`[${path.relative(src, file)}] changed: rebuilding app...`, LogLevels.DEV);
-    await generateApp(src, dist, config, opts);
+    const devJson = await generateApp(src, dist, config, opts, distDevJson);
+
+    if (io) {
+      io.emit("fileChange", devJson);
+    }
+
+    return devJson
   });
 
-  // 3. Start the server
-  startServer(opts, () => generateApp(src, dist, config, opts));
 }
 
-async function generateApp(src: string, dist: string, config: BaseConfig, opts: DevOptions): Promise<DevJson> {
+async function generateApp(src: string, dist: string, config: BaseConfig, opts: DevOptions, distDevJson: string): Promise<DevJson> {
   await buildApp(src, DEV_DIST_FOLDER, opts.network);
-  return await generateDevJson(dist, config);
+  const devJson = await generateDevJson(dist, config);
+  await writeJson(distDevJson, devJson);
+  return devJson;
 };
 
 
-function startServer(opts: DevOptions, devJsonGenerator: () => Promise<DevJson>) {
+function startServer(opts: DevOptions, devJsonPath: string) {
   log.info(`Starting bos-workspace`);
 
   // sanitize port to only allow numbers
@@ -87,11 +97,13 @@ function startServer(opts: DevOptions, devJsonGenerator: () => Promise<DevJson>)
   });
 
   app.get("/api/loader", (_, res) => {
-    devJsonGenerator().then((devJson) => {
+    readJson(devJsonPath).then((devJson: DevJson) => {
       res.json(devJson);
-    }).catch((err: Error) => {
-      log.error(err.message)
-    });
+    })
+      .catch((err: Error) => {
+        log.error(err.stack || err.message);
+        return res.status(500).send("Something went wrong.");
+      })
   });
 
   if (!opts.NoGateway) {
@@ -174,11 +186,12 @@ function startServer(opts: DevOptions, devJsonGenerator: () => Promise<DevJson>)
 
   if (opts.NoHot && io) {
     io.on("connection", () => {
-      devJsonGenerator().then((devJson) => {
+      readJson(devJsonPath).then((devJson: DevJson) => {
         io?.emit("fileChange", devJson);
-      }).catch((err: Error) => {
-        log.error(err.message)
-      });
+      })
+        .catch((err: Error) => {
+          log.error(err.stack || err.message);
+        })
     });
   }
 
