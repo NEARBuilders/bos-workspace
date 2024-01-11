@@ -173,10 +173,12 @@ async function updateIpfs(pwd: string, dest: string, options: UploadToIPFSOption
     newIpfsMap[file] = ipfsUploads[file];
   };
 
-  await writeJson(path.join(pwd, "ipfs.json"), newIpfsMap, {
-    spaces: 2,
-  })
-  await copy(path.join(pwd, "ipfs.json"), path.join(dest, "ipfs.json"));
+  if (Object.keys(ipfsUploads).length > 0) {
+    await writeJson(path.join(pwd, "ipfs.json"), newIpfsMap, {
+      spaces: 2,
+    })
+    await copy(path.join(pwd, "ipfs.json"), path.join(dest, "ipfs.json"));
+  }
 
   return newIpfsMap;
 };

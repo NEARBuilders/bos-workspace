@@ -5,6 +5,7 @@ import { buildApp } from "@/lib/build";
 import { buildWorkspace } from "./workspace";
 import { initProject } from "@/lib/init";
 import path from "path";
+import { dev } from "./dev";
 
 const program = new Command();
 
@@ -17,19 +18,23 @@ const [name, description, version] = [
 
 async function run() {
   program.name(name).description(description).version(version);
-  //
-  // program
-  //   .command("dev")
-  //   .description("Run the development server")
-  //   .option("-p, --port <port>", "Port to run the server on", "8080")
-  //   .option("-no-gateway", "Disable the gateway", false)
-  //   .option("-no-hot", "Disable hot reloading", false)
-  //   .option("-no-open", "Disable opening the browser", false)
-  //   .action((opts) => {
-  //     global.log = new Logger(LogLevel.DEV);
-  //   });
-  //
-  //
+
+  program
+    .command("dev")
+    .description("Run the development server")
+    .argument("[src]", "path to the app source code", ".")
+    .option("-p, --port <port>", "Port to run the server on", "8080")
+    .option("-no-gateway", "Disable the gateway", false)
+    .option("-no-hot", "Disable hot reloading", false)
+    .option("-no-open", "Disable opening the browser", false)
+    .action((src, opts) => {
+      global.log = new Logger(LogLevel.DEV);
+      dev(src, opts).catch((e: Error) => {
+        log.error(e.stack || e.message);
+      })
+    });
+
+
   program
     .command("build")
     .description("Build the project")
