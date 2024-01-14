@@ -1,8 +1,7 @@
-import { readJsonSync } from "fs-extra";
 import { Command } from "commander";
 import { LogLevel, Logger } from "@/lib/logger";
 import { buildApp } from "@/lib/build";
-import { buildWorkspace } from "./workspace";
+import { buildWorkspace, devWorkspace } from "./workspace";
 import { initProject } from "@/lib/init";
 import path from "path";
 import { dev } from "./dev";
@@ -59,6 +58,10 @@ async function run() {
     .argument("[dest]", "destination path", "./dest")
     .option("-n, --network <network>", "network to build for", "mainnet")
     .option("-l, --loglevel <loglevel>", "log level (ERROR, WARN, INFO, DEV, BUILD, DEBUG)")
+    .option("-p, --port <port>", "Port to run the server on", "8080")
+    .option("-no-gateway", "Disable the gateway", false)
+    .option("-no-hot", "Disable hot reloading", false)
+    .option("-no-open", "Disable opening the browser", false)
     .action(async (command, src, dest, opts) => {
       dest = dest || path.join(src, "dist")
       if (command === "build") {
@@ -67,7 +70,10 @@ async function run() {
           log.error(e.stack || e.message);
         });
       } else if (command === "dev") {
-        // TODO
+        global.log = new Logger(LogLevel?.[opts?.loglevel?.toUpperCase() as keyof typeof LogLevel] || LogLevel.DEV);
+        await devWorkspace(src, opts).catch((e: Error) => {
+          log.error(e.stack || e.message);
+        });
       } else {
         log.error(`Unknown command: workspace ${command}`);
       }

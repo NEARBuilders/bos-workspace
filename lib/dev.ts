@@ -9,13 +9,14 @@ import http from "http";
 import { Server as IoServer } from "socket.io";
 import { exec } from "child_process";
 import { Gaze } from "gaze";
+import { mergeDeep } from "./utils/objects";
 
 const DEV_DIST_FOLDER = path.join(".bos", "build");
 
 // the gateway dist path in node_modules
 const GATEWAY_PATH = path.join(__dirname, "../..", "gateway", "dist");
 
-type DevOptions = {
+export type DevOptions = {
   port?: number;
   NoGateway?: boolean;
   NoHot?: boolean;
@@ -29,7 +30,8 @@ export async function dev(src: string, opts: DevOptions) {
   const distDevJson = path.join(dist, "bos-loader.json");
 
   // 1. build app for the first time
-  await generateApp(src, dist, config, opts, distDevJson);
+  let devJson = await generateApp(src, dist, config, opts, distDevJson);
+  await writeJson(distDevJson, devJson);
 
   // 2. Start the server
   const { io } = startServer(opts, distDevJson);
@@ -43,7 +45,8 @@ export async function dev(src: string, opts: DevOptions) {
       config = await readConfig(path.join(src, "bos.config.json"), opts.network);
     }
     log.info(`[${path.relative(src, file)}] changed: rebuilding app...`, LogLevels.DEV);
-    const devJson = await generateApp(src, dist, config, opts, distDevJson);
+    devJson = await generateApp(src, dist, config, opts, distDevJson);
+    await writeJson(distDevJson, devJson);
 
     if (io) {
       io.emit("fileChange", devJson);
@@ -51,14 +54,46 @@ export async function dev(src: string, opts: DevOptions) {
 
     return devJson
   });
-
 }
 
-async function generateApp(src: string, dist: string, config: BaseConfig, opts: DevOptions, distDevJson: string): Promise<DevJson> {
-  await buildApp(src, DEV_DIST_FOLDER, opts.network);
-  const devJson = await generateDevJson(dist, config);
-  await writeJson(distDevJson, devJson);
-  return devJson;
+export async function devMulti(root: string, srcs: string[], opts: DevOptions) {
+  const dist = path.join(root, DEV_DIST_FOLDER);
+  const distDevJson = path.join(dist, "bos-loader.json");
+  let devJson = { components: {}, data: {} };
+
+  // 1. build all apps for the first time
+  for (const src of srcs) {
+    const appDevJson = await generateApp(src, path.join(dist, path.relative(root, src)), await readConfig(path.join(src, "bos.config.json"), opts.network), opts, distDevJson);
+    await writeJson(distDevJson, mergeDeep(devJson, appDevJson))
+  };
+
+  // 2. Start the server
+  const { io } = startServer(opts, distDevJson);
+
+  // 3. watch for changes in the srcs folder, rebuild apps on changes
+  const watchPaths = srcs.map((src) => [path.join(src, "widget/**/*"), path.join(src, "module/**/*"), path.join(src, "ipfs/**/*"), path.join(src, "bos.config.json"), path.join(src, "aliases.json")]).flat();
+  const gaze = new Gaze(watchPaths, { debounceDelay: 100 });
+
+  // @ts-ignore
+  gaze.on("all", async (_: string, file: string) => {
+    const src = srcs.find((src) => file.includes(src));
+    if (!src) {
+      return;
+    }
+    log.info(`[${path.relative(src, file)}] changed: rebuilding app...`, LogLevels.DEV);
+    const appDevJson = await generateApp(src, path.join(dist, path.relative(root, src)), await readConfig(path.join(src, "bos.config.json"), opts.network), opts, distDevJson);
+    await writeJson(distDevJson, mergeDeep(devJson, appDevJson))
+    if (io) {
+      io.emit("fileChange", devJson);
+    }
+    return devJson
+  });
+
+};
+
+async function generateApp(src: string, appDist: string, config: BaseConfig, opts: DevOptions, distDevJson: string): Promise<DevJson> {
+  await buildApp(src, appDist, opts.network);
+  return await generateDevJson(appDist, config);
 };
 
 
@@ -203,9 +238,6 @@ function startServer(opts: DevOptions, devJsonPath: string) {
 }
 
 
-async function devServerWorkspace(opts: DevOptions) {
-}
-
 interface DevJson {
   components: Record<string, {
     code: string;
@@ -234,14 +266,8 @@ async function generateDevJson(src: string, config: BaseConfig): Promise<DevJson
 
 
   return devJson;
-}
 
-function watchFolders() {
 }
-
-function generateAllDevJson() {
-}
-
 
 function injectHTML(html: string, injections: Record<string, string>) {
   Object.keys(injections).forEach((key) => {
@@ -249,3 +275,4 @@ function injectHTML(html: string, injections: Record<string, string>) {
   });
   return html;
 };
+
