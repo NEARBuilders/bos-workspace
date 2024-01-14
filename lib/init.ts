@@ -9,7 +9,7 @@ const templates = {
     "./aliases.json": JSON.stringify({
       "name": "My App",
     }),
-    "./module/hello.js": "const hello = () => `Welcome to ${alias/name}, ${config/account}!`; export { hello };",
+    "./module/hello.js": "const hello = () => `Welcome to ${alias/name}, ${config/account}!`; return { hello };",
     "./widget/home.metadata.json": JSON.stringify({
       name: "Hello",
       description: "Hello world widget",
@@ -45,6 +45,17 @@ const templates = {
   }
 };
 
+const messages = {
+  "js-single": {
+    "get-started": `To get started, cd into the project directory, then run:
+    bw dev`,
+  },
+  "js-multi": {
+    "get-started": `To get started, cd into the project directory, then run:
+    bw ws dev`,
+  }
+};
+
 // TODO: WIP
 export async function initProject(pwd: string, template: keyof typeof templates = "js-single") {
   try {
@@ -58,6 +69,7 @@ export async function initProject(pwd: string, template: keyof typeof templates 
     }));
 
     console.log('Project initialization complete.');
+    console.log(messages[template]["get-started"]);
   } catch (error) {
     console.error('Error during project initialization:', error);
   }
