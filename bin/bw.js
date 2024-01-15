@@ -2,7 +2,7 @@
 
 "use strict";
 
-const { run } = require("../build/lib/cli.js");
+const { run } = require("../dist/lib/cli.js");
 
 run().catch((error) => {
   console.error(error);

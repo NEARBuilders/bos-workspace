@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build": "tsc && tsc-alias && cp package.json build/",
+    "build": "tsc && tsc-alias",
     "dev": "watch 'npm run build' lib",
     "test": "jest",
     "test:watch": "jest --watch",
