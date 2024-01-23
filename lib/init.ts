@@ -14,7 +14,7 @@ const templates = {
       name: "Hello",
       description: "Hello world widget",
     }),
-    "./widget/home.tsx": "const { hello } = VM.require('${module/hello/utils.ts}'); return hello();",
+    "./widget/home.tsx": "const { hello } = VM.require('${module/hello}') || { hello: () => console.log('hello') }; return hello();",
   },
   "js-multi": {
     "./bos.workspace.json": JSON.stringify({
