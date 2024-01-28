@@ -17,6 +17,9 @@ Or download and run [create-bos-app](https://github.com/archetype-org/create-bos
 ```cmd
 > npm install create-bos-app
 > create-bos-app
+> cd newApp
+> npm install
+> npm run dev
 ```
 
 ## Features
