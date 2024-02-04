@@ -15,8 +15,8 @@
     "nearprotocol"
   ],
   "bin": {
-    "bos-workspace": "./bin/bos-workspace",
-    "bw": "./bin/bos-workspace"
+    "bos-workspace": "./ts/dist/index.js",
+    "bw": "./ts/dist/index.js"
   },
   "files": [
     "bin",
@@ -25,6 +25,7 @@
     "gateway/dist/*"
   ],
   "scripts": {
+    "build-ts": "tsc",
     "build-gateway": "cd ./gateway && npm install && npm run build",
     "test": "jest",
     "format": "prettier --write .",
@@ -45,7 +46,10 @@
     "sucrase": "^3.34.0"
   },
   "devDependencies": {
+    "@types/node": "^20.11.16",
     "eslint": "^8.53.0",
-    "jest": "^29.7.0"
+    "jest": "^29.7.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.3.3"
   }
 }

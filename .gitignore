@@ -2,4 +2,5 @@ build/
 node_modules/
 .env
 apps/
+.idea
 tree.json
