@@ -22,7 +22,7 @@ jobs:
 
       - name: Install Dependencies
         id: install
-        run: yarn install --frozen-lockfile
+        run: yarn install
 
       - name: Execute Test Tools
         run: yarn test
