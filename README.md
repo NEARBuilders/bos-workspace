@@ -27,8 +27,8 @@ Or download and run [create-bos-app](https://github.com/archetype-org/create-bos
 - [x] Alias Mapping
 - [x] Gateway for local development (without needing flags)
 - [x] Hot Reload
-- [x] Typescript support
-- [x] Deploy widgets via Github Action
+- [x] TypeScript support
+- [x] Deploy widgets via GitHub Action
 - [x] Manage multiple apps configured with different root accountIds
 - [x] Support for flags on other gateways
 
