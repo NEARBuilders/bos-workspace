@@ -44,3 +44,4 @@ jobs:
           VALIDATE_ALL_CODEBASE: false
           VALIDATE_CSS: false
           VALIDATE_MARKDOWN: false
+          FILTER_REGEX_EXCLUDE: ./dist
