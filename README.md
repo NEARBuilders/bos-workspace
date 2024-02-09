@@ -12,7 +12,7 @@ To use bos-workspace, install it globally or in your existing workspace:
 > npm install bos-workspace
 ```
 
-Or download and run [create-bos-app](https://github.com/archetype-org/create-bos-app).  ( [integrate create-bos-app #41](https://github.com/NEARBuilders/bos-workspace/issues/41) )
+Or download and run [create-bos-app](https://github.com/archetype-org/create-bos-app). ( [integrate create-bos-app #41](https://github.com/NEARBuilders/bos-workspace/issues/41) )
 
 ```cmd
 > npm install create-bos-app
@@ -24,14 +24,13 @@ Or download and run [create-bos-app](https://github.com/archetype-org/create-bos
 
 ## Features
 
-  - [x] Alias Mapping
-  - [x] Gateway for local development (without needing flags)
-  - [x] Hot Reload
-  - [x] Typescript support
-  - [x] Deploy widgets via Github Action
-  - [x] Manage multiple apps configured with different root accountIds
-  - [x] Support for flags on other gateways
-
+- [x] Alias Mapping
+- [x] Gateway for local development (without needing flags)
+- [x] Hot Reload
+- [x] Typescript support
+- [x] Deploy widgets via Github Action
+- [x] Manage multiple apps configured with different root accountIds
+- [x] Support for flags on other gateways
 
 ### Commands
 
