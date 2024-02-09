@@ -17,12 +17,12 @@ jobs:
         id: setup-node
         uses: actions/setup-node@v2
         with:
-          node-version: 18
-          cache: yarn
+          node-version: 16
+          cache: npm
 
       - name: Install Dependencies
         id: install
-        run: yarn install
+        run: npm install
 
       - name: Execute Test Tools
-        run: yarn test
+        run: npm test

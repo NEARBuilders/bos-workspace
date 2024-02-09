@@ -26,11 +26,11 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: yarn
+          cache: npm
 
       - name: Install Dependencies
         id: install
-        run: yarn install --frozen-lockfile
+        run: npm install
 
       - name: Lint Code Base
         id: super-linter
