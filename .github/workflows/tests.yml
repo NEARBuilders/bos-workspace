@@ -18,11 +18,11 @@ jobs:
         uses: actions/setup-node@v2
         with:
           node-version: 16
-          cache: yarn
+          cache: npm
 
       - name: Install Dependencies
         id: install
-        run: yarn install --frozen-lockfile
+        run: npm install
 
       - name: Execute Test Tools
-        run: yarn test
+        run: npm test
