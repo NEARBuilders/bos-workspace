@@ -1,5 +1,10 @@
 {
   "appAccount": "dummy.near",
+  "overrides": {
+    "testnet": {
+      "appAccount": "testing.testnet"      
+    }
+  },
   "aliases": {
     "hello": "<h1>Hello, world! Have a nice day!</h1>"
   }

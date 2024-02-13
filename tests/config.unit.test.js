@@ -12,6 +12,11 @@ test("reads the bos.config.json file correctly", () => {
   const config = read_bos_config("testAppFolder");
   expect(config).toEqual({
     appAccount: "test",
+    overrides: {
+      testnet: {
+        appAccount: "testing.testnet"      
+      }
+    },
     aliases: { test: "testAlias", nui: "nui.near" },
   });
 });

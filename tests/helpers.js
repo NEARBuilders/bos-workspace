@@ -6,6 +6,11 @@ const folders = {
   "./apps/testAppFolder": {
     "bos.config.json": JSON.stringify({
       appAccount: "test",
+      overrides: {
+        testnet: {
+          appAccount: "testing.testnet"      
+        }
+      },
       aliases: {
         test: "testAlias",
         nui: "nui.near",
