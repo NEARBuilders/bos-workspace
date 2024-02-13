@@ -39,9 +39,10 @@ export async function buildApp(src: string, dest: string, network: string = "mai
     }
   });
 
-  const modules: string[] = [];
+  const modules: string[] = []; // init modules
   const widgets: string[] = [];
 
+  // we identify all the modules
   await loopThroughFiles(path.join(src, "module"), async (file: string) => {
     const ext = path.extname(file);
     if (ext === ".js" || ext === ".jsx" || ext === ".ts" || ext === ".tsx") {
@@ -50,6 +51,7 @@ export async function buildApp(src: string, dest: string, network: string = "mai
   })
 
   await loopThroughFiles(path.join(src, "widget"), async (file: string) => {
+    // we need this to do dot notation too
     const ext = path.extname(file);
     if (ext === ".js" || ext === ".jsx" || ext === ".ts" || ext === ".tsx") {
       widgets.push(file);
@@ -64,6 +66,7 @@ export async function buildApp(src: string, dest: string, network: string = "mai
     aliases,
   };
 
+  // module transpilation
   const loadingModules = log.loading(`Transpiling ${modules.length} modules`, LogLevels.BUILD);
   try {
     for (const file of modules) {
@@ -97,6 +100,7 @@ export async function buildApp(src: string, dest: string, network: string = "mai
     throw e;
   }
 
+  // widget transpilation
   const loadingWidgets = log.loading(`Transpiling ${widgets.length} widgets`, LogLevels.BUILD);
   try {
     for (const file of widgets) {
@@ -118,7 +122,7 @@ export async function buildApp(src: string, dest: string, network: string = "mai
 
       logs.push(...new_logs);
       // write to dest
-      let new_file_name = path.basename(file);
+      let new_file_name = path.basename(file); // this needs to build pathname from the dot notation
       new_file_name = new_file_name.substring(0, new_file_name.length - path.extname(file).length);
       new_file_name += ".jsx";
 
