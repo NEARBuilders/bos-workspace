@@ -66,6 +66,7 @@ jobs:
       - name: Configure non-archival RPC endpoint
         run: |
           which near
+          mkdir -p ~/.config/near-cli
           touch ~/.config/near-cli/config.toml
           echo -e "[network_connection.mainnet]\nnetwork_name = \"mainnet\"\nrpc_url = \"https://rpc.mainnet.near.org/\"\nwallet_url = \"https://app.mynearwallet.com/\"\nexplorer_transaction_url = \"https://nearblocks.io/txns/\"" > ~/.config/near-cli/config.toml
 
@@ -89,3 +90,4 @@ jobs:
           cat ~/.config/near-cli/config.toml
           cd "$BOS_WORKSPACE_DIRECTORY/build/$BOS_APP_NAME"
           bos components deploy "$BOS_DEPLOY_ACCOUNT_ID" sign-as "$BOS_SIGNER_ACCOUNT_ID" network-config "$BOS_DEPLOY_ENV" sign-with-plaintext-private-key --signer-public-key "$BOS_SIGNER_PUBLIC_KEY" --signer-private-key "$BOS_SIGNER_PRIVATE_KEY" send
+          cat ~/.config/near-cli/config.toml
