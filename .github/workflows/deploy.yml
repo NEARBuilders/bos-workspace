@@ -66,7 +66,7 @@ jobs:
       - name: Configure non-archival RPC endpoint
         run: |
           which near
-          cd ~
+          cd ~/.config
           ls -la
           cat ~/.config/near-cli-rs/config.toml
           echo -e "[network_connection.mainnet]\nnetwork_name = \"mainnet\"\nrpc_url = \"https://rpc.mainnet.near.org/\"\nwallet_url = \"https://app.mynearwallet.com/\"\nexplorer_transaction_url = \"https://nearblocks.io/txns/\"" > ~/.config/near-cli-rs/config.toml
