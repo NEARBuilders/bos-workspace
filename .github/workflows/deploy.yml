@@ -59,6 +59,15 @@ jobs:
         run: |
           curl --proto '=https' --tlsv1.2 -LsSf https://github.com/FroVolod/bos-cli-rs/releases/download/v${{ inputs.cli-version }}/bos-cli-installer.sh | sh
 
+      - name: Install near-cli-rs
+        run: |
+          curl --proto '=https' --tlsv1.2 -LsSf https://github.com/near/near-cli-rs/releases/latest/download/near-cli-rs-installer.sh | sh
+
+      - name: Configure non-archival RPC endpoint
+        run: |
+          which near
+          echo "rpc_url = 'https://rpc.mainnet.near.org/'" > ~/.config/near-cli-rs/config.toml
+
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
