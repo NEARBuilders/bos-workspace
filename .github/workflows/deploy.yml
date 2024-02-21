@@ -66,8 +66,7 @@ jobs:
       - name: Configure non-archival RPC endpoint
         run: |
           which near
-          echo "rpc_url = 'https://rpc.mainnet.near.org/'" > ~/home/runner/.config/near-cli/config.toml
-          
+          echo "rpc_url = 'https://rpc.mainnet.near.org/'" > ~/.config/near-cli/config.toml
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
