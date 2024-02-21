@@ -66,6 +66,7 @@ jobs:
       - name: Configure non-archival RPC endpoint
         run: |
           which near
+          cd ~
           ls -la
           echo "rpc_url = 'https://rpc.mainnet.near.org/'" > ~/near-cli/.config/config.toml
 
