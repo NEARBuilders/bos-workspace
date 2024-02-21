@@ -68,7 +68,7 @@ jobs:
           which near
           mkdir -p ~/.config/near-cli
           touch ~/.config/near-cli/config.toml
-          echo -e "credentials_home_dir = "/home/runner/.near-credentials"\n[network_connection.mainnet]\nnetwork_name = \"mainnet\"\nrpc_url = \"https://rpc.mainnet.near.org/\"\nwallet_url = \"https://app.mynearwallet.com/\"\nexplorer_transaction_url = \"https://nearblocks.io/txns/\"" > ~/.config/near-cli/config.toml
+          echo -e "credentials_home_dir = \"/home/runner/.near-credentials\"\n[network_connection.mainnet]\nnetwork_name = \"mainnet\"\nrpc_url = \"https://rpc.mainnet.near.org/\"\nwallet_url = \"https://app.mynearwallet.com/\"\nexplorer_transaction_url = \"https://nearblocks.io/txns/\"" > ~/.config/near-cli/config.toml
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
