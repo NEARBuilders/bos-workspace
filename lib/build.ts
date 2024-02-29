@@ -122,7 +122,7 @@ export async function buildApp(src: string, dest: string, network: string = "mai
 
       logs.push(...new_logs);
       // write to dest
-      let new_file_name = path.basename(file); // this needs to build pathname from the dot notation
+      let new_file_name = path.relative(path.join(src, "widget"), file).replace("/", ".");
       new_file_name = new_file_name.substring(0, new_file_name.length - path.extname(file).length);
       new_file_name += ".jsx";
 

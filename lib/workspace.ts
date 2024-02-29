@@ -1,4 +1,5 @@
 import path from "path"
+import { glob } from "glob"
 
 import { buildApp } from "@/lib/build";
 import { readJson } from "@/lib/utils/fs"
@@ -26,7 +27,7 @@ export async function buildWorkspace(src: string, dest: string, network: string 
 export async function devWorkspace(src: string, devOpts: DevOptions): Promise<any> {
   const loading = log.loading(`Starting workspace ${src}`, LogLevels.BUILD);
 
-  const { apps } = await readWorkspace(path.join(src, "bos.workspace.json"));
+  const { apps } = await readWorkspace(src);
 
   log.info(`Found ${apps.length} apps\n`);
 
@@ -39,6 +40,19 @@ export async function devWorkspace(src: string, devOpts: DevOptions): Promise<an
 type WorkspaceConfig = {
   apps: string[]
 };
+
 export async function readWorkspace(src: string): Promise<WorkspaceConfig> {
-  return await readJson(src);
-};
+  const config = await readJson(path.join(src, "bos.workspace.json"));
+  const expandedApps: string[] = [];
+
+  for (const app of config.apps) {
+    if (app.includes("*")) {
+      const matches = glob.sync(path.join(src, app));
+      expandedApps.push(...matches);
+    } else {
+      expandedApps.push(app);
+    }
+  }
+
+  return { apps: expandedApps };
+}
