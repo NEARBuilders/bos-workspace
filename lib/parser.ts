@@ -209,7 +209,7 @@ export function evalCustomSyntax(code: Code, params: EvalCustomSyntaxParams): Ou
         evl = evalAlias(path, params.aliases);
         break;
       default:
-        evl = evalAlias(expression, params.aliases);
+        return _match;
     };
     logs.push(...evl.logs);
     return evl.code;
