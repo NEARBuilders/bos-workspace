@@ -47,7 +47,7 @@ const app_example_1_output = {
   "/build/ipfs.json": JSON.stringify({
     "logo.svg": "QmHash",
   }, null, 2) + "\n",
-  "/build/widget/hello.utils.module.js": "const hello = (name) => `Hello, world!`;\nreturn { hello };\n",
+  "/build/widget/hello.utils.module.js": "const hello = (name) => `Hello, ${name}!`;\nreturn { hello };\n",
   "/build/widget/index.jsx": "const hello = \"hi\";\nreturn hello(props);\n",
   "/build/widget/nested.index.jsx": "const hello = \"hi\";\nreturn hello(props);\n",
   "/build/widget/module.jsx": "VM.require(\"test.near/widget/hello.utils.module\");\nreturn hello(\"world\");\n",
