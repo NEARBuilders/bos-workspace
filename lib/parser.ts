@@ -209,7 +209,7 @@ export function evalCustomSyntax(code: Code, params: EvalCustomSyntaxParams): Ou
         evl = evalAlias(path, params.aliases);
         break;
       default:
-        evl = evalAlias(expression, params.aliases);
+        return _match;
     };
     logs.push(...evl.logs);
     return evl.code;
@@ -256,7 +256,7 @@ export async function format(code: Code): Promise<Output> {
   const logs: Array<Log> = [];
   let new_code = code;
   try {
-    new_code = beautify(code, {
+    new_code = await beautify(code, {
       parser: "babel",
     });
   } catch (e: any) {

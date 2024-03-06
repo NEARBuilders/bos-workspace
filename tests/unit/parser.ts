@@ -190,8 +190,6 @@ describe('evalCustomSyntax', () => {
       let module = "\${module/db}";
       let alias = "\${alias/util}";
       let ipfs = "\${ipfs/xyz}";
-      let other = "\${other/abc}";
-      let other1 = "\${REPL_HELLO}";
     `;
 
     const config = { accounts: { deploy: "user.near" } };
@@ -206,8 +204,27 @@ describe('evalCustomSyntax', () => {
       let module = "user.near/widget/db.module";
       let alias = "utility";
       let ipfs = "https://ipfs.org/bafkreihdwdcef3tkddpljak234nlasjd93j4asdhfas3";
-      let other = "other";
-      let other1 = "hello";
+    `,
+      logs: []
+    };
+
+    const result = evalCustomSyntax(code, { config, modules, aliases, ipfsMap, ipfsGateway });
+    expect(result).toEqual(expectedOutput);
+  });
+  it('should support default string literals', async () => {
+    const code = `
+      let styled = "\${(props) => (props.isConnected ? "green" : "red")}";
+    `;
+
+    const config = { accounts: { deploy: "user.near" } };
+    const modules = ["db"];
+    const aliases = { "util": "utility", "other/abc": "other", "REPL_HELLO": "hello" };
+    const ipfsMap = { "xyz": "bafkreihdwdcef3tkddpljak234nlasjd93j4asdhfas3" };
+    const ipfsGateway = "https://ipfs.org/";
+
+    const expectedOutput = {
+      code: `
+      let styled = "\${(props) => (props.isConnected ? "green" : "red")}";
     `,
       logs: []
     };

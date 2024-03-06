@@ -1,6 +1,7 @@
 import { buildApp } from '@/lib/build';
 import { BaseConfig, DEFAULT_CONFIG } from '@/lib/config';
 import * as fs from '@/lib/utils/fs';
+import { LogLevel, Logger } from "@/lib/logger";
 
 import { vol, } from 'memfs';
 jest.mock('fs', () => require('memfs').fs);
@@ -25,6 +26,11 @@ const app_example_1 = {
     name: "Hello",
     description: "Hello world widget",
   }),
+  "./widget/nested/index.tsx": "type Hello = {}; const hello: Hello = 'hi'; export default hello;",
+  "./widget/nested/index.metadata.json": JSON.stringify({
+    name: "Nested Hello",
+    description: "Nested Hello world widget",
+  }),
   "./widget/module.tsx": "VM.require('${module/hello/utils}'); export default hello('world');",
   "./widget/config.jsx": "return <h1>${config/account}${config / account / deploy}</h1>;",
   "./widget/alias.tsx": "export default <h1>Hello ${alias/name}!</h1>;",
@@ -41,8 +47,9 @@ const app_example_1_output = {
   "/build/ipfs.json": JSON.stringify({
     "logo.svg": "QmHash",
   }, null, 2) + "\n",
-  "/build/widget/hello.utils.module.js": "const hello = (name) => `Hello, world!`;\nreturn { hello };\n",
+  "/build/widget/hello.utils.module.js": "const hello = (name) => `Hello, ${name}!`;\nreturn { hello };\n",
   "/build/widget/index.jsx": "const hello = \"hi\";\nreturn hello(props);\n",
+  "/build/widget/nested.index.jsx": "const hello = \"hi\";\nreturn hello(props);\n",
   "/build/widget/module.jsx": "VM.require(\"test.near/widget/hello.utils.module\");\nreturn hello(\"world\");\n",
   "/build/widget/config.jsx": "return <h1>test.neartest.near</h1>;\n",
   "/build/widget/alias.jsx": "return <h1>Hello world!</h1>;\n",
@@ -63,6 +70,13 @@ const app_example_1_output = {
             name: "Hello",
             description: "Hello world widget",
           }
+        },
+        "nested.index": {
+          metadata: {
+            name: "Nested Hello",
+            description: "Nested Hello world widget",
+          }
+
         }
       }
     }
@@ -70,6 +84,7 @@ const app_example_1_output = {
 };
 
 const unmockedFetch = global.fetch;
+const unmockedLog = global.log;
 
 describe('build', () => {
   beforeEach(() => {
@@ -83,9 +98,11 @@ describe('build', () => {
         })
       })
     }) as any;
+    global.log = new Logger(LogLevel.DEV);
   })
   afterAll(() => {
     global.fetch = unmockedFetch;
+    global.log = unmockedLog;
   })
 
   it('should build correctly without logs', async () => {
