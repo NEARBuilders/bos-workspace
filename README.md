@@ -30,8 +30,5 @@ Feedback:
 - [ ] socket connects and disconnects, why? nice error logging
 - [ ] how could bw init be configured with template repositories? -- also, for easy integration, init structure should match/work with bos components download (I think mv ./widget ./src/widget, configs stay where they are)
 - [ ] newly initialized typescript files are throwing errors, want to include package.json, eslint, tsconfig, etc... (open to choose typescript or javascript)
-- [ ] I think module/hello should match: module.hello rather than hello.module
-- [ ] I really like the alias pattern -- alias/name, config/account, module/hello
+- [ ] module/hello should match: module.hello rather than hello.module
 - [ ] We could prompt the account name during bw init
-- [ ] Idk what error, but hot-reload was killed once during editing (exception handling)
-- [ ] I think the output should be /build, rather than in .bos; although maybe something like bos-loader.json should stay in .bos
