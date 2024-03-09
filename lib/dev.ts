@@ -249,13 +249,13 @@ async function generateDevJson(src: string, config: BaseConfig): Promise<DevJson
   let devAccount = config.accounts?.dev || config.account || "dev-1234";
 
   // for each js and jsx in src/widget
-  await loopThroughFiles(path.join(src, "widget"), async (file: string) => {
+  await loopThroughFiles(path.join(src, "src", "widget"), async (file: string) => {
     const ext = path.extname(file);
     if (ext !== ".js" && ext !== ".jsx") {
       return;
     }
 
-    const widgetPath = path.relative(path.join(src, "widget"), file).replace(ext, "");
+    const widgetPath = path.relative(path.join(src, "src", "widget"), file).replace(ext, "");
     const widgetKey = `${devAccount}/widget/${widgetPath.split("/").join(".")}`;
 
     // add to devJson.components

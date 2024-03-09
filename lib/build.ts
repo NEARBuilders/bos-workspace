@@ -90,7 +90,7 @@ export async function buildApp(src: string, dest: string, network: string = "mai
       new_file_name = new_file_name.substring(0, new_file_name.length - path.extname(file).length);
       new_file_name += ".module.js";
 
-      const new_file_path = path.join(dest, "widget", new_file_name);
+      const new_file_path = path.join(dest, "src", "widget", new_file_name);
 
       await outputFile(new_file_path, new_file.code);
     }
@@ -126,7 +126,7 @@ export async function buildApp(src: string, dest: string, network: string = "mai
       new_file_name = new_file_name.substring(0, new_file_name.length - path.extname(file).length);
       new_file_name += ".jsx";
 
-      const new_file_path = path.join(dest, "widget", new_file_name);
+      const new_file_path = path.join(dest, "src", "widget", new_file_name);
       await outputFile(new_file_path, new_file.code);
     }
     loadingWidgets.finish(`Transpiled ${widgets.length} widgets`);
