@@ -15,4 +15,5 @@ parserOptions:
   ecmaVersion: "latest"
 ignorePatterns:
   - "examples/*"
-  - "gateway/dist/*"
+  # - "gateway/dist/*"
+  - "gateway/*"

@@ -48,12 +48,6 @@
     "serve:prod": "http-server dist",
     "bw-serve": "webpack serve --port 4444 --no-hot --no-color --env mode=development "
   },
-  "eslintConfig": {
-    "extends": [
-      "react-app",
-      "react-app/jest"
-    ]
-  },
   "browserslist": {
     "production": [
       ">0.2%",
