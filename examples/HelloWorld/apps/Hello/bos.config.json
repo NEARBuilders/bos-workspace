@@ -1,5 +1,6 @@
 {
   "appAccount": "dummy.near",
+  "version": "0.1.0",
   "aliases": {
     "hello": "<h1>Hello, world! Have a nice day!</h1>"
   }

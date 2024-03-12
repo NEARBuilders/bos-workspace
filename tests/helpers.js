@@ -6,6 +6,7 @@ const folders = {
   "./apps/testAppFolder": {
     "bos.config.json": JSON.stringify({
       appAccount: "test",
+      // version: "0.1.0",
       aliases: {
         test: "testAlias",
         nui: "nui.near",
