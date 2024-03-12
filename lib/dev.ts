@@ -22,6 +22,7 @@ export type DevOptions = {
   NoHot?: boolean;
   NoOpen?: boolean;
   network?: Network;
+  gateway?: string;
 };
 
 export async function dev(src: string, opts: DevOptions) {
@@ -142,8 +143,10 @@ function startServer(opts: DevOptions, devJsonPath: string) {
   });
 
   if (!opts.NoGateway) {
+    const GATEWAY_PATH = path.join(__dirname, "../..", "gateway", "dist");
+    const gatewayPath = (opts.gateway && path.resolve(opts.gateway)) ?? GATEWAY_PATH;
     // let's check if gateway/dist/index.html exists
-    if (!(existsSync(path.join(GATEWAY_PATH, "index.html")))) {
+    if (!(existsSync(path.join(gatewayPath, "index.html")))) {
       log.error("Gateway not found. Skipping...");
       opts.NoGateway = true;
     } else {
@@ -152,12 +155,12 @@ function startServer(opts: DevOptions, devJsonPath: string) {
         if (req.path === "/") {
           return next();
         }
-        express.static(GATEWAY_PATH)(req, res, next);
+        express.static(gatewayPath)(req, res, next);
       });
       app.get("*", (_, res) => {
         // Inject Gateway with Environment Variables
         readFile(
-          path.join(GATEWAY_PATH, "index.html"),
+          path.join(gatewayPath, "index.html"),
           "utf8",
         ).then((data) => {
           const envConfig = JSON.stringify({
