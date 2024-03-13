@@ -1,17 +1,16 @@
-import { Command } from "commander";
-import { LogLevel, Logger } from "@/lib/logger";
 import { buildApp } from "@/lib/build";
-import { buildWorkspace, devWorkspace } from "./workspace";
 import { initProject } from "@/lib/init";
+import { LogLevel, Logger } from "@/lib/logger";
+import { Command } from "commander";
 import path from "path";
 import { dev } from "./dev";
-import { cloneRepository, pullRepository } from "./repository";
-import { readConfig } from "./config";
+import { cloneRepository } from "./repository";
+import { buildWorkspace, devWorkspace } from "./workspace";
 
 const program = new Command();
 
 const [name, description, version] = [
-  "bw",
+  "bos-workspace",
   "Build decentralized apps",
   "0.0.1",
 ];
