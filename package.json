@@ -7,7 +7,6 @@
     "bw": "./bin/bw.js"
   },
   "scripts": {
-    "prepare": "tsc",
     "build": "tsc && tsc-alias",
     "dev": "watch 'npm run build' lib",
     "test": "jest",
