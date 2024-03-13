@@ -27,7 +27,7 @@ interface AppConfig extends BaseConfig {
 }
 
 export const DEFAULT_CONFIG = {
-  account: "bosworkspace",
+  account: "bos.workspace",
   format: true,
   ipfs: {
     gateway: "https://ipfs.near.social/ipfs",
