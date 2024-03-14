@@ -1,5 +1,5 @@
 {
-  "exclude": ["node_modules", "./tests", "./gateway", "./bin", "./jest.config.ts"],
+  "exclude": ["node_modules", "./tests", "./gateway", "./bin", "./jest.config.ts", "./__app_example_1"],
   "compilerOptions": {
     /* Visit https://aka.ms/tsconfig to read more about this file */
 
