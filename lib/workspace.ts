@@ -8,7 +8,7 @@ import { DevOptions, devMulti } from "@/lib/dev";
 export async function buildWorkspace(src: string, dest: string, network: string = "mainnet"): Promise<any> {
   const loading = log.loading(`Building workspace ${src}`, LogLevels.BUILD);
 
-  const { apps } = await readWorkspace(path.join(src, "bos.workspace.json"));
+  const { apps } = await readWorkspace(src);
 
   log.info(`Found ${apps.length} apps\n`);
 

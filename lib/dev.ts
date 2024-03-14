@@ -11,7 +11,7 @@ import { exec } from "child_process";
 import { Gaze } from "gaze";
 import { mergeDeep } from "./utils/objects";
 
-const DEV_DIST_FOLDER = path.join(".bos", "build");
+const DEV_DIST_FOLDER = "build";
 
 // the gateway dist path in node_modules
 const GATEWAY_PATH = path.join(__dirname, "../..", "gateway", "dist");
@@ -212,7 +212,7 @@ function startServer(opts: DevOptions, devJsonPath: string) {
     │                                                             │
     └─────────────────────────────────────────────────────────────┘
  `);
-      log.success(`bos-workspace runnig on port ${port}!`);
+      log.success(`bos-workspace running on port ${port}!`);
     })
     .on("error", (err: Error) => {
       log.error(err.message);

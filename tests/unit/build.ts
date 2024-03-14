@@ -47,13 +47,13 @@ const app_example_1_output = {
   "/build/ipfs.json": JSON.stringify({
     "logo.svg": "QmHash",
   }, null, 2) + "\n",
-  "/build/widget/hello.utils.module.js": "const hello = (name) => `Hello, ${name}!`;\nreturn { hello };\n",
-  "/build/widget/index.jsx": "const hello = \"hi\";\nreturn hello(props);\n",
-  "/build/widget/nested.index.jsx": "const hello = \"hi\";\nreturn hello(props);\n",
-  "/build/widget/module.jsx": "VM.require(\"test.near/widget/hello.utils.module\");\nreturn hello(\"world\");\n",
-  "/build/widget/config.jsx": "return <h1>test.neartest.near</h1>;\n",
-  "/build/widget/alias.jsx": "return <h1>Hello world!</h1>;\n",
-  "/build/widget/ipfs.jsx": "return <img height=\"100\" src=\"https://testipfs/ipfs/QmHash\" />;\n",
+  "/build/src/widget/hello.utils.module.js": "const hello = (name) => `Hello, ${name}!`;\nreturn { hello };\n",
+  "/build/src/widget/index.jsx": "const hello = \"hi\";\nreturn hello(props);\n",
+  "/build/src/widget/nested.index.jsx": "const hello = \"hi\";\nreturn hello(props);\n",
+  "/build/src/widget/module.jsx": "VM.require(\"test.near/widget/hello.utils.module\");\nreturn hello(\"world\");\n",
+  "/build/src/widget/config.jsx": "return <h1>test.neartest.near</h1>;\n",
+  "/build/src/widget/alias.jsx": "return <h1>Hello world!</h1>;\n",
+  "/build/src/widget/ipfs.jsx": "return <img height=\"100\" src=\"https://testipfs/ipfs/QmHash\" />;\n",
   "/build/data.json": JSON.stringify({
     "test.near": {
       thing: {

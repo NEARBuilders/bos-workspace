@@ -56,7 +56,7 @@ async function run() {
     .description("Work with multiple apps")
     .argument("[command]", "command to run")
     .argument("[src]", "path to the workspace", ".")
-    .argument("[dest]", "destination path", "./dest")
+    .argument("[dest]", "destination path")
     .option("-n, --network <network>", "network to build for", "mainnet")
     .option("-l, --loglevel <loglevel>", "log level (ERROR, WARN, INFO, DEV, BUILD, DEBUG)")
     .option("-p, --port <port>", "Port to run the server on", "8080")
