@@ -31,6 +31,7 @@ Or download and run [create-bos-app](https://github.com/archetype-org/create-bos
 - [x] Deploy widgets via GitHub Action
 - [x] Manage multiple apps configured with different root accountIds
 - [x] Support for flags on other gateways
+- [x] Attestation registry publishing for package manifests
 
 ### Commands
 
@@ -50,6 +51,7 @@ Commands:
   build           Build the project
   deploy          Deploy the project
   upload          Upload data to SocialDB
+  attest          Upload manifest with metadata to package registry
 ```
 
 > If the gateway can't fetch local components, try disabling brave shields or your adblock.
@@ -111,6 +113,12 @@ To upload data to SocialDB for a specific app such as apps/my-app, use the follo
 
 ```bash
 bos-workspace upload my-app
+```
+
+To attest to both the data.json and metadata.json using a package registry for a given app, use the following command:
+
+```bash
+Usage: bos-workspace attest [app name]
 ```
 
 ## Key Features
