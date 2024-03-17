@@ -4,7 +4,7 @@ import path from "path";
 const templates = {
   "js-single": {
     "./bos.config.json": JSON.stringify({
-      account: "bosworkspace",
+      account: "bos.workspace",
     }),
     "./aliases.json": JSON.stringify({
       "name": "My App",
@@ -42,7 +42,7 @@ const templates = {
       name: "Hello",
       description: "Hello world widget",
     }),
-  }
+  },
 };
 
 const messages = {
