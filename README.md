@@ -109,3 +109,12 @@ The workflow accepts the following inputs:
 - `signer-public-key` (required): Public key for signing transactions in the format: `ed25519:<public_key>`.
 
 - `signer-private-key` (required): Private key for signing transactions in the format: `ed25519:<private_key>`.
+
+
+
+
+bos-workspace can be used in two ways
+
+You can create git repositories for each app w/ a bos.config.json
+Then you can reference them from a monorepo using a bos.workspace.json
+workspace is the root
