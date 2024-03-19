@@ -9,15 +9,15 @@ import { BaseConfig } from "@/lib/config";
 
 const SYNTAX = {
   keyword: '$',
-  separator: '/',
+  separator: '_',
   wrapper: '{}',
 
   /* 
    * Examples: 
-   * - const hello = "Hello, @{alias/name}!";
-   * - const modules = VM.require(`@{module/utils/name}`);
-   * - const ipfs = <img src="@{ipfs/brand/logo.svg}" />
-   * - const config = "by @{config/accounts/signer}";
+   * - const hello = "Hello, @{alias_name}!";
+   * - const modules = VM.require(`@{module_utils_name}`);
+   * - const ipfs = <img src="@{ipfs_brand_logo.svg}" />
+   * - const config = "by @{config_accounts_signer}";
    */
 };
 

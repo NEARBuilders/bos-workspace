@@ -68,7 +68,7 @@ describe('evalConfig', () => {
     const result = evalConfig(["accounts", "deploy"], {});
     expect(result.logs).toEqual([
       {
-        message: "Config value not found: ${config/accounts/deploy}",
+        message: "Config value not found: ${config_accounts_deploy}",
         level: "warn",
       }
     ])
@@ -78,9 +78,9 @@ describe('evalConfig', () => {
 describe('evalModule', () => {
   it('should correctly replace module imports in code', async () => {
     const inputs = [
-      "db".split('/'),
-      "folder/file".split('/'),
-      "folder/file/another".split('/'),
+      "db".split('_'),
+      "folder_file".split('_'),
+      "folder_file_another".split('_'),
     ];
     const outputs = [
       "jest.near/widget/db.module",
@@ -93,12 +93,12 @@ describe('evalModule', () => {
     }
   });
   it('should return logs for missing modules, but still replace them', async () => {
-    const input = "folder/file".split('/');
+    const input = "folder_file".split('_');
     const output = {
       code: "jest.near/widget/folder.file.module",
       logs: [
         {
-          message: "Imported module not found locally: ${module/folder/file}",
+          message: "Imported module not found locally: ${module_folder_file}",
           level: "warn",
         }
       ]
@@ -113,8 +113,8 @@ describe('evalIPFS', () => {
   it('should replace IPFS links in code as per the IPFS map', async () => {
     const inputs = [
       "abc.svg".split('/'),
-      "def/bcd.png".split('/'),
-      "ghi/xyz/abc.jpg".split('/'),
+      "def_bcd.png".split('/'),
+      "ghi_xyz_abc.jpg".split('/'),
     ];
     const outputs = [
       "https://ipfs.near.social/ipfs/cid1",
@@ -124,8 +124,8 @@ describe('evalIPFS', () => {
     for (let i = 0; i < inputs.length; i++) {
       const result = evalIPFS(inputs[i], {
         "abc.svg": "cid1",
-        "def/bcd.png": "cid2",
-        "ghi/xyz/abc.jpg": "cid3",
+        "def_bcd.png": "cid2",
+        "ghi_xyz_abc.jpg": "cid3",
       }, "https://ipfs.near.social/ipfs");
       expect(result.code).toEqual(outputs[i]);
     }
@@ -133,10 +133,10 @@ describe('evalIPFS', () => {
   it('should return logs for missing IPFS links', async () => {
     const input = "abc.svg".split('/');
     const output = {
-      code: "${ipfs/abc.svg}",
+      code: "${ipfs_abc.svg}",
       logs: [
         {
-          message: "IPFS file or mapping not found: ${ipfs/abc.svg}",
+          message: "IPFS file or mapping not found: ${ipfs_abc.svg}",
           level: "warn",
         }
       ]
@@ -149,9 +149,9 @@ describe('evalIPFS', () => {
 describe('evalAlias', () => {
   it('should replace alias imports in code according to aliases object', async () => {
     const inputs = [
-      "util".split('/'),
-      "util/abc/h".split('/'),
-      "Util.abc$xyz".split('/'),
+      "util".split('_'),
+      "util_abc_h".split('_'),
+      "Util.abc$xyz".split('_'),
     ];
     const outputs = [
       "val1",
@@ -161,19 +161,19 @@ describe('evalAlias', () => {
     for (let i = 0; i < inputs.length; i++) {
       const result = evalAlias(inputs[i], {
         "util": "val1",
-        "util/abc/h": "val2",
+        "util_abc_h": "val2",
         "Util.abc$xyz": "val3",
       });
       expect(result.code).toEqual(outputs[i]);
     }
   });
   it('should return logs for missing aliases', async () => {
-    const input = "util".split('/');
+    const input = "util".split('_');
     const output = {
-      code: "${alias/util}",
+      code: "${alias_util}",
       logs: [
         {
-          message: "Imported alias not found: ${alias/util}",
+          message: "Imported alias not found: ${alias_util}",
           level: "warn",
         }
       ]
@@ -186,15 +186,15 @@ describe('evalAlias', () => {
 describe('evalCustomSyntax', () => {
   it('should return code with replaced imports', async () => {
     const code = `
-      let config = "\${config/account}";
-      let module = "\${module/db}";
-      let alias = "\${alias/util}";
-      let ipfs = "\${ipfs/xyz}";
+      let config = "\${config_account}";
+      let module = "\${module_db}";
+      let alias = "\${alias_util}";
+      let ipfs = "\${ipfs_xyz}";
     `;
 
     const config = { accounts: { deploy: "user.near" } };
     const modules = ["db"];
-    const aliases = { "util": "utility", "other/abc": "other", "REPL_HELLO": "hello" };
+    const aliases = { "util": "utility", "other_abc": "other", "REPL_HELLO": "hello" };
     const ipfsMap = { "xyz": "bafkreihdwdcef3tkddpljak234nlasjd93j4asdhfas3" };
     const ipfsGateway = "https://ipfs.org/";
 
@@ -218,7 +218,7 @@ describe('evalCustomSyntax', () => {
 
     const config = { accounts: { deploy: "user.near" } };
     const modules = ["db"];
-    const aliases = { "util": "utility", "other/abc": "other", "REPL_HELLO": "hello" };
+    const aliases = { "util": "utility", "other_abc": "other", "REPL_HELLO": "hello" };
     const ipfsMap = { "xyz": "bafkreihdwdcef3tkddpljak234nlasjd93j4asdhfas3" };
     const ipfsGateway = "https://ipfs.org/";
 
@@ -234,10 +234,10 @@ describe('evalCustomSyntax', () => {
   });
   it('should return logs for missing imports', async () => {
     const code = `
-      let config = "\${config/account/deploy}";
-      let module = "\${module/db}";
-      let alias = "\${alias/util}";
-      let ipfs = "\${ipfs/xyz}";
+      let config = "\${config_account_deploy}";
+      let module = "\${module_db}";
+      let alias = "\${alias_util}";
+      let ipfs = "\${ipfs_xyz}";
     `;
 
     const config = {};
@@ -248,26 +248,26 @@ describe('evalCustomSyntax', () => {
 
     const expectedOutput = {
       code: `
-      let config = "\${config/accounts/deploy}";
+      let config = "\${config_accounts_deploy}";
       let module = "/widget/db.module";
-      let alias = "\${alias/util}";
-      let ipfs = "\${ipfs/xyz}";
+      let alias = "\${alias_util}";
+      let ipfs = "\${ipfs_xyz}";
     `,
       logs: [
         {
-          message: "Config value not found: ${config/accounts/deploy}",
+          message: "Config value not found: ${config_accounts_deploy}",
           level: "warn",
         },
         {
-          message: "Imported module not found locally: ${module/db}",
+          message: "Imported module not found locally: ${module_db}",
           level: "warn",
         },
         {
-          message: "Imported alias not found: ${alias/util}",
+          message: "Imported alias not found: ${alias_util}",
           level: "warn",
         },
         {
-          message: "IPFS file or mapping not found: ${ipfs/xyz}",
+          message: "IPFS file or mapping not found: ${ipfs_xyz}",
           level: "warn",
         },
       ]
@@ -352,9 +352,9 @@ describe('transpileJS', () => {
       {
         input: {
           code: `
-            let account = "\${config/account}";
-            let module = "\${module/db}";
-            let alias = "\${alias/util}";let ipfs = "\${ipfs/xyz}";
+            let account = "\${config_account}";
+            let module = "\${module_db}";
+            let alias = "\${alias_util}";let ipfs = "\${ipfs_xyz}";
             type MyType = {
               hello: string;
             }
