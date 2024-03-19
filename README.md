@@ -4,7 +4,7 @@
 
 🚧 **Warning: This library has undergone a major refactor.** 🚧
 
-**Legacy documentation for v0.0.1-alpha.7 can be found [here](https://github.com/NEARBuilders/bos-workspace/tree/version/0.0.1-alpha.7).**
+**Read the [migration guide](./MIGRATION_GUIDE.md), or the legacy documentation for v0.0.1-alpha.7 can be found [here](https://github.com/NEARBuilders/bos-workspace/tree/version/0.0.1-alpha.7).**
 
 </center>
 
@@ -32,7 +32,7 @@ or build your workspace from scratch.
 
 `bos-workspace` supports both multi and single app development because of this core concept:
   
-* **Apps**: which belong to an Account, described by a bos.config.json. A structure may look like this:
+* **Apps**: which belong to an Account, described by a `bos.config.json`. A structure may look like this:
 
 ```txt
 app.near/
@@ -49,7 +49,7 @@ where the content of `bos.config.json` is:
 }
 ```
 
-* **Workspace**: may hold multiple apps, described by a bos.workspace.json
+* **Workspace**: may hold multiple apps, described by a `bos.workspace.json`
 
 ```txt
 apps/
@@ -72,7 +72,7 @@ where the content of `bos.workspace.json` is:
 }
 ```
 
-**Note:** There is no requirement that the "app name" ends in `.near`, or that apps must be held in a directory named `apps`. What matters is that the `bos.config.json` is on the same level as directories like `/widget/` and that `bos.workspace.json` points to the directy it's in.
+**Note:** The "app name" is not required to end in `.near`, and apps don't necessarily have to be stored in a directory named `/apps`. What's important is that the `bos.config.json` is located at the same level as directories such as `/widget`, and that `bos.workspace.json` specifies the directory it resides in.
 
 
 
