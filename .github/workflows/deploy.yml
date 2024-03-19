@@ -104,6 +104,9 @@ jobs:
             fi
           fi
 
+          echo "BUILD_COMMAND: $BUILD_COMMAND"
+          echo "BUILD_PATH: $BUILD_PATH"
+
       - name: Build the workspace
         run: |
           echo "Building $BUILD_PATH, using command: $BUILD_COMMAND"
