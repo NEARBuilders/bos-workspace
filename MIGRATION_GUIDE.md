@@ -8,6 +8,7 @@ To use the latest version, you may maintain your current app's structure, but mu
 
 1. In every app's `bos.config.json`, rename "appAccount" to "account"
 2. Any widget utilizing replacements with `/*__@appAccount__*/` should replace with `${config_account}`. Aliases should be replaced with `${alias_ALIASKEY}`.
+3. 
 
 ### `bos.config.json`
 
@@ -50,3 +51,5 @@ If you decide to maintain the structure of your workspace (e.g. `/apps`), add a 
   "apps": ["/apps/*"]
 }
 ```
+
+And modify the script in the package.json to include `ws` (e.g. `npm run bw ws dev`)
