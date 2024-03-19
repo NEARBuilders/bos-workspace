@@ -25,7 +25,7 @@ on:
         required: false
         description: "Relative path to bos-workspace root"
         type: string
-        default: "./"
+        default: "."
       deploy-account-address:
         required: true
         description: "Account under which component code should be deployed"
@@ -83,7 +83,7 @@ jobs:
             npm install -g "git+https://github.com/NEARBuilders/bos-workspace.git#main"
           fi
 
-      - name: Check for bos.workspace.json or bos.config.json
+      - name: Build and deploy the workspace
         run: |
           cd "$WORKING_DIRECTORY"
           if [ "${{ inputs.bw-legacy }}" = "true" ]; then
@@ -107,13 +107,8 @@ jobs:
           echo "BUILD_COMMAND: $BUILD_COMMAND"
           echo "BUILD_PATH: $BUILD_PATH"
 
-      - name: Build the workspace
-        run: |
-          echo "Building $BUILD_PATH, using command: $BUILD_COMMAND"
           $BUILD_COMMAND
 
-      - name: Deploy widgets
-        run: |
           cd $BUILD_PATH
           pwd
           bos components deploy "$BOS_DEPLOY_ACCOUNT_ID" sign-as "$BOS_SIGNER_ACCOUNT_ID" network-config "$BOS_DEPLOY_ENV" sign-with-plaintext-private-key --signer-public-key "$BOS_SIGNER_PUBLIC_KEY" --signer-private-key "$BOS_SIGNER_PRIVATE_KEY" send
