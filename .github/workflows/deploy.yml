@@ -75,17 +75,13 @@ jobs:
         with:
           node-version: "18"
 
-      - name: Check bw-legacy flag
-        run: |
-          if [ "${{ inputs.bw-legacy }}" = "true" ]; then
-            export BW_VERSION="version/0.0.1-alpha.7"
-          else
-            export BW_VERSION="main"
-          fi
-
       - name: Install bos-workspace globally
         run: |
-          npm install -g "git+https://github.com/NEARBuilders/bos-workspace.git#$BW_VERSION"
+          if [ "${{ inputs.bw-legacy }}" = "true" ]; then
+            npm install -g "git+https://github.com/NEARBuilders/bos-workspace.git#version/0.0.1-alpha.7"
+          else
+            npm install -g "git+https://github.com/NEARBuilders/bos-workspace.git#main"
+          fi
 
       - name: Check for bos.workspace.json or bos.config.json
         run: |
