@@ -1,4 +1,12 @@
+<center>
+
 # bos-workspace
+
+🚧 **Warning: This library has undergone a major refactor.** 🚧
+
+**Legacy documentation for v0.0.1-alpha.7 can be found [here](https://github.com/NEARBuilders/bos-workspace/tree/version/0.0.1-alpha.7).**
+
+</center>
 
 `bos-workspace` is a comprehensive toolset designed to simplify the development and deployment of [NEAR components](https://docs.near.org/bos/tutorial/quickstart) and applications. With support for hot reload, TypeScript, and multiple app management, it caters to developers looking for an efficient and scalable development environment.
 
@@ -12,30 +20,61 @@ You can install `bos-workspace` globally on your machine or within your existing
 npm install bos-workspace
 ```
 
-Alternatively, to scaffold a new project, use the `create-bos-app` command. This utility sets up a new application and installs all necessary dependencies to provide a ready-to-use development environment:
-
-```cmd
-npx @archetype-org/create-bos-app
-```
-
-( [create-bos-app](https://github.com/archetype-org/create-bos-app) will soon be absorbed into bos-workspace [#41](https://github.com/NEARBuilders/bos-workspace/issues/41) )
-
 ### Usage
 
-`bos-workspace` supports both multi and single app development-- workspaces are composable.
+To start, you may clone an existing project via:
 
-For single applications, place a `bos.config.json` with an "account" defined.
-For multi applications, place a `bos.workspace.json` in your root.
+```bash
+bos-workspace clone [accountId]
+```
 
-## Features
+or build your workspace from scratch. 
 
-- [x] Alias Mapping
-- [x] Gateway for local development (without needing flags)
-- [x] Hot Reload
-- [x] TypeScript support
-- [x] Deploy widgets via GitHub Action
-- [x] Manage multiple apps configured with different root accountIds
-- [x] Support for flags on other gateways
+`bos-workspace` supports both multi and single app development because of this core concept:
+  
+* **Apps**: which belong to an Account, described by a bos.config.json. A structure may look like this:
+
+```txt
+app.near/
+├── widget/
+│   └── example.jsx
+└── bos.config.json
+```
+
+where the content of `bos.config.json` is:
+
+```json
+{
+  "account": "app.near"
+}
+```
+
+* **Workspace**: may hold multiple apps, described by a bos.workspace.json
+
+```txt
+apps/
+├── app1.near/
+│   ├── widget/
+│   │   └── example.jsx
+│   └── bos.config.json
+├── app2.near/
+│   ├── widget/
+│   │   └── example.jsx
+│   └── bos.config.json
+bos.workspace.json
+```
+
+where the content of `bos.workspace.json` is:
+
+```json
+{
+  "apps": ["/apps/*"]
+}
+```
+
+**Note:** There is no requirement that the "app name" ends in `.near`, or that apps must be held in a directory named `apps`. What matters is that the `bos.config.json` is on the same level as directories like `/widget/` and that `bos.workspace.json` points to the directy it's in.
+
+
 
 ### Commands
 
@@ -64,57 +103,3 @@ Commands:
 
 > If the gateway can't fetch local components, try disabling brave shields or your adblock.
 > If the commands don't work, try again using Node >=16
-
-
-
-## Deploying Widgets through GitHub Actions
-
-To deploy widgets on push to branch, create a GitHub Actions workflow file in your repository, e.g., `.github/workflows/deploy-embeds-mainnet.yml`, and configure it as follows:
-
-```yaml
-name: Deploy 'AppName' App Components to Mainnet
-
-on:
-  push:
-    branches: [main] // branch for trigger
-
-jobs:
-  deploy-mainnet:
-    uses: NEARBuilders/bos-workspace/.github/workflows/deploy.yml@main
-    with:
-      deploy-env: "mainnet"  // environemnt to deploy to
-      app-name: "embeds" // app name with bos.config.json
-      deploy-account-address: ${{ vars.DEPLOY_ACCOUNT_ID }} // should match bos.config.json (TODO fix this)
-      signer-account-address: ${{ vars.SIGNER_ACCOUNT_ID }} // account to sign with
-      signer-public-key: ${{ vars.SIGNER_PUBLIC_KEY }}
-      signer-private-key: ${{ secrets.SIGNER_PRIVATE_KEY }}
-```
-
-Adjust the workflow as needed, then configure your variables + secrets on GitHub Settings -> Actions -> secrets & variables. Use [near-cli-rs](https://github.com/near/near-cli-rs) for generating keypairs.
-
-### Workflow Inputs
-
-The workflow accepts the following inputs:
-
-- `cli-version` (optional): Version of BOS CLI to use for deployment (e.g., 0.3.0). Default: "0.3.6"
-
-- `deploy-env` (optional): Environment to deploy component code to (e.g., mainnet, testnet). Default: "mainnet"
-
-- `app-name` (required): Workspace app name to deploy (from the /apps directory).
-
-- `deploy-account-address` (required): Account under which component code should be deployed.
-
-- `signer-account-address` (required): Account used for signing the deploy transaction, frequently the same as `deploy-account-address`.
-
-- `signer-public-key` (required): Public key for signing transactions in the format: `ed25519:<public_key>`.
-
-- `signer-private-key` (required): Private key for signing transactions in the format: `ed25519:<private_key>`.
-
-
-
-
-bos-workspace can be used in two ways
-
-You can create git repositories for each app w/ a bos.config.json
-Then you can reference them from a monorepo using a bos.workspace.json
-workspace is the root
