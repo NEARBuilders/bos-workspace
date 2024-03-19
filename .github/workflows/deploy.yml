@@ -106,10 +106,11 @@ jobs:
 
       - name: Build the workspace
         run: |
+          echo "Building $BUILD_PATH, using command: $BUILD_COMMAND"
           $BUILD_COMMAND
 
       - name: Deploy widgets
         run: |
-          pwd
           cd $BUILD_PATH
+          pwd
           bos components deploy "$BOS_DEPLOY_ACCOUNT_ID" sign-as "$BOS_SIGNER_ACCOUNT_ID" network-config "$BOS_DEPLOY_ENV" sign-with-plaintext-private-key --signer-public-key "$BOS_SIGNER_PUBLIC_KEY" --signer-private-key "$BOS_SIGNER_PRIVATE_KEY" send
