@@ -1,9 +1,12 @@
-# bos-workspace (ALPHA)
+<center>
 
-🚧 **Warning: This library is in alpha and may undergo significant changes.** 🚧
+# bos-workspace (0.0.1-alpha.7)
 
-![bos-workspace](./docs/assets/bos-workspace.gif)
+🚧 **Warning: This version of the library has been depreciated.** 🚧
 
+**Below is the legacy documentation.**
+
+</center>
 ## Getting Started
 
 To use bos-workspace, install it globally or in your existing workspace:
