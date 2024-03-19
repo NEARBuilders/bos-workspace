@@ -85,7 +85,7 @@ jobs:
 
       - name: Install bos-workspace globally
         run: |
-          npm install -g git+https://github.com/NEARBuilders/bos-workspace.git#$BW_VERSION
+          npm install -g "git+https://github.com/NEARBuilders/bos-workspace.git#$BW_VERSION"
 
       - name: Check for bos.workspace.json or bos.config.json
         run: |
