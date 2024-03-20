@@ -92,11 +92,11 @@ jobs:
           else
             if [ -f "bos.workspace.json" ]; then
               echo "Found bos.workspace.json"
-              BUILD_COMMAND="bos-workspace ws build"
+              BUILD_COMMAND="bos-workspace ws build -n $BOS_DEPLOY_ENV"
               BUILD_PATH="$WORKING_DIRECTORY/dist/apps/$BOS_APP_NAME"
             elif [ -f "bos.config.json" ]; then
               echo "Found bos.config.json"
-              BUILD_COMMAND="bos-workspace build"
+              BUILD_COMMAND="bos-workspace build -n $BOS_DEPLOY_ENV"
               BUILD_PATH="$WORKING_DIRECTORY/dist/$BOS_APP_NAME"
             else
               echo "Neither bos.workspace.json nor bos.config.json found, aborting"
