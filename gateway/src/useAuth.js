@@ -72,6 +72,9 @@ export function useAuth() {
             return <Link {...props} />;
           },
         },
+        features: {
+          enableComponentSrcDataKey: true,
+        },
         config: {
           defaultFinality: undefined,
         },
