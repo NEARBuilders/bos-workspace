@@ -7,7 +7,6 @@
     "bw": "./bin/bw.js"
   },
   "scripts": {
-    "prepublish": "npm run build",
     "build": "tsc && tsc-alias",
     "dev": "watch 'npm run build' lib",
     "test": "jest",
@@ -20,6 +19,7 @@
     "gateway/dist/*"
   ],
   "keywords": [],
+  "main": "./bin/bw.js",
   "author": "",
   "license": "ISC",
   "dependencies": {
