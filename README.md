@@ -4,7 +4,7 @@
 
 🚧 **Warning: This library has undergone a major refactor.** 🚧
 
-**Read the [migration guide](./MIGRATION_GUIDE.md), or the legacy documentation for v0.0.1-alpha.7 can be found [here](https://github.com/NEARBuilders/bos-workspace/tree/version/0.0.1-alpha.7).**
+**Read the [migration guide](./MIGRATION_GUIDE.md), or the legacy documentation for v0.0.1-alpha.6 can be found [here](https://github.com/NEARBuilders/bos-workspace/tree/version/0.0.1-alpha.6).**
 
 </center>
 

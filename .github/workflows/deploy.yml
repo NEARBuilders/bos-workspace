@@ -9,7 +9,7 @@ on:
         default: "0.3.6"
       bw-legacy:
         required: false
-        description: "Flag to use legacy BOS Workspace deploy (e.g. 0.0.1-alpha.7)"
+        description: "Flag to use legacy BOS Workspace deploy (e.g. 0.0.1-alpha.6)"
         type: boolean
         default : true
       deploy-env:
@@ -78,9 +78,9 @@ jobs:
       - name: Install bos-workspace globally
         run: |
           if [ "${{ inputs.bw-legacy }}" = "true" ]; then
-            npm install -g "git+https://github.com/NEARBuilders/bos-workspace.git#version/0.0.1-alpha.7"
+            npm install -g bos-workspace@0.0.1-alpha.6
           else
-            npm install -g "git+https://github.com/NEARBuilders/bos-workspace.git#main"
+            npm install -g bos-workspace
           fi
 
       - name: Build and deploy the workspace
