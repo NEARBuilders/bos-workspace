@@ -12,6 +12,11 @@ on:
         description: "Flag to use legacy BOS Workspace deploy (e.g. 0.0.1-alpha.6)"
         type: boolean
         default : true
+      build-env:
+          required: false
+          description: "Environment to build workspace code to (e.g. staging)"
+          type: string
+          default: "mainnet"
       deploy-env:
         required: false
         description: "Environment to deploy component code to (e.g. mainnet, testnet)"
@@ -48,6 +53,7 @@ jobs:
     runs-on: ubuntu-latest
     name: Deploy Widgets
     env:
+      BW_BUILD_ENV: ${{ inputs.build-env }}
       BOS_DEPLOY_ENV: ${{ inputs.deploy-env }}
       BOS_APP_NAME: ${{ inputs.app-name }}
       WORKING_DIRECTORY: ${{ inputs.working-directory }}
@@ -92,11 +98,11 @@ jobs:
           else
             if [ -f "bos.workspace.json" ]; then
               echo "Found bos.workspace.json"
-              BUILD_COMMAND="bos-workspace ws build -n $BOS_DEPLOY_ENV"
+              BUILD_COMMAND="bos-workspace ws build -n $BW_BUILD_ENV"
               BUILD_PATH="$WORKING_DIRECTORY/dist/apps/$BOS_APP_NAME"
             elif [ -f "bos.config.json" ]; then
               echo "Found bos.config.json"
-              BUILD_COMMAND="bos-workspace build -n $BOS_DEPLOY_ENV"
+              BUILD_COMMAND="bos-workspace build -n $BW_BUILD_ENV"
               BUILD_PATH="$WORKING_DIRECTORY/dist"
             else
               echo "Neither bos.workspace.json nor bos.config.json found, aborting"
