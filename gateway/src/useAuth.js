@@ -77,6 +77,7 @@ export function useAuth() {
         },
         config: {
           defaultFinality: undefined,
+          nodeUrl: "https://near.lava.build",
         },
       });
   }, [initNear]);
