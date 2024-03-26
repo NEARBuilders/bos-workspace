@@ -1,6 +1,6 @@
 {
   "name": "bos-workspace",
-  "version": "1.0.0-alpha.1",
+  "version": "1.0.0-alpha.2",
   "description": "",
   "bin": {
     "bos-workspace": "./bin/bw.js",
@@ -13,7 +13,7 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
-    "prepublishOnly": "npm run build & npm run build:gateway"
+    "prepublish": "npm run build && npm run build:gateway"
   },
   "files": [
     "dist",
