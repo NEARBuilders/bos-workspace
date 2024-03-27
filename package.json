@@ -1,14 +1,16 @@
 {
   "name": "bos-workspace",
-  "version": "1.0.0-alpha.3",
+  "version": "1.0.0-alpha.4",
   "description": "",
   "bin": {
     "bos-workspace": "./bin/bw.js",
-    "bw": "./bin/bw.js"
+    "bw": "./bin/bw.js",
+    "bw-dev": "./bw.ts"
   },
   "scripts": {
     "build": "tsc && tsc-alias",
     "build:gateway": "cd ./gateway && npm install && npm run build",
+    "bw": "tsx watch bw.ts",
     "dev": "watch 'npm run build' lib",
     "test": "jest",
     "test:watch": "jest --watch",
@@ -35,7 +37,8 @@
     "multilang-extract-comments": "^0.4.0",
     "prettier": "^2.8.8",
     "socket.io": "^4.7.3",
-    "sucrase": "^3.34.0"
+    "sucrase": "^3.34.0",
+    "tsx": "^4.7.1"
   },
   "devDependencies": {
     "@types/crypto-js": "^4.2.2",
