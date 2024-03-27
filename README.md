@@ -2,37 +2,35 @@
 
 # bos-workspace
 
-🚧 **Warning: This library has undergone a major refactor.** 🚧
+🚧 **Warning: This library has recently undergone a major refactor.** 🚧
 
-**Read the [migration guide](./MIGRATION_GUIDE.md), or the legacy documentation for v0.0.1-alpha.6 can be found [here](https://github.com/NEARBuilders/bos-workspace/tree/version/0.0.1-alpha.6).**
+**If this is not your first time using bos-workspace, read the [migration guide](./MIGRATION_GUIDE.md). The legacy documentation for v0.0.1-alpha.6 can be found [here](https://github.com/NEARBuilders/bos-workspace/tree/version/0.0.1-alpha.6).**
 
 </center>
 
-`bos-workspace` is a comprehensive toolset designed to simplify the development and deployment of [NEAR components](https://docs.near.org/bos/tutorial/quickstart) and applications. With support for hot reload, TypeScript, and multiple app management, it caters to developers looking for an efficient and scalable development environment.
+`bos-workspace` is a comprehensive toolset designed to simplify the development and deployment of [NEAR components](https://docs.near.org/bos/tutorial/quickstart) and applications. With support for hot reload, TypeScript, and multiple app management, it caters to developers looking for an efficient and scalable developer environment.
 
 ## Quickstart
 
-### Installation
-
-You can install `bos-workspace` globally on your machine or within your existing project workspace using npm (or other package manager):
+To begin, either start fresh with [this template repository](https://github.com/nearbuilders/quickstart) or install `bos-workspace` within an existing project:
 
 ```cmd
 npm install bos-workspace
 ```
 
-### Usage
-
-To start, you may clone an existing project via:
+Then, you can clone widgets from an existing [account](https://near.social/mob.near/widget/Everyone) via:
 
 ```bash
 bos-workspace clone [accountId]
 ```
 
-or build your workspace from scratch. 
+Or ensure the proper workspace [structure and usage](#usage).
 
-`bos-workspace` supports both multi and single app development because of this core concept:
+### Usage
+
+`bos-workspace` supports both multi and single app development because of `Apps` and `Workspaces`:
   
-* **Apps**: which belong to an Account, described by a `bos.config.json`. A structure may look like this:
+* **App**: which belong to an Account, described by a `bos.config.json`. A structure may look like this:
 
 ```txt
 app.near/
@@ -73,7 +71,6 @@ where the content of `bos.workspace.json` is:
 ```
 
 **Note:** The "app name" is not required to end in `.near`, and apps don't necessarily have to be stored in a directory named `/apps`. What's important is that the `bos.config.json` is located at the same level as directories such as `/widget`, and that `bos.workspace.json` specifies the directory it resides in.
-
 
 
 ### Commands

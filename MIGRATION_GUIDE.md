@@ -1,6 +1,6 @@
 # Migration Guide
 
-## 0.0.1-alpha.x to 1.0.0-alpha
+## 0.0.1-alpha.x to 1.0.0
 
 This upgrade introduces some name changes, a new replacements strategy, and a more modular approach with apps and workspaces.
 
