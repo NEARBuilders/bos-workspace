@@ -70,11 +70,11 @@ jobs:
         run: |
           curl --proto '=https' --tlsv1.2 -LsSf https://github.com/FroVolod/bos-cli-rs/releases/download/v${{ inputs.cli-version }}/bos-cli-installer.sh | sh
 
-      - name: Configure non-archival RPC endpoint
+      - name: Configure Lava Network RPC endpoint
         run: |
           mkdir -p ~/.config/near-cli
           touch ~/.config/near-cli/config.toml
-          echo -e "credentials_home_dir = \"/home/runner/.near-credentials\"\n[network_connection.mainnet]\nnetwork_name = \"mainnet\"\nrpc_url = \"https://rpc.mainnet.near.org/\"\nwallet_url = \"https://app.mynearwallet.com/\"\nexplorer_transaction_url = \"https://nearblocks.io/txns/\"" > ~/.config/near-cli/config.toml
+          echo -e "credentials_home_dir = \"/home/runner/.near-credentials\"\n[network_connection.mainnet]\nnetwork_name = \"mainnet\"\nrpc_url = \"https://near.lava.build/\"\nwallet_url = \"https://app.mynearwallet.com/\"\nexplorer_transaction_url = \"https://nearblocks.io/txns/\"\n[network_connection.testnet]\nnetwork_name = \"testnet\"\nrpc_url = \"https://near-testnet.lava.build/\"\nwallet_url = \"https://wallet.testnet.near.org/\"\nexplorer_transaction_url = \"https://explorer.testnet.near.org/transactions/\"\nlinkdrop_account_id = \"testnet\"\nfaucet_url = \"https://helper.nearprotocol.com/account\"" > ~/.config/near-cli/config.toml
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
@@ -116,6 +116,13 @@ jobs:
           $BUILD_COMMAND
 
           cd $BUILD_PATH
-          pwd
-          ls
+
+          # workaround because bos-cli-rs puts all widgets in src
+          if [ "${{ inputs.bw-legacy }}" = "true" ]; then
+            find src/widget/* -maxdepth 0 -exec mv -t ./src '{}' +
+            if [ -z "$(ls -A src/widget)" ]; then
+              rm -r src/widget
+            fi
+          fi
+
           bos components deploy "$BOS_DEPLOY_ACCOUNT_ID" sign-as "$BOS_SIGNER_ACCOUNT_ID" network-config "$BOS_DEPLOY_ENV" sign-with-plaintext-private-key --signer-public-key "$BOS_SIGNER_PUBLIC_KEY" --signer-private-key "$BOS_SIGNER_PRIVATE_KEY" send
