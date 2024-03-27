@@ -12,7 +12,7 @@
 
 ## Quickstart
 
-To begin, either start fresh with [this template repository](https://github.com/nearbuilders/quickstart) or install `bos-workspace` within an existing project:
+To begin, either [use this template repository](https://github.com/new?template_name=quickstart&template_owner=NEARBuilders) or install `bos-workspace` within an existing project:
 
 ```cmd
 npm install bos-workspace
