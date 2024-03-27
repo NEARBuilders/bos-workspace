@@ -118,7 +118,7 @@ jobs:
           cd $BUILD_PATH
 
           # workaround because bos-cli-rs puts all widgets in src
-          if [ "${{ inputs.bw-legacy }}" = "true" ]; then
+          if [ "${{ inputs.bw-legacy }}" = "false" ]; then
             find src/widget/* -maxdepth 0 -exec mv -t ./src '{}' +
             if [ -z "$(ls -A src/widget)" ]; then
               rm -r src/widget
