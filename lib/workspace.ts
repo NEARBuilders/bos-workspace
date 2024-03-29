@@ -47,7 +47,9 @@ export async function readWorkspace(src: string): Promise<WorkspaceConfig> {
 
   for (const app of config.apps) {
     if (app.includes("*")) {
-      const matches = glob.sync(path.join(src, app));
+      const matches = glob.sync(path.join(src, app), {
+        windowsPathsNoEscape: true,
+      });
       expandedApps.push(...matches);
     } else {
       expandedApps.push(app);
