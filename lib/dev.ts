@@ -167,6 +167,7 @@ function startServer(opts: DevOptions, devJsonPath: string) {
             bosLoaderWs: `ws://127.0.0.1:${port}`,
             bosLoaderUrl: `http://127.0.0.1:${port}/api/loader`,
             enableHotReload: opts.NoHot ? false : true,
+            network: opts.network,
           });
           const withEnv = injectHTML(data, { ENV_CONFIG: envConfig });
           res.send(withEnv);
