@@ -23,8 +23,5 @@ Thumbs.db
 dist/**/*
 /examples/**/build/
 
-# ignore yarn.lock
-yarn.lock
-
 # tests
 __app_example_1/
