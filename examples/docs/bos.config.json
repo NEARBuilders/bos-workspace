@@ -1,0 +1,8 @@
+{
+  "account": "docs.bos-workspace.near",
+  "overrides": {
+    "testnet": {
+      "account": "docs.bos-workspace.testnet"
+    }
+  }
+}
