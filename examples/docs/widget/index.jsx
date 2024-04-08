@@ -33,6 +33,8 @@ const config = {
         src="${config_account}/widget/components.Header"
         props={{
           routes: config.router.routes,
+          basePath: "${config_account}/widget/index",
+          param: "page",
           ...passProps,
         }}
       />
@@ -94,7 +96,11 @@ const Root = styled.div`
     border-radius: "5px";
     cursor: "pointer";
   }
-  // you can override classnames here
+
+  .link {
+    text-decoration: "none";
+    color: inherit;
+  }
 `;
 
 return (
