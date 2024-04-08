@@ -4,7 +4,6 @@ import { setupMeteorWallet } from "@near-wallet-selector/meteor-wallet";
 import { setupModal } from "@near-wallet-selector/modal-ui";
 import "@near-wallet-selector/modal-ui/styles.css";
 import { setupMyNearWallet } from "@near-wallet-selector/my-near-wallet";
-import { setupNearWallet } from "@near-wallet-selector/near-wallet";
 import { setupNeth } from "@near-wallet-selector/neth";
 import { setupNightly } from "@near-wallet-selector/nightly";
 import { setupSender } from "@near-wallet-selector/sender";
@@ -20,9 +19,10 @@ import {
 import React, { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useEthersProviderContext } from "./useWeb3";
+import { flags } from "../config/flags.js";
 
 export const refreshAllowanceObj = {};
-const NetworkId = "mainnet";
+const NetworkId = flags.network;
 
 export function useAuth() {
   const [connected, setConnected] = useState(false);
@@ -46,7 +46,6 @@ export function useAuth() {
         selector: setupWalletSelector({
           network: NetworkId,
           modules: [
-            setupNearWallet(),
             setupMyNearWallet(),
             setupSender(),
             setupHereWallet(),
