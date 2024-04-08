@@ -9,7 +9,7 @@ const config = {
   layout: {
     src: "${config_account}/widget/layout",
     props: {
-      variant: "standard",
+      variant: "sidebar",
     },
   },
   blocks: {
@@ -22,6 +22,12 @@ const config = {
       />
     ),
     Footer: () => <></>, // customize your footer
+    Sidebar: () => (
+      <Widget
+        src="${config_account}/widget/components.Sidebar"
+        props={{ routes: config.router.routes, ...passProps }}
+      />
+    ),
   },
   router: {
     param: "page",
@@ -39,11 +45,30 @@ const config = {
 };
 
 const Root = styled.div`
+  .sidebar {
+    min-width: 250px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .button {
+    width: 100%;
+    padding: 10px;
+    border: "none";
+    background-color: "#007bff";
+    color: "#fff";
+    border-radius: "5px";
+    cursor: "pointer";
+  }
   // you can override classnames here
 `;
 
 return (
   <Root>
-    <Widget src="${config_account}/widget/PR.view" props={{ config, ...props }} />
+    <Widget
+      src="${config_account}/widget/PR.view"
+      props={{ config, ...props }}
+    />
   </Root>
 );

@@ -1,4 +1,4 @@
-const { Router } = VM.require("devs.near/widget/Router") || {
+const { Router } = VM.require("${config_account}/widget/PR.Router") || {
   Router: () => <></>,
 };
 

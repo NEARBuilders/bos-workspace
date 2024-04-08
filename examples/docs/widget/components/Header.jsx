@@ -1,5 +1,5 @@
 return (
   <div className="header">
-    <h1>everything</h1>
+    <h3>bos-workspace</h3>
   </div>
 );
