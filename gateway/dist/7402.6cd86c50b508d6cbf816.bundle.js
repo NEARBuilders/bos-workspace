@@ -1,0 +1,1 @@
+"use strict";(self.webpackChunkbos_workspace_gateway=self.webpackChunkbos_workspace_gateway||[]).push([[7402],{47402:(a,e,s)=>{s.d(e,{take:()=>k.s,takeUntil:()=>t.Q});var k=s(38975),t=s(67791)}}]);

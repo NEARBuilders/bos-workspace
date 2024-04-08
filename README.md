@@ -15,7 +15,7 @@
 To begin, either [use this template repository](https://github.com/new?template_name=quickstart&template_owner=NEARBuilders) or install `bos-workspace` within an existing project:
 
 ```cmd
-npm install bos-workspace
+yarn add -D bos-workspace
 ```
 
 Then, you can clone widgets from an existing [account](https://near.social/mob.near/widget/Everyone) via:

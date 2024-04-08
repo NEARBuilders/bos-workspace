@@ -57,6 +57,7 @@ module.exports = function (env) {
           fs: false,
           path: require.resolve("path-browserify"),
           zlib: require.resolve("browserify-zlib"),
+          vm: require.resolve("vm-browserify"),
         },
         // Fix for using `yarn link "near-social-vm"`
         alias: {

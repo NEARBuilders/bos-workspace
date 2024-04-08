@@ -8,7 +8,6 @@
     "@near-wallet-selector/modal-ui": "^8.5.0",
     "@near-wallet-selector/my-near-wallet": "^8.5.0",
     "@near-wallet-selector/near-wallet": "^8.5.0",
-    "@near-wallet-selector/neth": "^8.5.0",
     "@near-wallet-selector/nightly": "^8.5.0",
     "@near-wallet-selector/sender": "^8.5.0",
     "@web3-onboard/core": "^2.20.2",
@@ -35,7 +34,8 @@
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.20.0",
     "socket.io-client": "^4.7.2",
-    "styled-components": "^5.3.6"
+    "styled-components": "^5.3.6",
+    "vm-browserify": "^1.1.2"
   },
   "scripts": {
     "serve": "webpack serve",

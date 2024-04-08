@@ -23,13 +23,15 @@ async function run() {
     .command("dev")
     .description("Run the development server")
     .argument("[src]", "path to the app source code", ".")
+    .option("-n, --network <network>", "network to build for", "mainnet")
+    .option("-l, --loglevel <loglevel>", "log level (ERROR, WARN, INFO, DEV, BUILD, DEBUG)", "DEV")
     .option("-p, --port <port>", "Port to run the server on", "8080")
     .option("-g, --gateway <gateway>", "Path to custom gateway dist", undefined)
     .option("--no-gateway", "Disable the gateway", false)
     .option("--no-hot", "Disable hot reloading", false)
     .option("--no-open", "Disable opening the browser", false)
     .action((src, opts) => {
-      global.log = new Logger(LogLevel.DEV);
+      global.log = new Logger(LogLevel[opts.loglevel.toUpperCase() as keyof typeof LogLevel]);
       dev(src, opts).catch((e: Error) => {
         log.error(e.stack || e.message);
       })
