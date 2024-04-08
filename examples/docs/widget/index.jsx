@@ -52,23 +52,28 @@ const config = {
   },
   router: {
     param: "page",
-    routes: {
-      home: {
-        path: "${config_account}/widget/home",
-        blockHeight: "final",
-        init: {
-          name: "Home",
-        },
-        default: true,
-      },
-      settings: {
-        path: "${config_account}/widget/settings",
-        blockHeight: "final",
-        init: {
-          name: "Settings",
+    routes: [
+      {
+        path: "/",
+        element: {
+          src: "${config_account}/widget/home",
+          initialProps: {},
         },
       },
-    },
+      {
+        path: "/settings",
+        element: {
+          src: "${config_account}/widget/settings",
+          initialProps: {},
+        },
+      },
+      {
+        path: "/:path*",
+        element: {
+          src: "${config_account}/widget/document",
+        },
+      },
+    ],
   },
 };
 

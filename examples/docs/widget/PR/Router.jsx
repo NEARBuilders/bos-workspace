@@ -7,62 +7,69 @@ const Content = styled.div`
   height: 100%;
 `;
 
-function findDefaultRoute(routesObject) {
-  const routeKey =
-    routesObject &&
-    Object.keys(routesObject).find((key) => {
-      const route = routesObject[key];
-      return route.default === true;
-    });
-
-  if (routeKey) {
-    return routesObject[routeKey];
-  } else {
-    return null;
-  }
-}
-
 function Router({ config, ...passProps }) {
   const { routes, PageNotFound, debug, param } = config;
 
+  let activeRoute;
+  let activeRouteProps = {};
+
   if (!param) param = "page";
+  const matchingRoute = routes.find((route) => {
+    const pattern = `^${route.path
+      .substring(1)
+      .replace(/\//g, "\\/")
+      .replace(/:\w+\*?/g, "([^/]+)")}$`;
 
-  const defaultRoute =
-    findDefaultRoute(routes) ??
-    (routes && Object.keys(routes).length && routes[Object.keys(routes)[0]]);
-  const activeRoute =
-    (routes &&
-      routes.hasOwnProperty(passProps[param]) &&
-      routes[passProps[param]]) ||
-    defaultRoute;
+    if (passProps[param] === undefined && route.path === "/") {
+      return true; // Match root path
+    } else if (passProps[param]) {
+      const match = passProps[param].match(pattern);
+      if (match) {
+        const [_, ...params] = match;
+        activeRouteProps = { _params: { [param]: params.join("") } };
+        return true;
+      }
+    }
 
-  if (!PageNotFound) PageNotFound = () => <p>404 Not Found</p>;
+    return false;
+  });
 
-  if (!activeRoute) {
-    // Handle 404 or default case for unknown routes
-    return <PageNotFound />;
+  if (matchingRoute) {
+    activeRoute = matchingRoute;
+  } else {
+    // Fallback to dynamic path route if no other route matches
+    const dynamicPathRoute = routes.find((route) => route.path === "/:path*");
+    if (dynamicPathRoute) {
+      activeRoute = dynamicPathRoute;
+      activeRouteProps = { _params: { [param]: passProps[param] || "" } };
+    } else {
+      activeRoute = PageNotFound;
+    }
   }
 
-  // An improvement may be to "lazy load", e.g. load all widgets at once and only "display" the active one
-  // potentionally add a "lazy: true" prop to the route object
+  if (activeRoute.element) {
+    activeRouteProps = {
+      ...activeRouteProps,
+      ...activeRoute.element.initialProps,
+    };
+  }
 
-  // for each route, if lazy, load the widget and store it in a map
-  // set display for the active route
-
-  // we may want to convert this to a widget for that purpose, to manage state?
   if (debug) {
     return (
       <div key={JSON.stringify(activeRoute)}>
         <pre>{JSON.stringify(activeRoute, null, 2)}</pre>
-        <pre>{JSON.stringify(props, null, 2)}</pre>
+        <pre>{JSON.stringify(passProps, null, 2)}</pre>
       </div>
     );
   } else {
+    const params = passProps[param]
+      ? { _params: { [param]: passProps[param] } }
+      : {};
     return (
       <Content key={param + JSON.stringify(activeRoute)}>
         <Widget
-          src={activeRoute.path}
-          props={activeRoute.init}
+          src={activeRoute.element.src}
+          props={{ ...activeRouteProps, ...params }}
           loading={<div style={{ height: "100%", width: "100%" }} />}
         />
       </Content>
