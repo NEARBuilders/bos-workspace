@@ -90,11 +90,6 @@ const Root = styled.div`
   .button {
     width: 100%;
     padding: 10px;
-    border: "none";
-    background-color: "#007bff";
-    color: "#fff";
-    border-radius: "5px";
-    cursor: "pointer";
   }
 
   .link {

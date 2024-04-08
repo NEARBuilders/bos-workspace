@@ -2,14 +2,13 @@ const { normalize } = VM.require("devhub.near/widget/core.lib.stringUtils") || {
   normalize: (str) => str,
 };
 
-const { basePath, param } = props;
-
 const data = {
   "": JSON.stringify({
     title: "My Documentation",
     sections: [
       {
         title: "Getting Started",
+        content: "Hello",
         subsections: [
           {
             title: "Installation",
@@ -23,6 +22,7 @@ const data = {
       },
       {
         title: "Usage",
+        content: "Hello",
         subsections: [
           {
             title: "Basic Usage",
@@ -36,6 +36,7 @@ const data = {
       },
       {
         title: "Examples",
+        content: "Hello",
         subsections: [
           {
             title: "Example 1",
@@ -60,28 +61,28 @@ const data = {
 
 const documentation = JSON.parse(data[""] || "null");
 
-// Create a map to store paths and corresponding content
 const contentMap = {};
 
-// Iterate over sections
+// Iterate over sections and subsections to populate content map
 documentation.sections.forEach((section) => {
   const sectionPath = normalize(section.title);
   contentMap[sectionPath] = { title: section.title, content: section.content };
 
-  // Iterate over subsections
   section.subsections.forEach((subsection) => {
-    const subsectionPath = normalize(subsection.title);
-    contentMap[`${sectionPath}/${subsectionPath}`] = { title: subsection.title, content: subsection.content };
+    const subsectionPath = `${sectionPath}/${normalize(subsection.title)}`;
+    contentMap[subsectionPath] = {
+      title: subsection.title,
+      content: subsection.content,
+    };
   });
 });
 
-// Function to retrieve content based on path
-const getContent = (path) => {
-  return contentMap[path];
+return {
+  get: (path) => {
+    if (path) {
+      return contentMap[path];
+    } else {
+      return contentMap;
+    }
+  },
 };
-
-// Example usage:
-const routePath = 'getting-started/setup'; // Example path
-const content = getContent(routePath);
-
-return <p>{JSON.stringify(content)}</p>
