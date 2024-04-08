@@ -1,3 +1,16 @@
+/**
+ * We can get some data from the project itself
+ * metadata, name, description, tags, etc.
+ * We want the document paths... We want to be able to add or remove them...
+ *
+ * What would be ideal for this? It can be a post or a page
+ * If it is a post, then we got comments on it directly.
+ *
+ * If you'd like to leave any questions, feel free to comment directly on the page.
+ *
+ * I want to be able to render some embeddings
+ */
+
 const config = {
   theme: {
     // add key values to define colors
@@ -18,14 +31,22 @@ const config = {
       // customize your header
       <Widget
         src="${config_account}/widget/components.Header"
-        props={{ routes: config.router.routes, ...passProps }}
+        props={{
+          routes: config.router.routes,
+          ...passProps,
+        }}
       />
     ),
     Footer: () => <></>, // customize your footer
     Sidebar: () => (
       <Widget
         src="${config_account}/widget/components.Sidebar"
-        props={{ routes: config.router.routes, ...passProps }}
+        props={{
+          routes: config.router.routes,
+          basePath: "${config_account}/widget/index",
+          param: "page",
+          ...passProps,
+        }}
       />
     ),
   },
@@ -39,6 +60,13 @@ const config = {
           name: "Home",
         },
         default: true,
+      },
+      settings: {
+        path: "${config_account}/widget/settings",
+        blockHeight: "final",
+        init: {
+          name: "Settings",
+        },
       },
     },
   },
