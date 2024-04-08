@@ -12,25 +12,16 @@ function Router({ config, ...passProps }) {
 
   let activeRoute;
   let activeRouteProps = {};
+  let params = {};
 
   if (!param) param = "page";
   const matchingRoute = routes.find((route) => {
-    const pattern = `^${route.path
-      .substring(1)
-      .replace(/\//g, "\\/")
-      .replace(/:\w+\*?/g, "([^/]+)")}$`;
-
+    // if no path is provided, match root path
     if (passProps[param] === undefined && route.path === "/") {
-      return true; // Match root path
-    } else if (passProps[param]) {
-      const match = passProps[param].match(pattern);
-      if (match) {
-        const [_, ...params] = match;
-        activeRouteProps = { _params: { [param]: params.join("") } };
-        return true;
-      }
+      return true;
+    } else if (passProps[param] === route.path.substring(1)) {
+      return true;
     }
-
     return false;
   });
 
@@ -38,10 +29,17 @@ function Router({ config, ...passProps }) {
     activeRoute = matchingRoute;
   } else {
     // Fallback to dynamic path route if no other route matches
-    const dynamicPathRoute = routes.find((route) => route.path === "/:path*");
+    const dynamicPathRoute = routes.find((route) => {
+      const path = route.path.substring(1);
+      return path.startsWith(":") || path.startsWith("*");
+    });
     if (dynamicPathRoute) {
+      const key = dynamicPathRoute.path
+        .substring(1)
+        .replace("*", "")
+        .replace(":", "");
       activeRoute = dynamicPathRoute;
-      activeRouteProps = { _params: { [param]: passProps[param] || "" } };
+      params = { _params: { [key]: passProps[param] || "" } };
     } else {
       activeRoute = PageNotFound;
     }
@@ -62,9 +60,6 @@ function Router({ config, ...passProps }) {
       </div>
     );
   } else {
-    const params = passProps[param]
-      ? { _params: { [param]: passProps[param] } }
-      : {};
     return (
       <Content key={param + JSON.stringify(activeRoute)}>
         <Widget
