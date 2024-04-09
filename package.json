@@ -25,7 +25,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@archetype-org/ribbit": "^0.2.0",
+    "@archetype-org/ribbit": "^0.2.1",
     "@helia/json": "^3.0.1",
     "commander": "^11.1.0",
     "crypto-js": "^4.2.0",
