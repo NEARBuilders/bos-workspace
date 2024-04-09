@@ -1,1 +1,0 @@
-const hashtag = props.hashtag ?? "bos"; return (<Widget src="mob.near/widget/Hashtag.Feed" props={{hashtag: hashtag}} />);
