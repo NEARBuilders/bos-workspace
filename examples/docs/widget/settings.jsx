@@ -1,1 +1,1 @@
-return <Widget src="devs.near/widget/Editor" />;
+return <Widget src="devs.near/widget/Editor" props={{}} />;

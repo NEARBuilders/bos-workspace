@@ -1,0 +1,3 @@
+{
+  "apps": ["./guestbook", "./devs.near", "./docs"]
+}
