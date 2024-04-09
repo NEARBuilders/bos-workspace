@@ -80,21 +80,139 @@ const config = {
 };
 
 const Root = styled.div`
+  * {
+    box-sizing: border-box;
+    font-weight: 400;
+  }
+
+  .window {
+    /* -webkit-font-smoothing: none; */
+    letter-spacing: 0.025em;
+
+    background-color: #fff;
+    height: 100vh;
+    width: 100% !important;
+
+    border-radius: 5px;
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+  }
+
   .sidebar {
-    min-width: 250px;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
+    padding: 20px;
+    width: 250px;
+  }
+
+  .nested-section {
+    margin-bottom: 10px;
+  }
+
+  .parent-section {
+    margin-bottom: 5px;
+  }
+
+  .child-section {
+    margin-left: 20px; /* Adjust as needed for indentation */
   }
 
   .button {
+    display: block;
     width: 100%;
-    padding: 10px;
+    padding: 8px;
+    margin: 0;
+    border: none;
+    /* background-color: transparent; */
+    text-align: left;
+
+    -moz-appearance: none;
+    appearance: none;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    padding: 0.45em 0.75em;
+    border-left: 2px solid #ededed;
+    border-top: 2px solid #ededed;
+    border-right: 2px solid #404040;
+    border-bottom: 2px solid #404040;
+
+    color: #000;
+    background-color: silver;
+    position: relative;
+    z-index: 10;
+  }
+
+  .button:hover {
+    background-color: #f0f0f0;
+  }
+
+  .separator {
+    border-bottom: 1px solid #ccc;
+    margin-bottom: 10px;
   }
 
   .link {
     text-decoration: "none";
     color: inherit;
+  }
+
+  .header {
+    width: 100%;
+    position: relative;
+    color: #fff;
+    padding: 0.25em 0.75em;
+    line-height: 1.4;
+    border-left: 2px solid #ededed;
+    border-top: 2px solid #ededed;
+    border-right: 2px solid #404040;
+    border-bottom: 2px solid #404040;
+    background: navy;
+
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 20px;
+    color: white;
+
+    .branding {
+      margin-right: 24px;
+    }
+
+    .nav {
+      display: flex;
+      flex-direction: row;
+      gap: 20px;
+
+      padding: 0 20px;
+    }
+
+    .end {
+      margin-left: auto;
+    }
+  }
+
+  .left-branding {
+    margin-right: auto; /* Pushes the branding to the left */
+  }
+
+  .routes {
+    display: flex;
+    gap: 20px;
+  }
+
+  .settings {
+    margin-left: auto; /* Pushes the settings to the right */
+  }
+
+  .link {
+    text-decoration: none;
+    color: white;
+  }
+
+  .link:hover {
+    text-decoration: underline;
+  }
+
+  .content {
+    padding: 20px;
   }
 `;
 

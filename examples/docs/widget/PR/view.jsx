@@ -90,7 +90,7 @@ const Content = styled.div`
 
 return (
   <CSS style={config.theme}>
-    <Container>
+    <Container className="window">
       <Layout
         {...(config.layout?.props ?? { variant: "standard" })}
         blocks={config.blocks}
