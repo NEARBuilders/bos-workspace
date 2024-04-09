@@ -8,7 +8,15 @@ const data = {
     sections: [
       {
         title: "Getting Started",
-        content: "Hello 1",
+        content: {
+          ref: {
+            cid: "....."
+          }, 
+          adapter: "docs.bos-workspace.near/widget/utils.adapter",
+          path: "bos-workspace.near/post/main", // it would be great if this was just the CID for the hyperfile
+          blockHeight: "",
+          type: "social"
+        },
         subsections: [
           {
             title: "Installation",
@@ -85,4 +93,7 @@ return {
       return contentMap;
     }
   },
+  create: (k, v) => {
+    console.log("create");
+  }
 };

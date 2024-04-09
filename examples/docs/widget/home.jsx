@@ -51,6 +51,9 @@ return (
     </BosWorkspaceInfo>
     <Title>Quickstart</Title>
     <BosWorkspaceInfo>
+      {`bafkreide2vbxjaqsmcsm7gn3poss42n2xxqt7x25qmuzcs4htxbnwphp4i`}
+    </BosWorkspaceInfo>
+    <BosWorkspaceInfo>
       To begin, either use this template repository or install bos-workspace
       within an existing project:
     </BosWorkspaceInfo>

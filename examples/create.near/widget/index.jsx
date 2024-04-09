@@ -94,7 +94,7 @@ const [showPreview, setShowPreview] = useState(defaultPreview || false);
 const [type, setType] = useState(defaultType || "");
 const [editor, setEditor] = useState(defaultEditor || "");
 const [language, setLanguage] = useState(defaultLanguage || "md");
-const [path, setPath] = useState(defaultPath || "");
+const [path, setPath] = useState(props.path || "");
 
 const handleToggleViewMode = () => {
   const newMode = viewMode === "single" ? "split" : "single";
@@ -185,7 +185,7 @@ return (
               <div className="w-100">
                 <ModalBox>
                   <Widget
-                    src={"devs.near/widget/modal.create"}
+                    src={"${config_account}/widget/modal.create"}
                     props={{
                       creatorId: context.accountId,
                       path: path,
@@ -194,6 +194,10 @@ return (
                         set("path", v);
                       },
                       data: JSON.stringify({ body: content }),
+                      adapter: {
+                        label: "Test",
+                        value: "docs.bos-workspace.near/widget/utils.adapter"
+                      },
                       closeModal: () => {
                         State.update({
                           ...state,
