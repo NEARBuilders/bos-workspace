@@ -1,12 +1,14 @@
 const { basePath, param, _params } = props;
 
-const { get } = VM.require("${config_account}/widget/adapter");
+const { get } = VM.require("${config_account}/widget/utils.adapter");
 
 const data = get(_params.path); // this is our adapter
 
 if (!data) {
   return <p>Page not found</p>;
 }
+
+
 
 return (
   <div className="content">

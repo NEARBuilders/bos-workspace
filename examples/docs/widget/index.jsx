@@ -219,7 +219,7 @@ const Root = styled.div`
 return (
   <Root>
     <Widget
-      src="${config_account}/widget/PR.view"
+      src="${config_account}/widget/PR.App"
       props={{ config, ...props }}
     />
   </Root>
