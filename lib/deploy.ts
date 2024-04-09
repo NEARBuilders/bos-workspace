@@ -1,9 +1,9 @@
 import { BaseConfig } from "./config";
+import { uploadAndPinJson } from '@archetype-org/ribbit';
 const { read_bos_config } = require("./config");
 const fs = require("fs");
 const path = require("path");
 const { execSync } = require("child_process");
-const { uploadUsingHelia } = require("./ipfs");
 
 const distFolder = process.env.DIST_FOLDER || "build";
 
@@ -62,7 +62,7 @@ export async function deploy_with_metadata(appFolder, typeFile) {
   }
 
   const formattedContent = [content];
-  const ipfsHash = await uploadUsingHelia(formattedContent);
+  const ipfsHash = await uploadAndPinJson(formattedContent);
   try {
     console.log(`Uploaded data for ${appFolder} with ipfs hash: ${ipfsHash}`);
   } catch (error) {
