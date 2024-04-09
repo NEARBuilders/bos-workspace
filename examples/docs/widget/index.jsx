@@ -20,7 +20,7 @@ const config = {
     // color: "var(--secondary-color)",
   },
   layout: {
-    src: "${config_account}/widget/layout",
+    src: "devs.near/widget/Layout",
     props: {
       variant: "sidebar",
     },
@@ -35,7 +35,7 @@ const config = {
           routes: config.router.routes,
           basePath: "${config_account}/widget/index",
           param: "page",
-          ...passProps,
+          ...props,
         }}
       />
     ),
@@ -47,7 +47,7 @@ const config = {
           routes: config.router.routes,
           basePath: "${config_account}/widget/index",
           param: "page",
-          ...passProps,
+          ...props,
         }}
       />
     ),
@@ -212,7 +212,11 @@ const Root = styled.div`
   }
 
   .content {
-    padding: 20px;
+    flex: 1;
+    padding: 48px 96px;
+    margin: 20px auto;
+    height: 100%;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
   }
 `;
 

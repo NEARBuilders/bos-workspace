@@ -12,7 +12,7 @@ const data = {
         subsections: [
           {
             title: "Installation",
-            content: "Instructions for installing the software.",
+            content: "# Instructions for installing the software.",
           },
           {
             title: "Setup",

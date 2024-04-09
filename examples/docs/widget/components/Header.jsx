@@ -18,7 +18,7 @@ return (
     </div>
     <div className="end">
       {context.accountId === "efiz.near" && (
-        <Link to={`/${basePath}?${param}=settings`} className="link">
+        <Link to={props[param] === "settings" ? `/${basePath}` : `/${basePath}?${param}=settings`} className="link">
           <img
             src="https://win98icons.alexmeub.com/icons/png/settings_gear-0.png"
             alt="settings"
