@@ -10,6 +10,10 @@ const SidebarLayout = styled.div`
   flex-direction: row;
   width: 100%;
 
+  .aside {
+    display: flex;
+  }
+
   .main {
     flex-grow: 1;
   }
@@ -26,11 +30,13 @@ const SplitLayout = styled.div`
 `;
 
 const Layout = ({ variant, blocks, children }) => {
-  const { Header, Footer, Sidebar } = blocks;
+  const { Header, Footer, Sidebar, Left, Right } = blocks;
 
   Header = Header ? Header : () => <></>;
   Footer = Footer ? Footer : () => <></>;
   Sidebar = Sidebar ? Sidebar : () => <></>;
+  Left = Left ? Left : ({ children }) => <>{children}</>;
+  Right = Right ? Right : ({ children }) => <>{children}</>;
 
   if (!variant) {
     variant = "standard";
@@ -69,10 +75,13 @@ const Layout = ({ variant, blocks, children }) => {
         <StandardLayout>
           <Header />
           <SplitLayout>
+            <Sidebar />
             <div className="children">
-              <Sidebar />
+              <Left>{children}</Left>
             </div>
-            <div className="children">{children}</div>
+            <div className="children">
+              <Right>{children}</Right>
+            </div>
           </SplitLayout>
           <Footer />
         </StandardLayout>
