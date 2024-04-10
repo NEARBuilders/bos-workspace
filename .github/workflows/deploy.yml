@@ -87,7 +87,7 @@ jobs:
           if [ "${{ inputs.bw-legacy }}" = "true" ]; then
             yarn global add bos-workspace@0.0.1-alpha.6
           else
-            npm global add bos-workspace
+            yarn global add bos-workspace
           fi
 
       - name: Build and deploy the workspace
