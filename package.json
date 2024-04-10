@@ -1,6 +1,6 @@
 {
   "name": "bos-workspace",
-  "version": "1.0.0-alpha.6",
+  "version": "1.0.0-alpha.7",
   "description": "",
   "bin": {
     "bos-workspace": "./bin/bw.js",
