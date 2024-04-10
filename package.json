@@ -1,6 +1,6 @@
 {
   "name": "bos-workspace",
-  "version": "1.0.0-alpha.5",
+  "version": "1.0.0-alpha.6",
   "description": "",
   "bin": {
     "bos-workspace": "./bin/bw.js",
@@ -13,7 +13,7 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
-    "prepublish": "yarn run build && yarn run build:gateway"
+    "prepublishOnly": "yarn run build && yarn run build:gateway"
   },
   "files": [
     "dist",
