@@ -8,15 +8,23 @@ const data = {
     sections: [
       {
         title: "Getting Started",
-        content: {
-          ref: {
-            cid: "....."
-          }, 
-          adapter: "docs.bos-workspace.near/widget/utils.adapter",
-          path: "bos-workspace.near/post/main", // it would be great if this was just the CID for the hyperfile
-          blockHeight: "",
-          type: "social"
-        },
+        content: `
+        ## Quickstart
+
+        To begin, either [use this template repository](https://github.com/new?template_name=quickstart&template_owner=NEARBuilders) or install \`bos-workspace\` within an existing project:
+        
+        \`\`\`cmd
+        yarn add -D bos-workspace
+        \`\`\`
+        
+        Then, you can clone widgets from an existing [account](https://near.social/mob.near/widget/Everyone) via:
+        
+        \`\`\`bash
+        bos-workspace clone [accountId]
+        \`\`\`
+        
+        Or ensure the proper workspace [structure and usage](#usage).
+        `,
         subsections: [
           {
             title: "Installation",

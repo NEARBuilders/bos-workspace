@@ -70,6 +70,15 @@ const config = {
         },
       },
       {
+        path: "/edit",
+        element: {
+          src: "${config_account}/widget/edit",
+          initialProps: {
+            path: props.path,
+          },
+        },
+      },
+      {
         path: "/:path*",
         element: {
           src: "${config_account}/widget/document",
