@@ -71,7 +71,7 @@ export function useAuth() {
         },
         config: {
           defaultFinality: undefined,
-          nodeUrl: NetworkId === "mainnet" ? "https://near.lava.build" : "near-testnet.lava.build",
+          nodeUrl: NetworkId === "mainnet" ? "https://near.lava.build" : "https://near-testnet.lava.build",
         },
       });
   }, [initNear]);
