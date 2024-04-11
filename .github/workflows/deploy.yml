@@ -80,13 +80,14 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: "18"
+          cache: yarn
 
       - name: Install bos-workspace globally
         run: |
           if [ "${{ inputs.bw-legacy }}" = "true" ]; then
-            npm install -g bos-workspace@0.0.1-alpha.6
+            yarn global add bos-workspace@0.0.1-alpha.6
           else
-            npm install -g bos-workspace
+            yarn global add bos-workspace
           fi
 
       - name: Build and deploy the workspace

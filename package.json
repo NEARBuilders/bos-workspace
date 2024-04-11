@@ -1,6 +1,6 @@
 {
   "name": "bos-workspace",
-  "version": "1.0.0-alpha.4",
+  "version": "1.0.0-alpha.9",
   "description": "",
   "bin": {
     "bos-workspace": "./bin/bw.js",
@@ -8,12 +8,12 @@
   },
   "scripts": {
     "build": "tsc && tsc-alias",
-    "build:gateway": "cd ./gateway && npm install && npm run build",
-    "dev": "watch 'npm run build' lib",
+    "build:gateway": "cd ./gateway && yarn install && yarn run build",
+    "dev": "watch 'yarn run build' lib",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
-    "prepublish": "npm run build && npm run build:gateway"
+    "prepublishOnly": "yarn run build && yarn run build:gateway"
   },
   "files": [
     "dist",
