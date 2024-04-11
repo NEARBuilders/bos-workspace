@@ -21,7 +21,7 @@ yarn add -D bos-workspace
 Then, you can clone widgets from an existing [account](https://near.social/mob.near/widget/Everyone) via:
 
 ```bash
-yarn run bos-workspace clone [accountId]
+yarn run bos-workspace clone [accountId] [dest]
 ```
 
 Or ensure the proper workspace [structure and usage](#usage).
