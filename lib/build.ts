@@ -1,6 +1,6 @@
 import path from "path";
 import { readConfig } from "@/lib/config";
-import { writeJson, copy, loopThroughFiles, outputFile, readFile, readJson } from "@/lib/utils/fs";
+import { writeJson, copy, loopThroughFiles, outputFile, readFile, readJson, remove } from "@/lib/utils/fs";
 import { transpileJS, EvalCustomSyntaxParams } from "@/lib/parser";
 import { Log } from "@/lib/types";
 import { UploadToIPFSOptions, uploadToIPFS } from "@/lib/ipfs";
@@ -66,6 +66,9 @@ export async function buildApp(src: string, dest: string, network: string = "mai
     aliases,
   };
 
+  const new_build_files: string[] = [];
+  const original_build_files: string[] = [];
+
   // module transpilation
   const loadingModules = log.loading(`Transpiling ${modules.length} modules`, LogLevels.BUILD);
   try {
@@ -85,15 +88,18 @@ export async function buildApp(src: string, dest: string, network: string = "mai
         }
       });
       logs.push(...new_logs);
+
       // write to dest
       let new_file_name = path.relative(path.join(src, "module"), file).replace("/", ".");
       new_file_name = new_file_name.substring(0, new_file_name.length - path.extname(file).length);
       new_file_name += ".module.js";
 
       const new_file_path = path.join(dest, "src", "widget", new_file_name);
+      new_build_files.push(new_file_path);
 
       await outputFile(new_file_path, new_file.code);
     }
+
     loadingModules.finish(`Transpiled ${modules.length} modules`);
   } catch (e) {
     loadingModules.error(`Failed to transpile modules`);
@@ -121,18 +127,33 @@ export async function buildApp(src: string, dest: string, network: string = "mai
       new_logs.forEach(log.send);
 
       logs.push(...new_logs);
+
       // write to dest
       let new_file_name = path.relative(path.join(src, "widget"), file).replace("/", ".");
       new_file_name = new_file_name.substring(0, new_file_name.length - path.extname(file).length);
       new_file_name += ".jsx";
 
       const new_file_path = path.join(dest, "src", "widget", new_file_name);
+      new_build_files.push(new_file_path);
+
       await outputFile(new_file_path, new_file.code);
     }
+
     loadingWidgets.finish(`Transpiled ${widgets.length} widgets`);
   } catch (e) {
     loadingWidgets.error(`Failed to transpile widgets`);
     throw e;
+  }
+
+  // remove unnecessary build files
+  await loopThroughFiles(path.join(dest, "src", "widget"), async (file: string) => {
+    original_build_files.push(file);
+  })
+  for (const file of original_build_files) {
+    if (new_build_files.includes(file))
+      continue;
+
+    await remove(file);
   }
 
   await log.wait(
