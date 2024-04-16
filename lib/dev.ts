@@ -1,15 +1,17 @@
+// @ts-nocheck
+import { exec } from "child_process";
+import express from "express";
+import { existsSync, readJson, writeJson } from "fs-extra";
+import { Gaze } from "gaze";
+import http from "http";
 import path from "path";
+import { Server as IoServer } from "socket.io";
 import { buildApp } from "./build";
 import { BaseConfig, readConfig } from "./config";
-import { loopThroughFiles, readFile } from "./utils/fs";
 import { Network } from "./types";
-import { existsSync, writeJson, readJson } from "fs-extra";
-import express from "express";
-import http from "http";
-import { Server as IoServer } from "socket.io";
-import { exec } from "child_process";
-import { Gaze } from "gaze";
+import { loopThroughFiles, readFile } from "./utils/fs";
 import { mergeDeep } from "./utils/objects";
+const bodyParser = require('body-parser');
 
 const DEV_DIST_FOLDER = "build";
 
@@ -100,6 +102,8 @@ async function generateApp(src: string, appDist: string, config: BaseConfig, opt
 
 function startServer(opts: DevOptions, devJsonPath: string) {
   log.info(`Starting bos-workspace`);
+  log.debug(`HELLLOOOOO`);
+  log.info("Hmmmmmmmmm")
 
   // sanitize port to only allow numbers
   const port = opts.port ? parseInt(opts.port.toString().replace(/\D/g, "")) : 3000;
@@ -132,6 +136,8 @@ function startServer(opts: DevOptions, devJsonPath: string) {
     next();
   });
 
+  app.use(bodyParser.json());
+
   app.get("/api/loader", (_, res) => {
     readJson(devJsonPath).then((devJson: DevJson) => {
       res.json(devJson);
@@ -140,6 +146,76 @@ function startServer(opts: DevOptions, devJsonPath: string) {
         log.error(err.stack || err.message);
         return res.status(500).send("Something went wrong.");
       })
+  });
+
+  app.post("/rpc", async (req, res) => {
+    log.debug(`RPC Request: ${JSON.stringify(req.body)}`);
+
+    let json = {};
+
+    // Forward the incoming request to the target rpc
+    const response = await fetch("https://rpc.mainnet.near.org/", {
+      method: req.method,
+      headers: req.headers,
+      body: req.body
+    });
+
+    if (!response.ok) {
+      // Handle the error response
+      log.error(`Error response: ${response.status}`);
+      return res.status(response.status).send("Error hitting rpc.");
+    }
+
+    // Process the successful response
+    json = await response.json();
+
+    try {
+      // Check if the request needs to be proxied
+      if (
+        req.params &&
+        req.params.account_id === "social.near" &&
+        req.params.method_name === "get"
+      ) {
+        log.debug(`Proxying request: ${JSON.stringify(req.params)}`);
+
+        // Safely decode and parse args_base64
+        try {
+          const social_get_key = JSON.parse(atob(req.params.args_base64)).keys[0];
+
+          readJson(devJsonPath).then((devJson: DevJson) => {
+            const { components } = devJson;
+            if (!components) {
+              log.error(`No components found in devJson`);
+              return res.status(500).send("No components found in devJson.");
+            }
+            // Modify the response if needed
+            if (components[social_get_key]) {
+              const social_get_key_parts = social_get_key.split("/");
+              const devWidget = {};
+              devWidget[social_get_key_parts[0]] = { widget: {} };
+              devWidget[social_get_key_parts[0]].widget[social_get_key_parts[2]] = components[social_get_key].code;
+              json.result.result = Array.from(new TextEncoder().encode(JSON.stringify(devWidget)));
+            }
+            log.debug(`Returning something: ${JSON.stringify({})}`);
+            res.json(json);
+          }).catch((err: Error) => {
+            log.error(err.stack || err.message);
+            return res.status(500).send("Something went wrong with config map.");
+          })
+        } catch (e) {
+          log.error(`Error decoding or processing args_base64: ${e.message}`);
+          res.status(400).send("Invalid or corrupt args_base64.");
+        }
+      } else {
+        // Send the original response if not proxied
+        log.debug(`Returning original response`);
+        res.json(json);
+      }
+    } catch (err) {
+      // Handle errors
+      log.error(err.stack || err.message);
+      res.status(500).send("Something went wrong.");
+    }
   });
 
   if (!opts.NoGateway) {
@@ -202,6 +278,7 @@ function startServer(opts: DevOptions, devJsonPath: string) {
           : ""
         }
     │                                                             │
+    │ ➜ RPC: \u001b[32mhttp://127.0.0.1:${port}/rpc\u001b[0m         │
     │ ➜ Bos Loader Http: \u001b[32mhttp://127.0.0.1:${port}/api/loader\u001b[0m         │${!opts.NoHot
           ? `
     │ ➜ Bos Loader WebSocket: \u001b[32mws://127.0.0.1:${port}\u001b[0m                 │`
