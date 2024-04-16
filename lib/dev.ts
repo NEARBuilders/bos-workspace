@@ -102,8 +102,6 @@ async function generateApp(src: string, appDist: string, config: BaseConfig, opt
 
 function startServer(opts: DevOptions, devJsonPath: string) {
   log.info(`Starting bos-workspace`);
-  log.debug(`HELLLOOOOO`);
-  log.info("Hmmmmmmmmm")
 
   // sanitize port to only allow numbers
   const port = opts.port ? parseInt(opts.port.toString().replace(/\D/g, "")) : 3000;
