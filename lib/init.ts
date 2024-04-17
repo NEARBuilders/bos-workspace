@@ -1,76 +1,90 @@
-import { ensureDir, outputFile } from "@/lib/utils/fs";
+import { promises as fs } from "fs"
 import path from "path";
+import mvdir from "mvdir";
+import prompts from "prompts";
+import replace from "replace-in-file";
+import slugify from "slugify";
 
-const templates = {
-  "js-single": {
-    "./bos.config.json": JSON.stringify({
-      account: "bos.workspace",
-    }),
-    "./aliases.json": JSON.stringify({
-      "name": "My App",
-    }),
-    "./module/hello.js": "const hello = () => `Welcome to ${alias/name}, ${config/account}!`; return { hello };",
-    "./widget/home.metadata.json": JSON.stringify({
-      name: "Hello",
-      description: "Hello world widget",
-    }),
-    "./widget/home.tsx": "const { hello } = VM.require('${module/hello}') || { hello: () => console.log('hello') }; return hello();",
-  },
-  "js-multi": {
-    "./bos.workspace.json": JSON.stringify({
-      apps: ["./app1", "./app2"],
-    }),
-    "./app1/bos.config.json": JSON.stringify({
-      account: "app1.near",
-    }),
-    "./app1/aliases.json": JSON.stringify({
-      "name": "App 1",
-    }),
-    "./app1/widget/home.jsx": "return <h1>Hello, ${alias/name}!</h1>;",
-    "./app1/widget/home.metadata.json": JSON.stringify({
-      name: "Hello",
-      description: "Hello world widget",
-    }),
-    "./app2/bos.config.json": JSON.stringify({
-      account: "app2.near",
-    }),
-    "./app2/aliases.json": JSON.stringify({
-      "name": "App 2",
-    }),
-    "./app2/widget/home.jsx": "return <h1>Hello, ${alias/name}!</h1>;",
-    "./app2/widget/home.metadata.json": JSON.stringify({
-      name: "Hello",
-      description: "Hello world widget",
-    }),
-  },
-};
 
-const messages = {
-  "js-single": {
-    "get-started": `To get started, cd into the project directory, then run:
-    bw dev`,
-  },
-  "js-multi": {
-    "get-started": `To get started, cd into the project directory, then run:
-    bw ws dev`,
-  }
-};
+export async function initProject(pwd: string, template: string) {
+  const ts = template === "ts"
+  const codebase = ts ? "ts" : "js";
+  const res = await prompts([
+    {
+      type: "text",
+      name: "app",
+      message: "What should we call your BOS application?",
+    },
+    {
+      type: async (prev) =>
+        (await hasDirectory(getDir(path.join(pwd, prev)))) ? "text" : null,
+      name: "dir",
+      message: async (prev) =>
+        `Looks like a directory already exists called "${slugify(prev, {
+          lower: true,
+        })}". Where should your app be placed instead?`,
+    },
+  ]);
 
-// TODO: WIP
-export async function initProject(pwd: string, template: keyof typeof templates = "js-single") {
+  const name = res.app.trim();
+  const slug = slugify(name, { lower: true });
+  const dir = res.dir || path.join(pwd, slug);
+  const templateDir = path.join(__dirname, '..', '..', 'templates')
   try {
-    await Promise.all(Object.entries(templates[template]).map(async ([relativePath, content]) => {
-      const fullPath = path.join(pwd, relativePath);
+    await mvdir(path.join(templateDir, codebase), dir, { copy: true });
+    await mvdir(path.join(dir, "_gitignore"), path.join(dir, ".gitignore"));
 
-      const dir = path.dirname(fullPath);
+    await mvdir(path.join(dir, "_github"), path.join(dir, ".github"));
 
-      await ensureDir(dir);
-      await outputFile(fullPath, content);
-    }));
+    const prefixPath = (p) => path.join(dir, p);
+
+    await mvdir(
+      path.join(dir, "/%APPNAME%"),
+      path.join(dir, `/${name}`)
+    );
+
+    await replace({
+      files: [
+        "README.md",
+        `bos.workspace.json`,
+        `${name}/bos.config.json`,
+        `${name}/widget/app.${ts ? "tsx" : "jsx"}`,
+        `.github/workflows/release.yml`,
+      ].map(prefixPath),
+      from: /%APPNAME%/g,
+      to: name,
+    });
+
+    await replace({
+      files: ["README.md", `${name}/bos.config.json`, "package.json"].map(
+        prefixPath
+      ),
+      from: /%APPNAME%/g,
+      to: slug,
+    });
 
     console.log('Project initialization complete.');
-    console.log(messages[template]["get-started"]);
-  } catch (error) {
-    console.error('Error during project initialization:', error);
+    console.log(`To get started, cd into the ${res.dir || slug} directory, then run:
+    bw ws dev`);
+    console.log("Be the BOS!");
+  } catch (err) {
+    console.error(err);
+    console.log(
+      `Something went wrong when generating your app. You may need to delete the folder at ${dir}`
+    );
   }
+}
+
+async function hasDirectory(dir) {
+  try {
+    await fs.access(dir);
+    return true;
+  } catch (err) {
+    return false;
+  }
+}
+
+function getDir(appName) {
+  const slug = slugify(appName, { lower: true });
+  return path.join(".", slug);
 }
