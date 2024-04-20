@@ -11,7 +11,6 @@ import { BaseConfig, readConfig } from "./config";
 import { Network } from "./types";
 import { loopThroughFiles, readFile } from "./utils/fs";
 import { mergeDeep } from "./utils/objects";
-const bodyParser = require('body-parser');
 
 const DEV_DIST_FOLDER = "build";
 
@@ -31,12 +30,13 @@ export async function dev(src: string, opts: DevOptions) {
   let config = await readConfig(path.join(src, "bos.config.json"), opts.network);
   const dist = path.join(src, DEV_DIST_FOLDER);
   const distDevJson = path.join(dist, "bos-loader.json");
+  const hotReloadEnabled = !opts.NoHot;
 
   // 1. build app for the first time
   let devJson = await generateApp(src, dist, config, opts, distDevJson);
   await writeJson(distDevJson, devJson);
 
-  // 2. Start the server
+  // 2. start the server
   const { io } = startServer(opts, distDevJson);
 
   // 3. watch for changes in the src folder, rebuild app on changes
@@ -51,10 +51,10 @@ export async function dev(src: string, opts: DevOptions) {
     devJson = await generateApp(src, dist, config, opts, distDevJson);
     await writeJson(distDevJson, devJson);
 
-    if (io) {
+    if (hotReloadEnabled && io) {
       io.emit("fileChange", devJson);
     }
-
+    
     return devJson
   });
 }
@@ -99,223 +99,81 @@ async function generateApp(src: string, appDist: string, config: BaseConfig, opt
   return await generateDevJson(appDist, config);
 };
 
-
-function startServer(opts: DevOptions, devJsonPath: string) {
-  log.info(`Starting bos-workspace`);
-
-  // sanitize port to only allow numbers
-  const port = opts.port ? parseInt(opts.port.toString().replace(/\D/g, "")) : 3000;
-
-  const app = express();
-  const server = http.createServer(app);
-  let io: null | IoServer = null;
-
-  if (!opts.NoHot) {
-    log.success("Socket server setup successfully.");
-    io = new IoServer(server, {
-      cors: {
-        origin: "*",
-        methods: ["GET", "POST"],
-        allowedHeaders: ["Content-Type", "Authorization"],
-        credentials: true,
-      },
-    });
-  }
-
-  log.success("HTTP server setup successfully.");
-  app.use((_, res, next) => {
-    res.header("Access-Control-Allow-Origin", "*");
-    res.header("Access-Control-Allow-Methods", "GET,PUT,POST,DELETE,OPTIONS");
-    res.header(
-      "Access-Control-Allow-Headers",
-      "Content-Type, Authorization, Content-Length, X-Requested-With",
-    );
-
-    next();
-  });
-
-  app.use(bodyParser.json());
-
-  app.get("/api/loader", (_, res) => {
-    readJson(devJsonPath).then((devJson: DevJson) => {
-      res.json(devJson);
-    })
-      .catch((err: Error) => {
-        log.error(err.stack || err.message);
-        return res.status(500).send("Something went wrong.");
-      })
-  });
-
-  app.post("/rpc", async (req, res) => {
-    log.debug(`RPC Request: ${JSON.stringify(req.body)}`);
-
-    let json = {};
-
-    // Forward the incoming request to the target rpc
-    const response = await fetch("https://rpc.mainnet.near.org/", {
-      method: req.method,
-      headers: req.headers,
-      body: req.body
-    });
-
-    if (!response.ok) {
-      // Handle the error response
-      log.error(`Error response: ${response.status}`);
-      return res.status(response.status).send("Error hitting rpc.");
+function startServer(server) {
+  server.listen(port, "127.0.0.1", () => {
+    if (!opts.NoGateway && !opts.NoOpen) {
+      // open gateway in browser
+      let start =
+        process.platform == "darwin"
+          ? "open"
+          : process.platform == "win32"
+            ? "start"
+            : "xdg-open";
+      start = process.env.WSL_DISTRO_NAME ? "explorer.exe" : start;
+      exec(`${start} http://127.0.0.1:${port}`);
     }
-
-    // Process the successful response
-    json = await response.json();
-
-    try {
-      // Check if the request needs to be proxied
-      if (
-        req.params &&
-        req.params.account_id === "social.near" &&
-        req.params.method_name === "get"
-      ) {
-        log.debug(`Proxying request: ${JSON.stringify(req.params)}`);
-
-        // Safely decode and parse args_base64
-        try {
-          const social_get_key = JSON.parse(atob(req.params.args_base64)).keys[0];
-
-          readJson(devJsonPath).then((devJson: DevJson) => {
-            const { components } = devJson;
-            if (!components) {
-              log.error(`No components found in devJson`);
-              return res.status(500).send("No components found in devJson.");
-            }
-            // Modify the response if needed
-            if (components[social_get_key]) {
-              const social_get_key_parts = social_get_key.split("/");
-              const devWidget = {};
-              devWidget[social_get_key_parts[0]] = { widget: {} };
-              devWidget[social_get_key_parts[0]].widget[social_get_key_parts[2]] = components[social_get_key].code;
-              json.result.result = Array.from(new TextEncoder().encode(JSON.stringify(devWidget)));
-            }
-            log.debug(`Returning something: ${JSON.stringify({})}`);
-            res.json(json);
-          }).catch((err: Error) => {
-            log.error(err.stack || err.message);
-            return res.status(500).send("Something went wrong with config map.");
-          })
-        } catch (e) {
-          log.error(`Error decoding or processing args_base64: ${e.message}`);
-          res.status(400).send("Invalid or corrupt args_base64.");
-        }
-      } else {
-        // Send the original response if not proxied
-        log.debug(`Returning original response`);
-        res.json(json);
+    log.log(`
+  ┌─────────────────────────────────────────────────────────────┐
+  │ BosLoader Server is Up and Running                          │
+  │                                                             │${!opts.NoGateway
+        ? `
+  │ ➜ Local Gateway: \u001b[32mhttp://127.0.0.1:${port}\u001b[0m                      │`
+        : ""
       }
-    } catch (err) {
-      // Handle errors
-      log.error(err.stack || err.message);
-      res.status(500).send("Something went wrong.");
-    }
-  });
-
-  if (!opts.NoGateway) {
-    const GATEWAY_PATH = path.join(__dirname, "../..", "gateway", "dist");
-    const gatewayPath = (opts.gateway && path.resolve(opts.gateway)) ?? GATEWAY_PATH;
-    // let's check if gateway/dist/index.html exists
-    if (!(existsSync(path.join(gatewayPath, "index.html")))) {
-      log.error("Gateway not found. Skipping...");
-      opts.NoGateway = true;
-    } else {
-      // everything else is redirected to the gateway/dist
-      app.use((req, res, next) => {
-        if (req.path === "/") {
-          return next();
-        }
-        express.static(gatewayPath)(req, res, next);
-      });
-      app.get("*", (_, res) => {
-        // Inject Gateway with Environment Variables
-        readFile(
-          path.join(gatewayPath, "index.html"),
-          "utf8",
-        ).then((data) => {
-          const envConfig = JSON.stringify({
-            bosLoaderWs: `ws://127.0.0.1:${port}`,
-            bosLoaderUrl: `http://127.0.0.1:${port}/api/loader`,
-            enableHotReload: opts.NoHot ? false : true,
-            network: opts.network,
-          });
-          const withEnv = injectHTML(data, { ENV_CONFIG: envConfig });
-          res.send(withEnv);
-        }).catch((err) => {
-          log.error(err);
-          return res.status(404).send("Something went wrong.");
-        })
-      });
-      log.success("Gateway setup successfully.");
-    }
-  }
-
-  server
-    .listen(port, "127.0.0.1", () => {
-      if (!opts.NoGateway && !opts.NoOpen) {
-        // open gateway in browser
-        let start =
-          process.platform == "darwin"
-            ? "open"
-            : process.platform == "win32"
-              ? "start"
-              : "xdg-open";
-        start = process.env.WSL_DISTRO_NAME ? "explorer.exe" : start;
-        exec(`${start} http://127.0.0.1:${port}`);
+  │                                                             │
+  │ ➜ RPC: \u001b[32mhttp://127.0.0.1:${port}/rpc\u001b[0m         │
+  │ ➜ Bos Loader Http: \u001b[32mhttp://127.0.0.1:${port}/api/loader\u001b[0m         │${!opts.NoHot
+        ? `
+  │ ➜ Bos Loader WebSocket: \u001b[32mws://127.0.0.1:${port}\u001b[0m                 │`
+        : ""
       }
-      log.log(`
-    ┌─────────────────────────────────────────────────────────────┐
-    │ BosLoader Server is Up and Running                          │
-    │                                                             │${!opts.NoGateway
-          ? `
-    │ ➜ Local Gateway: \u001b[32mhttp://127.0.0.1:${port}\u001b[0m                      │`
-          : ""
-        }
-    │                                                             │
-    │ ➜ RPC: \u001b[32mhttp://127.0.0.1:${port}/rpc\u001b[0m         │
-    │ ➜ Bos Loader Http: \u001b[32mhttp://127.0.0.1:${port}/api/loader\u001b[0m         │${!opts.NoHot
-          ? `
-    │ ➜ Bos Loader WebSocket: \u001b[32mws://127.0.0.1:${port}\u001b[0m                 │`
-          : ""
-        }
-    │                                                             │
-    │ Optionaly, to open local widgets:                           │
-    │ 1. Visit either of the following sites:                     │
-    │    - https://near.org/flags                                 │
-    │    - https://everything.dev/flags                           │
-    │ 2. Paste the Bos Loader Http URL                            │
-    │                                                             │
-    └─────────────────────────────────────────────────────────────┘
- `);
-      log.success(`bos-workspace running on port ${port}!`);
-    })
+  │                                                             │
+  │ Optionaly, to open local widgets:                           │
+  │ 1. Visit either of the following sites:                     │
+  │    - https://near.org/flags                                 │
+  │    - https://everything.dev/flags                           │
+  │ 2. Paste the Bos Loader Http URL                            │
+  │                                                             │
+  └─────────────────────────────────────────────────────────────┘
+`);
+    log.success(`bos-workspace running on port ${port}!`);
+  })
     .on("error", (err: Error) => {
       log.error(err.message);
       process.exit(1);
     });
-
-  if (!opts.NoHot && io) {
-    io.on("connection", (socket) => {
-      log.info(`Socket connected: ${socket.id}`, LogLevels.DEV);
-      socket.on("disconnect", () => {
-        log.info(`Socket disconnected: ${socket.id}`, LogLevels.DEV);
-      })
-      readJson(devJsonPath).then((devJson: DevJson) => {
-        io?.emit("fileChange", devJson);
-      })
-        .catch((err: Error) => {
-          log.error(err.stack || err.message);
-        })
-    });
-  }
-
-  return { io };
 }
 
+function startSocket() {
+  let io: null | IoServer = null;
+
+
+
+  io = new IoServer(server, {
+    cors: {
+      origin: "*",
+      methods: ["GET", "POST"],
+      allowedHeaders: ["Content-Type", "Authorization"],
+      credentials: true,
+    },
+  });
+
+  log.success("Socket server setup successfully.");
+
+  io.on("connection", (socket) => {
+    log.info(`Socket connected: ${socket.id}`, LogLevels.DEV);
+    socket.on("disconnect", () => {
+      log.info(`Socket disconnected: ${socket.id}`, LogLevels.DEV);
+    })
+    readJson(devJsonPath).then((devJson: DevJson) => {
+      io?.emit("fileChange", devJson);
+    })
+      .catch((err: Error) => {
+        log.error(err.stack || err.message);
+      })
+  });
+
+}
 
 interface DevJson {
   components: Record<string, {

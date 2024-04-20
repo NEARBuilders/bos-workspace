@@ -1,6 +1,5 @@
 import { buildApp } from '@/lib/build';
-import { BaseConfig, DEFAULT_CONFIG } from '@/lib/config';
-import * as fs from '@/lib/utils/fs';
+import { DEFAULT_CONFIG } from '@/lib/config';
 import { LogLevel, Logger } from "@/lib/logger";
 
 import { vol, } from 'memfs';
