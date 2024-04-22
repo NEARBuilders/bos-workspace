@@ -80,7 +80,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: "18"
-          cache: yarn
 
       - name: Install bos-workspace globally
         run: |
