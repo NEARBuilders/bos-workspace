@@ -260,7 +260,7 @@ async function generateDevJson(src: string, config: BaseConfig): Promise<DevJson
     }
 
     const widgetPath = path.relative(path.join(src, "src", "widget"), file).replace(ext, "");
-    const widgetKey = `${devAccount}/widget/${widgetPath.split("/").join(".")}`;
+    const widgetKey = `${devAccount}/widget/${widgetPath.split(path.sep).join(".")}`;
 
     // add to devJson.components
     devJson.components[widgetKey] = {
