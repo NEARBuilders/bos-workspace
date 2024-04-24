@@ -6,6 +6,7 @@ import path from "path";
 import { dev } from "./dev";
 import { cloneRepository } from "./repository";
 import { buildWorkspace, devWorkspace } from "./workspace";
+import { deploy_with_metadata } from "./deploy";
 
 const program = new Command();
 
@@ -133,6 +134,14 @@ async function run() {
     .argument("[string]", "app name")
     .action((appName) => {
       console.log("not yet supported");
+    });
+    program
+    .command("attest")
+    .description("Deploy the project with metadata")
+    .argument("[app_name]", "app name")
+    .argument("[type_file]", "type definition")
+    .action((appName, typeFile) => {
+      deploy_with_metadata(appName, typeFile);
     });
 
   program.parse();
