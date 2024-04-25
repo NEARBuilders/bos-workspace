@@ -1,4 +1,4 @@
-import { DevOptions, startServer } from '@/lib/dev'; // Update with the correct path to your server file
+import { DevOptions, startServer } from '@/lib/dev';
 import { LogLevel, Logger } from "@/lib/logger";
 import fetchMock from 'jest-fetch-mock';
 

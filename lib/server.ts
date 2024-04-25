@@ -1,28 +1,35 @@
-import express, { Express } from 'express';
-import http from 'http';
-import { Server as IoServer } from "socket.io";
-import { DevOptions } from '@/lib/dev'; // Update with the correct path to your server file
-import { LogLevel, Logger } from "@/lib/logger";
+import { DevJson, DevOptions } from '@/lib/dev'; // Update with the correct path to your server file
 import bodyParser from "body-parser";
 import { exec } from "child_process";
-import { existsSync, readJson, writeJson } from "fs-extra";
-import { Gaze } from "gaze";
+import express from 'express';
+import { existsSync, readJson } from "fs-extra";
+import http from 'http';
 import path from "path";
-import { buildApp } from "./build";
-import { BaseConfig, readConfig } from "./config";
-import { Network } from "./types";
-import { loopThroughFiles, readFile } from "./utils/fs";
-import { mergeDeep } from "./utils/objects";
+import { readFile } from "./utils/fs";
 
 // the gateway dist path in node_modules
 const GATEWAY_PATH = path.join(__dirname, "../..", "gateway", "dist");
 
 /**
+ * Starts the dev server
+ * @param devJsonPath path to json redirect map
+ * @param opts DevOptions
+ * @returns http server
+ */
+export function startDevServer(devJsonPath: string, opts: DevOptions,): http.Server {
+  const app = createApp(devJsonPath, opts);
+  const server = http.createServer(app);
+  startServer(server, opts);
+  return server;
+}
+
+/**
  * Creates the Express app for serving widgets and other assets
+ * (separated out to enable endpoint testing)
  * @param opts 
  * @param devJsonPath 
  */
-export function createApp(opts: DevOptions, devJsonPath: string): Express {
+export function createApp(devJsonPath: string, opts: DevOptions): Express.Application {
   const app = express();
 
   log.success("HTTP server setup successfully.");
@@ -120,7 +127,6 @@ export function createApp(opts: DevOptions, devJsonPath: string): Express {
   // });
 
   if (!opts.NoGateway) {
-    const GATEWAY_PATH = path.join(__dirname, "../..", "gateway", "dist");
     const gatewayPath = (opts.gateway && path.resolve(opts.gateway)) ?? GATEWAY_PATH;
     // let's check if gateway/dist/index.html exists
     if (!(existsSync(path.join(gatewayPath, "index.html")))) {
@@ -160,35 +166,54 @@ export function createApp(opts: DevOptions, devJsonPath: string): Express {
   return app;
 };
 
-interface DevJson {
-  components: Record<string, {
-    code: string;
-  }>;
-  data: Record<string, any>;
-};
-async function generateDevJson(src: string, config: BaseConfig): Promise<DevJson> {
-  let devJson: DevJson = { components: {}, data: {} };
-  let devAccount = config.accounts?.dev || config.account || "dev-1234";
-
-  // for each js and jsx in src/widget
-  await loopThroughFiles(path.join(src, "src", "widget"), async (file: string) => {
-    const ext = path.extname(file);
-    if (ext !== ".js" && ext !== ".jsx") {
-      return;
+/**
+ * Starts BosLoader Server and optionally opens gateway in browser
+ * @param server http server
+ * @param opts DevOptions
+ */
+function startServer(server, opts) {
+  server.listen(opts.port, "127.0.0.1", () => {
+    if (!opts.NoGateway && !opts.NoOpen) {
+      // open gateway in browser
+      let start =
+        process.platform == "darwin"
+          ? "open"
+          : process.platform == "win32"
+            ? "start"
+            : "xdg-open";
+      start = process.env.WSL_DISTRO_NAME ? "explorer.exe" : start;
+      exec(`${start} http://127.0.0.1:${opts.port}`);
     }
-
-    const widgetPath = path.relative(path.join(src, "src", "widget"), file).replace(ext, "");
-    const widgetKey = `${devAccount}/widget/${widgetPath.split("/").join(".")}`;
-
-    // add to devJson.components
-    devJson.components[widgetKey] = {
-      code: await readFile(file, "utf-8"),
-    }
+    log.log(`
+  ┌─────────────────────────────────────────────────────────────┐
+  │ BosLoader Server is Up and Running                          │
+  │                                                             │${!opts.NoGateway
+        ? `
+  │ ➜ Local Gateway: \u001b[32mhttp://127.0.0.1:${opts.port}\u001b[0m                      │`
+        : ""
+      }
+  │                                                             │
+  │ ➜ RPC: \u001b[32mhttp://127.0.0.1:${opts.port}/rpc\u001b[0m         │
+  │ ➜ Bos Loader Http: \u001b[32mhttp://127.0.0.1:${opts.port}/api/loader\u001b[0m         │${!opts.NoHot
+        ? `
+  │ ➜ Bos Loader WebSocket: \u001b[32mws://127.0.0.1:${opts.port}\u001b[0m                 │`
+        : ""
+      }
+  │                                                             │
+  │ Optionaly, to open local widgets:                           │
+  │ 1. Visit either of the following sites:                     │
+  │    - https://near.org/flags                                 │
+  │    - https://everything.dev/flags                           │
+  │ 2. Paste the Bos Loader Http URL                            │
+  │                                                             │
+  └─────────────────────────────────────────────────────────────┘
+`);
+    log.success(`bos-workspace running on port ${opts.port}!`);
   })
-
-
-  return devJson;
-
+    .on("error", (err: Error) => {
+      log.error(err.message);
+      process.exit(1);
+    });
 }
 
 function injectHTML(html: string, injections: Record<string, string>) {
