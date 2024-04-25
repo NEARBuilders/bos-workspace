@@ -1,7 +1,6 @@
 // @ts-nocheck
 import { exec } from "child_process";
-import express from "express";
-import { existsSync, readJson, writeJson } from "fs-extra";
+import { readJson, writeJson } from "fs-extra";
 import { Gaze } from "gaze";
 import http from "http";
 import path from "path";
@@ -11,11 +10,9 @@ import { BaseConfig, readConfig } from "./config";
 import { Network } from "./types";
 import { loopThroughFiles, readFile } from "./utils/fs";
 import { mergeDeep } from "./utils/objects";
+import { createApp } from "./server";
 
 const DEV_DIST_FOLDER = "build";
-
-// the gateway dist path in node_modules
-const GATEWAY_PATH = path.join(__dirname, "../..", "gateway", "dist");
 
 export type DevOptions = {
   port?: number;
@@ -27,6 +24,7 @@ export type DevOptions = {
 };
 
 export async function dev(src: string, opts: DevOptions) {
+  // enter, read config
   let config = await readConfig(path.join(src, "bos.config.json"), opts.network);
   const dist = path.join(src, DEV_DIST_FOLDER);
   const distDevJson = path.join(dist, "bos-loader.json");
@@ -37,7 +35,13 @@ export async function dev(src: string, opts: DevOptions) {
   await writeJson(distDevJson, devJson);
 
   // 2. start the server
-  const { io } = startServer(opts, distDevJson);
+  const app = createApp(opts, distDevJson);
+  const server = http.createServer(app);
+  let io: null | IoServer = null;
+  if (!opts.NoHot) {
+    io = startSocket(server, distDevJson);
+  }
+  startServer(server, opts);
 
   // 3. watch for changes in the src folder, rebuild app on changes
   const gaze = new Gaze([path.join(src, "widget/**/*"), path.join(src, "module/**/*"), path.join(src, "ipfs/**/*"), path.join(src, "bos.config.json"), path.join(src, "aliases.json")], { debounceDelay: 100 });
@@ -54,12 +58,13 @@ export async function dev(src: string, opts: DevOptions) {
     if (hotReloadEnabled && io) {
       io.emit("fileChange", devJson);
     }
-    
+
     return devJson
   });
 }
 
 export async function devMulti(root: string, srcs: string[], opts: DevOptions) {
+  // enter, read config
   const dist = path.join(root, DEV_DIST_FOLDER);
   const distDevJson = path.join(dist, "bos-loader.json");
   let devJson = { components: {}, data: {} };
@@ -99,8 +104,8 @@ async function generateApp(src: string, appDist: string, config: BaseConfig, opt
   return await generateDevJson(appDist, config);
 };
 
-function startServer(server) {
-  server.listen(port, "127.0.0.1", () => {
+function startServer(server, opts) {
+  server.listen(opts.port, "127.0.0.1", () => {
     if (!opts.NoGateway && !opts.NoOpen) {
       // open gateway in browser
       let start =
@@ -110,21 +115,21 @@ function startServer(server) {
             ? "start"
             : "xdg-open";
       start = process.env.WSL_DISTRO_NAME ? "explorer.exe" : start;
-      exec(`${start} http://127.0.0.1:${port}`);
+      exec(`${start} http://127.0.0.1:${opts.port}`);
     }
     log.log(`
   ┌─────────────────────────────────────────────────────────────┐
   │ BosLoader Server is Up and Running                          │
   │                                                             │${!opts.NoGateway
         ? `
-  │ ➜ Local Gateway: \u001b[32mhttp://127.0.0.1:${port}\u001b[0m                      │`
+  │ ➜ Local Gateway: \u001b[32mhttp://127.0.0.1:${opts.port}\u001b[0m                      │`
         : ""
       }
   │                                                             │
-  │ ➜ RPC: \u001b[32mhttp://127.0.0.1:${port}/rpc\u001b[0m         │
-  │ ➜ Bos Loader Http: \u001b[32mhttp://127.0.0.1:${port}/api/loader\u001b[0m         │${!opts.NoHot
+  │ ➜ RPC: \u001b[32mhttp://127.0.0.1:${opts.port}/rpc\u001b[0m         │
+  │ ➜ Bos Loader Http: \u001b[32mhttp://127.0.0.1:${opts.port}/api/loader\u001b[0m         │${!opts.NoHot
         ? `
-  │ ➜ Bos Loader WebSocket: \u001b[32mws://127.0.0.1:${port}\u001b[0m                 │`
+  │ ➜ Bos Loader WebSocket: \u001b[32mws://127.0.0.1:${opts.port}\u001b[0m                 │`
         : ""
       }
   │                                                             │
@@ -136,7 +141,7 @@ function startServer(server) {
   │                                                             │
   └─────────────────────────────────────────────────────────────┘
 `);
-    log.success(`bos-workspace running on port ${port}!`);
+    log.success(`bos-workspace running on port ${opts.port}!`);
   })
     .on("error", (err: Error) => {
       log.error(err.message);
@@ -144,11 +149,8 @@ function startServer(server) {
     });
 }
 
-function startSocket() {
+function startSocket(server, devJsonPath) {
   let io: null | IoServer = null;
-
-
-
   io = new IoServer(server, {
     cors: {
       origin: "*",
@@ -172,7 +174,7 @@ function startSocket() {
         log.error(err.stack || err.message);
       })
   });
-
+  return io;
 }
 
 interface DevJson {
@@ -205,11 +207,3 @@ async function generateDevJson(src: string, config: BaseConfig): Promise<DevJson
   return devJson;
 
 }
-
-function injectHTML(html: string, injections: Record<string, string>) {
-  Object.keys(injections).forEach((key) => {
-    html = html.replace(`%${key}%`, injections[key]);
-  });
-  return html;
-};
-

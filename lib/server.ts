@@ -14,15 +14,17 @@ import { Network } from "./types";
 import { loopThroughFiles, readFile } from "./utils/fs";
 import { mergeDeep } from "./utils/objects";
 
+// the gateway dist path in node_modules
+const GATEWAY_PATH = path.join(__dirname, "../..", "gateway", "dist");
+
 /**
- * Creates the server for serving widgets and other assets
+ * Creates the Express app for serving widgets and other assets
  * @param opts 
  * @param devJsonPath 
  */
-export function createServer(opts: DevOptions, devJsonPath: string): Express {
+export function createApp(opts: DevOptions, devJsonPath: string): Express {
   const app = express();
-  const server = http.createServer(app);
-  
+
   log.success("HTTP server setup successfully.");
   app.use((_, res, next) => {
     res.header("Access-Control-Allow-Origin", "*");
@@ -139,8 +141,8 @@ export function createServer(opts: DevOptions, devJsonPath: string): Express {
           "utf8",
         ).then((data) => {
           const envConfig = JSON.stringify({
-            bosLoaderWs: `ws://127.0.0.1:${port}`,
-            bosLoaderUrl: `http://127.0.0.1:${port}/api/loader`,
+            bosLoaderWs: `ws://127.0.0.1:${opts.port}`,
+            bosLoaderUrl: `http://127.0.0.1:${opts.port}/api/loader`,
             enableHotReload: opts.NoHot ? false : true,
             network: opts.network,
           });
