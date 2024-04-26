@@ -9,6 +9,15 @@ import { readFile } from "./utils/fs";
 
 // the gateway dist path in node_modules
 const GATEWAY_PATH = path.join(__dirname, "../..", "gateway", "dist");
+export const RPC_URL = {
+  mainnet: "https://rpc.mainnet.near.org/",
+  testnet: "https://rpc.testnet.near.org/",
+};
+
+const SOCIAL_CONTRACT = {
+  mainnet: "social.near",
+  testnet: "v1.social08.testnet",
+}
 
 /**
  * Starts the dev server
@@ -22,7 +31,7 @@ export function startDevServer(devJsonPath: string, opts: DevOptions,): http.Ser
   startServer(server, opts);
   return server;
 }
-
+/*  */
 /**
  * Creates the Express app for serving widgets and other assets
  * (separated out to enable endpoint testing)
@@ -52,79 +61,65 @@ export function createApp(devJsonPath: string, opts: DevOptions): Express.Applic
     })
       .catch((err: Error) => {
         log.error(err.stack || err.message);
-        return res.status(500).send("Something went wrong.");
+        return res.status(500).send("Error reading redirect map.");
       })
   });
 
-  // app.post("/rpc", async (req, res) => {
-  //   log.debug(`RPC Request: ${JSON.stringify(req.body)}`);
+  function proxyMiddleware(proxyUrl) {
+    return async (req, res, next) => {
+      let json = {};
 
-  //   let json = {};
+      log.debug(`RPC Request: ${JSON.stringify(req.body)}`);
 
-  //   // Forward the incoming request to the target rpc
-  //   const response = await fetch("https://rpc.mainnet.near.org/", {
-  //     method: req.method,
-  //     headers: req.headers,
-  //     body: req.body
-  //   });
+      try {
+        // Make a request to the target rpc
+        const response = await fetch(proxyUrl, {
+          method: req.method,
+          headers: req.headers,
+          body: req.body,
+        });
+        // res.status(200).send(response);
+        json = await response.json();
+      } catch (err) {
+        log.error(err.stack || err.message);
+        res.status(500).send('Proxy request failed');
+      };
 
-  //   if (!response.ok) {
-  //     // Handle the error response
-  //     log.error(`Error response: ${response.status}`);
-  //     return res.status(response.status).send("Error hitting rpc.");
-  //   }
+      const { params } = req.body;
 
-  //   // Process the successful response
-  //   json = await response.json();
+      if (
+        params &&
+        params.account_id === SOCIAL_CONTRACT[opts.network] &&
+        params.method_name === "get"
+      ) {
+        const social_get_key = JSON.parse(atob(params.args_base64)).keys[0];
 
-  //   try {
-  //     // Check if the request needs to be proxied
-  //     if (
-  //       req.params &&
-  //       req.params.account_id === "social.near" &&
-  //       req.params.method_name === "get"
-  //     ) {
-  //       log.debug(`Proxying request: ${JSON.stringify(req.params)}`);
+        log.debug(`RPC Request for key: ${social_get_key}`);
 
-  //       // Safely decode and parse args_base64
-  //       try {
-  //         const social_get_key = JSON.parse(atob(req.params.args_base64)).keys[0];
+        const devComponents = await readJson(devJsonPath).then(
+          (devJson: DevJson) => {
+            return devJson.components;
+          }).catch((err: Error) => {
+            log.error(err.stack || err.message);
+            return res.status(500).send("Error reading redirect map.");
+          });
+        if (devComponents[social_get_key]) {
+          const social_get_key_parts = social_get_key.split("/");
+          const devWidget = {};
+          devWidget[social_get_key_parts[0]] = { widget: {} };
+          devWidget[social_get_key_parts[0]].widget[social_get_key_parts[2]] =
+            devComponents[social_get_key].code;
+          // @ts-ignore
+          json.result.result = Array.from(
+            new TextEncoder().encode(JSON.stringify(devWidget))
+          );
+        }
+      }
+      return res.status(200).send(json);
+    };
+  }
 
-  //         readJson(devJsonPath).then((devJson: DevJson) => {
-  //           const { components } = devJson;
-  //           if (!components) {
-  //             log.error(`No components found in devJson`);
-  //             return res.status(500).send("No components found in devJson.");
-  //           }
-  //           // Modify the response if needed
-  //           if (components[social_get_key]) {
-  //             const social_get_key_parts = social_get_key.split("/");
-  //             const devWidget = {};
-  //             devWidget[social_get_key_parts[0]] = { widget: {} };
-  //             devWidget[social_get_key_parts[0]].widget[social_get_key_parts[2]] = components[social_get_key].code;
-  //             json.result.result = Array.from(new TextEncoder().encode(JSON.stringify(devWidget)));
-  //           }
-  //           log.debug(`Returning something: ${JSON.stringify({})}`);
-  //           res.json(json);
-  //         }).catch((err: Error) => {
-  //           log.error(err.stack || err.message);
-  //           return res.status(500).send("Something went wrong with config map.");
-  //         })
-  //       } catch (e) {
-  //         log.error(`Error decoding or processing args_base64: ${e.message}`);
-  //         res.status(400).send("Invalid or corrupt args_base64.");
-  //       }
-  //     } else {
-  //       // Send the original response if not proxied
-  //       log.debug(`Returning original response`);
-  //       res.json(json);
-  //     }
-  //   } catch (err) {
-  //     // Handle errors
-  //     log.error(err.stack || err.message);
-  //     res.status(500).send("Something went wrong.");
-  //   }
-  // });
+  app.all('/proxy-rpc', proxyMiddleware(RPC_URL[opts.network]));
 
   if (!opts.NoGateway) {
     const gatewayPath = (opts.gateway && path.resolve(opts.gateway)) ?? GATEWAY_PATH;
@@ -171,7 +166,7 @@ export function createApp(devJsonPath: string, opts: DevOptions): Express.Applic
  * @param server http server
  * @param opts DevOptions
  */
-function startServer(server, opts) {
+export function startServer(server, opts) {
   server.listen(opts.port, "127.0.0.1", () => {
     if (!opts.NoGateway && !opts.NoOpen) {
       // open gateway in browser

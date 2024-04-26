@@ -1,120 +1,89 @@
-import { DevOptions, startServer } from '@/lib/dev';
-import { LogLevel, Logger } from "@/lib/logger";
-import fetchMock from 'jest-fetch-mock';
+import { Logger, LogLevel } from "@/lib/logger";
+import { createApp, RPC_URL } from '@/lib/server';
+import supertest from 'supertest';
+import { TextEncoder } from 'util';
+import { Network } from './../../lib/types';
 
 import { vol } from 'memfs';
 jest.mock('fs', () => require('memfs').fs);
 jest.mock('fs/promises', () => require('memfs').fs.promises);
+Object.assign(global, { TextEncoder });
 
 const unmockedLog = global.log;
+const unmockedFetch = global.fetch;
 
-const bos_loader_example = {
-  "/bos-loader.json": JSON.stringify({ "components": { "test.testnet/widget/home": { "code": "retrun <p>hello world</p>" } }, "data": {} }),
+const devJson = { "components": { "test.testnet/widget/home": { "code": "return <p>hello world</p>" } }, "data": {} };
+const app_example_1 = {
+  "./build/bos-loader.json": JSON.stringify(devJson),
 };
 
-describe('server', () => {
-
-  beforeAll(() => {
-    global.fs = vol;
-  });
+describe('createApp', () => {
+  let app;
+  const mockSrc = "/app_example_1";
+  const devJsonPath = `${mockSrc}/build/bos-loader.json`; // Replace with your path
+  const opts = {
+    NoGateway: false,
+    port: 3000,
+    NoHot: false,
+    network: 'testnet' as Network,
+  };
 
   beforeEach(() => {
     vol.reset();
-    vol.fromJSON(bos_loader_example, '/');
+    vol.fromJSON(app_example_1, mockSrc);
     global.log = new Logger(LogLevel.DEV);
+    app = createApp(devJsonPath, opts);
   });
-  afterAll(() => {
+
+  afterEach(() => {
+    jest.resetAllMocks();
     global.log = unmockedLog;
+    global.fetch = unmockedFetch;
   });
 
-  it('should start the dev server without errors', async () => {
-    const opts: DevOptions = {
-      port: 3000,
-      NoGateway: false,
-      NoHot: false,
-      NoOpen: false,
-      network: 'testnet',
-    };
+  it('/api/loader should return devJson', async () => {
+    const response = await supertest(app).get('/api/loader');
+    expect(response.status).toBe(200);
+    expect(response.body).toEqual(devJson);
+  });
 
+  it("/proxy-rpc should proxy rpc request if key exists", async () => {
+    global.fetch = jest.fn().mockImplementation((url, options) => {
+      expect(url).toBe(RPC_URL[opts.network]);
+      expect(options.method).toBe('POST');
+      return Promise.resolve({
+        json: () => Promise.resolve({
+          "result": {
+            "result": [] // this is the mocked response from the rpc call
+          }
+        })
+      });
+    });
+    const response = await supertest(app).post('/proxy-rpc').send({"method":"query","params":{"request_type":"call_function","account_id":"v1.social08.testnet","method_name":"get","args_base64":"eyJrZXlzIjpbInRlc3QudGVzdG5ldC93aWRnZXQvaG9tZSJdfQ==","finality":"optimistic"},"id":123,"jsonrpc":"2.0"});
+    expect(response.status).toBe(200);
+    expect(response.body).toHaveProperty('result');
+    expect(response.body.result).toHaveProperty('result');
+    expect(Array.isArray(response.body.result.result)).toBe(true);
+    expect(response.body.result.result.length).toBeGreaterThan(0); // we want to make sure it gets replaced from dev JSON
+  });
 
-    // fetchMock.mockOnce(async (req) => {
-    //   if (req.url === 'https://ipfs.near.social/add') {
-    //     return {
-    //       body: JSON.stringify(
-    //         {
-    //           cid: "bafkreicpbijnii55242f7wcs6xnjf3ocyuyuguts6r6kkfz745g3jjudam",
-    //         }
-    //       )
-    //     };
-    //   }
-    //   throw new Error(`Unexpected fetch call: ${req.url}`);
-    // });
-
-    // Start dev server
-    const { serverInstance, io } = await startServer(opts, '/bos-loader.json');
-
-    // Assert no exceptions
-    expect(serverInstance).toBeDefined();
-    
-    serverInstance.close();
+  it("/proxy-rpc should not proxy rpc request (return original) if key does not exist", async () => {
+    global.fetch = jest.fn().mockImplementation((url, options) => {
+      expect(url).toBe(RPC_URL[opts.network]);
+      expect(options.method).toBe('POST');
+      return Promise.resolve({
+        json: () => Promise.resolve({
+          "result": {
+            "result": [] // this is the mocked response from the rpc call
+          }
+        })
+      });
+    });
+    const response = await supertest(app).post('/proxy-rpc').send({ "method": "query", "params": { "request_type": "call_function", "account_id": "v1.social08.testnet", "method_name": "get", "args_base64": "eyJrZXlzIjpbIm1pa2UudGVzdG5ldC93aWRnZXQvUHJvZmlsZUltYWdlIl19", "finality": "optimistic" }, "id": 123, "jsonrpc": "2.0" });
+    expect(response.status).toBe(200);
+    expect(response.body).toHaveProperty('result');
+    expect(response.body.result).toHaveProperty('result');
+    expect(Array.isArray(response.body.result.result)).toBe(true);
+    expect(response.body.result.result.length).toEqual(0); // we want to make sure it does not get replaced by dev JSON
   });
 });
-
-// describe('RPC Route Tests', () => {
-//   let request: supertest.SuperTest<supertest.Test>;
-
-//   beforeAll(() => {
-//     request = supertest(server);
-//   });
-
-//   afterAll((done) => {
-//     server.close(done);
-//   });
-
-//   describe('With Default Options', () => {
-//     beforeAll(() => {
-//       const opts: DevOptions = {
-//         port: 3000,
-//         NoGateway: false,
-//         NoHot: false,
-//         NoOpen: false,
-//         network: 'test',
-//         gateway: 'mocked-gateway-path',
-//       };
-//       dev(__dirname, opts);
-//     });
-
-//     it('should handle RPC requests properly', async () => {
-//       const response = await request
-//         .post('/rpc')
-//         .send({ /* your request body */ });
-
-//       expect(response.status).toBe(200);
-//       // Add more assertions as needed
-//     });
-
-//     // Add more test cases with default options if needed
-//   });
-
-//   describe('With No Gateway Option', () => {
-//     beforeAll(() => {
-//       const opts: DevOptions = {
-//         port: 3001, // Different port to avoid conflicts
-//         NoGateway: true, // Set NoGateway to true
-//         NoHot: false,
-//         NoOpen: false,
-//         network: 'test',
-//         gateway: 'mocked-gateway-path',
-//       };
-//       dev(__dirname, opts);
-//     });
-
-//     it('should handle RPC requests properly when NoGateway is true', async () => {
-//       // Test scenario when NoGateway is true
-//     });
-
-//     // Add more test cases with NoGateway option if needed
-//   });
-
-//   // Add more describe blocks for testing other combinations of options
-// });
