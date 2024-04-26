@@ -124,7 +124,7 @@ async function run() {
   program
     .command("deploy")
     .description("Deploy the project")
-    .argument("[string]", "Workspace app name to deploy")
+    .argument("[appName]", "Workspace app name to deploy")
     .option("--deploy-account-id <deployAccountId>", "Account under which component code should be deployed")
     .option("--signer-account-id <signerAccountId>", "Account which will be used for signing deploy transaction, frequently the same as deploy-account-id")
     .option("--signer-public-key <signerPublicKey>", "Public key for signing transactions in the format: `ed25519:<public_key>`")
