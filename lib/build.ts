@@ -1,6 +1,6 @@
 import path from "path";
 import { readConfig } from "@/lib/config";
-import { writeJson, copy, loopThroughFiles, outputFile, readFile, readJson, remove } from "@/lib/utils/fs";
+import { writeJson, copy, loopThroughFiles, outputFile, readdir, readFile, readJson, remove } from "@/lib/utils/fs";
 import { transpileJS, EvalCustomSyntaxParams } from "@/lib/parser";
 import { Log } from "@/lib/types";
 import { UploadToIPFSOptions, uploadToIPFS } from "@/lib/ipfs";
@@ -153,7 +153,15 @@ export async function buildApp(src: string, dest: string, network: string = "mai
     if (new_build_files.includes(file))
       continue;
 
-    await remove(file);
+    const filePathArr = file.split(path.sep);
+    do {
+      const dir = filePathArr.join(path.sep);
+      const files = await readdir(dir).catch(() => ([]));
+      if (files.length == 0)
+        await remove(dir);
+
+      filePathArr.pop();
+    } while (filePathArr.length > 3)
   }
 
   await log.wait(

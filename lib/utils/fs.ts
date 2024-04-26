@@ -1,4 +1,4 @@
-import { copy, readFile, lstat, readJson, writeJson, ensureDir, outputFile, readdir, remove, rename } from 'fs-extra';
+import { copy, readFile, lstat, readJson, writeJson, ensureDir, outputFile, readdir, remove, move } from 'fs-extra';
 import path from 'path';
 
 async function loopThroughFiles(pwd: string, callback: (file: string) => Promise<void>) {
@@ -16,4 +16,4 @@ async function loopThroughFiles(pwd: string, callback: (file: string) => Promise
   }
 }
 
-export { copy, readJson, writeJson, ensureDir, outputFile, loopThroughFiles, readFile, readdir, remove, rename };
+export { copy, readJson, writeJson, ensureDir, outputFile, loopThroughFiles, readFile, readdir, remove, move };

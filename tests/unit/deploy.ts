@@ -1,4 +1,5 @@
-import { deploy } from '@/lib/deploy';
+import * as process from "child_process";
+import { deployAppCode } from '@/lib/deploy';
 import { BaseConfig, DEFAULT_CONFIG } from '@/lib/config';
 import * as fs from '@/lib/utils/fs';
 import { LogLevel, Logger } from "@/lib/logger";
@@ -6,6 +7,11 @@ import { LogLevel, Logger } from "@/lib/logger";
 import { vol, } from 'memfs';
 jest.mock('fs', () => require('memfs').fs);
 jest.mock('fs/promises', () => require('memfs').fs.promises);
+jest.mock('child_process', () => ({
+  exec: jest.fn((command: string) => {
+    return command;
+  }),
+}))
 
 const app_example = {
   "./bos.config.json": JSON.stringify({
@@ -47,9 +53,9 @@ const app_example_output = {
   "/build/ipfs.json": JSON.stringify({
     "logo.svg": "QmHash",
   }, null, 2) + "\n",
-  "/build/src/hello.utils.module.js": "const hello = (name) => `Hello, ${name}!`;\nreturn { hello };\n",
+  "/build/src/hello/utils.module.js": "const hello = (name) => `Hello, ${name}!`;\nreturn { hello };\n",
   "/build/src/index.jsx": "const hello = \"hi\";\nreturn hello(props);\n",
-  "/build/src/nested.index.jsx": "const hello = \"hi\";\nreturn hello(props);\n",
+  "/build/src/nested/index.jsx": "const hello = \"hi\";\nreturn hello(props);\n",
   "/build/src/module.jsx": "VM.require(\"test.near/widget/hello.utils.module\");\nreturn hello(\"world\");\n",
   "/build/src/config.jsx": "return <h1>test.neartest.near</h1>;\n",
   "/build/src/alias.jsx": "return <h1>Hello world!</h1>;\n",
@@ -86,7 +92,7 @@ const app_example_output = {
 const unmockedFetch = global.fetch;
 const unmockedLog = global.log;
 
-describe('build', () => {
+describe('deploy', () => {
   beforeEach(() => {
     vol.reset();
     vol.fromJSON(app_example, '/app_example');
@@ -105,9 +111,8 @@ describe('build', () => {
     global.log = unmockedLog;
   })
 
-  it('should build correctly without logs', async () => {
-    const { logs } = await deploy('/app_example', {});
-    expect(logs).toEqual([]);
+  it('should build correctly', async () => {
+    await deployAppCode('/app_example', '/build', {});
     expect(vol.toJSON('/build')).toEqual(app_example_output);
   })
 })
