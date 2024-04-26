@@ -53,9 +53,9 @@ const app_example_output = {
   "/build/ipfs.json": JSON.stringify({
     "logo.svg": "QmHash",
   }, null, 2) + "\n",
-  "/build/src/hello/utils.module.js": "const hello = (name) => `Hello, ${name}!`;\nreturn { hello };\n",
+  "/build/src/hello.utils.module.js": "const hello = (name) => `Hello, ${name}!`;\nreturn { hello };\n",
   "/build/src/index.jsx": "const hello = \"hi\";\nreturn hello(props);\n",
-  "/build/src/nested/index.jsx": "const hello = \"hi\";\nreturn hello(props);\n",
+  "/build/src/nested.index.jsx": "const hello = \"hi\";\nreturn hello(props);\n",
   "/build/src/module.jsx": "VM.require(\"test.near/widget/hello.utils.module\");\nreturn hello(\"world\");\n",
   "/build/src/config.jsx": "return <h1>test.neartest.near</h1>;\n",
   "/build/src/alias.jsx": "return <h1>Hello world!</h1>;\n",
@@ -111,7 +111,7 @@ describe('deploy', () => {
     global.log = unmockedLog;
   })
 
-  it('should build correctly', async () => {
+  it('should match expected input for bos-cli-rs', async () => {
     await deployAppCode('/app_example', '/build', {});
     expect(vol.toJSON('/build')).toEqual(app_example_output);
   })
