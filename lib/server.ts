@@ -1,8 +1,8 @@
-import { DevJson, DevOptions } from '@/lib/dev'; // Update with the correct path to your server file
+import { DevJson, DevOptions } from '@/lib/dev';
 import { fetchJson } from "@near-js/providers";
 import bodyParser from "body-parser";
 import { exec } from "child_process";
-import express from 'express';
+import express, { Request, Response } from 'express';
 import { existsSync, readJson } from "fs-extra";
 import http from 'http';
 import path from "path";
@@ -36,7 +36,7 @@ export function startDevServer(devJsonPath: string, opts: DevOptions,): http.Ser
   startServer(server, opts);
   return server;
 }
-/*  */
+
 /**
  * Creates the Express app for serving widgets and other assets
  * (separated out to enable endpoint testing)
@@ -59,7 +59,7 @@ export function createApp(devJsonPath: string, opts: DevOptions): Express.Applic
     next();
   });
 
-  app.options('*', (req, res) => {
+  app.options('*', (_, res) => {
     res.header("Access-Control-Allow-Origin", "*");
     res.header("Access-Control-Allow-Methods", "GET,PUT,POST,DELETE,OPTIONS");
     res.header(
@@ -81,8 +81,8 @@ export function createApp(devJsonPath: string, opts: DevOptions): Express.Applic
       })
   });
 
-  function proxyMiddleware(proxyUrl) {
-    return async (req, res, _) => {
+  function proxyMiddleware(proxyUrl: string) {
+    return async (req: Request, res: Response, _) => {
       let json = {};
 
       log.debug(`RPC Request: ${JSON.stringify(req.body)}`);
@@ -90,7 +90,7 @@ export function createApp(devJsonPath: string, opts: DevOptions): Express.Applic
       try {
         // Make a request to the target rpc
         json = await fetchJson(proxyUrl, JSON.stringify(req.body));
-        // res.status(200).send(response);
+
         log.debug(`RPC Response: ${json}`);
       } catch (err) {
         log.error(err.stack || err.message);
@@ -110,7 +110,7 @@ export function createApp(devJsonPath: string, opts: DevOptions): Express.Applic
       ) {
         const social_get_key = JSON.parse(atob(params.args_base64)).keys[0];
 
-        log.debug(`RPC Request for key: ${social_get_key}`);
+        log.debug(`Replace with local components for key: ${social_get_key}`);
 
         const devComponents = await readJson(devJsonPath).then(
           (devJson: DevJson) => {
@@ -234,4 +234,3 @@ function injectHTML(html: string, injections: Record<string, string>) {
   });
   return html;
 };
-
