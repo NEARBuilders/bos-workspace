@@ -1,1 +1,0 @@
-(self.webpackChunkbos_workspace_gateway=self.webpackChunkbos_workspace_gateway||[]).push([[7051,9432],{99432:()=>{}}]);
