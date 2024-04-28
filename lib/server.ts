@@ -1,4 +1,5 @@
 import { DevJson, DevOptions } from '@/lib/dev'; // Update with the correct path to your server file
+import { fetchJson } from "@near-js/providers";
 import bodyParser from "body-parser";
 import { exec } from "child_process";
 import express from 'express';
@@ -9,9 +10,13 @@ import { readFile } from "./utils/fs";
 
 // the gateway dist path in node_modules
 const GATEWAY_PATH = path.join(__dirname, "../..", "gateway", "dist");
+
 export const RPC_URL = {
-  mainnet: "https://rpc.mainnet.near.org/",
-  testnet: "https://rpc.testnet.near.org/",
+  mainnet: "https://rpc.mainnet.near.org",
+  testnet: "https://rpc.testnet.near.org",
+
+  // mainnet: "https://near.lava.build",
+  // testnet: "https://near-testnet.lava.build",
 };
 
 const SOCIAL_CONTRACT = {
@@ -42,6 +47,7 @@ export function createApp(devJsonPath: string, opts: DevOptions): Express.Applic
   const app = express();
 
   log.success("HTTP server setup successfully.");
+
   app.use((_, res, next) => {
     res.header("Access-Control-Allow-Origin", "*");
     res.header("Access-Control-Allow-Methods", "GET,PUT,POST,DELETE,OPTIONS");
@@ -51,6 +57,16 @@ export function createApp(devJsonPath: string, opts: DevOptions): Express.Applic
     );
 
     next();
+  });
+
+  app.options('*', (req, res) => {
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header("Access-Control-Allow-Methods", "GET,PUT,POST,DELETE,OPTIONS");
+    res.header(
+      "Access-Control-Allow-Headers",
+      "Content-Type, Authorization, Content-Length, X-Requested-With",
+    );
+    res.sendStatus(200);
   });
 
   app.use(bodyParser.json());
@@ -66,24 +82,24 @@ export function createApp(devJsonPath: string, opts: DevOptions): Express.Applic
   });
 
   function proxyMiddleware(proxyUrl) {
-    return async (req, res, next) => {
+    return async (req, res, _) => {
       let json = {};
 
       log.debug(`RPC Request: ${JSON.stringify(req.body)}`);
 
       try {
         // Make a request to the target rpc
-        const response = await fetch(proxyUrl, {
-          method: req.method,
-          headers: req.headers,
-          body: req.body,
-        });
+        json = await fetchJson(proxyUrl, JSON.stringify(req.body));
         // res.status(200).send(response);
-        json = await response.json();
+        log.debug(`RPC Response: ${json}`);
       } catch (err) {
         log.error(err.stack || err.message);
-        res.status(500).send('Proxy request failed');
+        return res.status(500).send('Proxy request failed');
       };
+
+      if (!json) {
+        return res.status(500).send('No response from proxy');
+      }
 
       const { params } = req.body;
 
@@ -103,6 +119,7 @@ export function createApp(devJsonPath: string, opts: DevOptions): Express.Applic
             log.error(err.stack || err.message);
             return res.status(500).send("Error reading redirect map.");
           });
+
         if (devComponents[social_get_key]) {
           const social_get_key_parts = social_get_key.split("/");
           const devWidget = {};
@@ -115,7 +132,7 @@ export function createApp(devJsonPath: string, opts: DevOptions): Express.Applic
           );
         }
       }
-      return res.status(200).send(json);
+      return res.status(200).json(json);
     };
   }
 
