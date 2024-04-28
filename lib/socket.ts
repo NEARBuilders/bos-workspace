@@ -13,7 +13,7 @@ export function startSocket(server: http.Server, callback: (io: IoServer) => voi
       origin: "*",
       methods: ["GET", "POST"],
       allowedHeaders: ["Content-Type", "Authorization"],
-      credentials: true,
+      credentials: false,
     },
   });
 

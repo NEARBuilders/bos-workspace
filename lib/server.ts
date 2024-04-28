@@ -84,14 +84,9 @@ export function createApp(devJsonPath: string, opts: DevOptions): Express.Applic
   function proxyMiddleware(proxyUrl: string) {
     return async (req: Request, res: Response, _) => {
       let json = {};
-
-      log.debug(`RPC Request: ${JSON.stringify(req.body)}`);
-
       try {
         // Make a request to the target rpc
         json = await fetchJson(proxyUrl, JSON.stringify(req.body));
-
-        log.debug(`RPC Response: ${json}`);
       } catch (err) {
         log.error(err.stack || err.message);
         return res.status(500).send('Proxy request failed');
@@ -110,7 +105,7 @@ export function createApp(devJsonPath: string, opts: DevOptions): Express.Applic
       ) {
         const social_get_key = JSON.parse(atob(params.args_base64)).keys[0];
 
-        log.debug(`Replace with local components for key: ${social_get_key}`);
+        log.debug(`Replacing ${social_get_key} with local component`);
 
         const devComponents = await readJson(devJsonPath).then(
           (devJson: DevJson) => {

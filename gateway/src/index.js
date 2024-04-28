@@ -69,7 +69,8 @@ function Viewer({ widgetSrc, code }) {
 }
 
 function Home() {
-  const { components: redirectMap } = useRedirectMap();
+  // const { components: redirectMap } = useRedirectMap();
+  const redirectMap = { };
   const widgets = {};
   Object.keys(redirectMap).forEach((key) => {
     const parts = key.split("/widget/");

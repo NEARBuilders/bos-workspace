@@ -151,7 +151,6 @@ export function useAuth() {
 
 import ls from "local-storage";
 import * as nearAPI from "near-api-js";
-import { RPC_URL } from "../data.js";
 
 export async function getSocialKeyPair(accountId) {
   const keyStore = new nearAPI.keyStores.BrowserLocalStorageKeyStore();
