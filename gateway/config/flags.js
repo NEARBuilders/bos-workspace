@@ -13,5 +13,3 @@ export const flags = {
   network:
     process.env.NETWORK || config.network || "mainnet",
 };
-
-console.log("flags", flags);

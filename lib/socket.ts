@@ -20,9 +20,9 @@ export function startSocket(server: http.Server, callback: (io: IoServer) => voi
   log.success("Socket server setup successfully.");
 
   io.on("connection", (socket) => {
-    log.info(`Socket connected: ${socket.id}`, LogLevels.DEV);
+    log.debug(`Socket connected: ${socket.id}`);
     socket.on("disconnect", () => {
-      log.info(`Socket disconnected: ${socket.id}`, LogLevels.DEV);
+      log.debug(`Socket disconnected: ${socket.id}`);
     })
     callback(io)
   });
