@@ -51,7 +51,7 @@ describe('createApp', () => {
     expect(response.body).toEqual(devJson);
   });
 
-  it("/proxy-rpc should proxy rpc request if key exists", async () => {
+  it("/api/proxy-rpc should proxy rpc request if key exists", async () => {
     const request = { "method": "query", "params": { "request_type": "call_function", "account_id": "v1.social08.testnet", "method_name": "get", "args_base64": "eyJrZXlzIjpbInRlc3QudGVzdG5ldC93aWRnZXQvaG9tZSJdfQ==", "finality": "optimistic" }, "id": 123, "jsonrpc": "2.0" };
 
     (fetchJson as jest.MockedFunction<typeof fetchJson>).mockImplementation((url, req) => {
@@ -64,14 +64,14 @@ describe('createApp', () => {
       });
     });
 
-    const response = await supertest(app).post('/proxy-rpc').send(request);
+    const response = await supertest(app).post('/api/proxy-rpc').send(request);
     expect(response.body).toHaveProperty('result');
     expect(response.body.result).toHaveProperty('result');
     expect(Array.isArray(response.body.result.result)).toBe(true);
     expect(response.body.result.result.length).toBeGreaterThan(0); // confirm it is replaced by dev json
   });
 
-  it("/proxy-rpc should not proxy rpc request (return original) if key does not exist", async () => {
+  it("/api/proxy-rpc should not proxy rpc request (return original) if key does not exist", async () => {
     const request = { "method": "query", "params": { "request_type": "call_function", "account_id": "v1.social08.testnet", "method_name": "get", "args_base64": "eyJrZXlzIjpbIm1pa2UudGVzdG5ldC93aWRnZXQvUHJvZmlsZUltYWdlIl19", "finality": "optimistic" }, "id": 123, "jsonrpc": "2.0" };
     (fetchJson as jest.MockedFunction<typeof fetchJson>).mockImplementation((url, req) => {
       expect(url).toBe(RPC_URL[opts.network]);
@@ -83,7 +83,7 @@ describe('createApp', () => {
       });
     });
 
-    const response = await supertest(app).post('/proxy-rpc').send(request);
+    const response = await supertest(app).post('/api/proxy-rpc').send(request);
     expect(response.body).toHaveProperty('result');
     expect(response.body.result).toHaveProperty('result');
     expect(Array.isArray(response.body.result.result)).toBe(true);

@@ -32,7 +32,6 @@ async function run() {
     .option("--no-open", "Disable opening the browser", false)
     .action((src, opts) => {
       global.log = new Logger(LogLevel[opts.loglevel.toUpperCase() as keyof typeof LogLevel]);
-      // run the dev server
       dev(src, opts).catch((e: Error) => {
         log.error(e.stack || e.message);
       })

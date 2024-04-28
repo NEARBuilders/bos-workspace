@@ -14,9 +14,6 @@ const GATEWAY_PATH = path.join(__dirname, "../..", "gateway", "dist");
 export const RPC_URL = {
   mainnet: "https://rpc.mainnet.near.org",
   testnet: "https://rpc.testnet.near.org",
-
-  // mainnet: "https://near.lava.build",
-  // testnet: "https://near-testnet.lava.build",
 };
 
 const SOCIAL_CONTRACT = {
@@ -71,6 +68,9 @@ export function createApp(devJsonPath: string, opts: DevOptions): Express.Applic
 
   app.use(bodyParser.json());
 
+  /**
+   * Serves the loader json
+   */
   app.get("/api/loader", (_, res) => {
     readJson(devJsonPath).then((devJson: DevJson) => {
       res.json(devJson);
@@ -136,7 +136,11 @@ export function createApp(devJsonPath: string, opts: DevOptions): Express.Applic
     };
   }
 
-  app.all('/proxy-rpc', proxyMiddleware(RPC_URL[opts.network]));
+  /**
+   * Proxy middleware for RPC requests
+   * @param proxyUrl 
+   */
+  app.all('/api/proxy-rpc', proxyMiddleware(RPC_URL[opts.network]));
 
   if (!opts.NoGateway) {
     const gatewayPath = (opts.gateway && path.resolve(opts.gateway)) ?? GATEWAY_PATH;
@@ -205,12 +209,12 @@ export function startServer(server, opts) {
         : ""
       }
   │                                                             │
-  │ ➜ RPC: \u001b[32mhttp://127.0.0.1:${opts.port}/rpc\u001b[0m         │
   │ ➜ Bos Loader Http: \u001b[32mhttp://127.0.0.1:${opts.port}/api/loader\u001b[0m         │${!opts.NoHot
         ? `
   │ ➜ Bos Loader WebSocket: \u001b[32mws://127.0.0.1:${opts.port}\u001b[0m                 │`
         : ""
       }
+  │ ➜ Proxy RPC: \u001b[32mhttp://127.0.0.1:${opts.port}/api/proxy-rpc\u001b[0m         │
   │                                                             │
   │ Optionaly, to open local widgets:                           │
   │ 1. Visit either of the following sites:                     │
