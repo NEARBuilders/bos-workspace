@@ -1,14 +1,15 @@
 {
-  "name": "%APPNAME%",
+  "name": "%ACCOUNT_ID%",
   "version": "0.0.0",
   "description": "",
   "author": "",
   "license": "MIT",
   "scripts": {
-    "dev": "bos-workspace dev",
-    "build": "bos-workspace build"
+    "bw": "bos-workspace",
+    "dev": "bw dev",
+    "build": "bw build"
   },
   "devDependencies": {
-    "bos-workspace": "^0.0.1-alpha.4"
+    "bos-workspace": "^1.0.0-alpha"
   }
 }

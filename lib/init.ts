@@ -13,7 +13,7 @@ export async function initProject(pwd: string, template: string) {
     {
       type: "text",
       name: "app",
-      message: "What should we call your BOS application?",
+      message: "What NEAR AccountId deploys your project?",
     },
     {
       type: async (prev) =>
@@ -38,34 +38,34 @@ export async function initProject(pwd: string, template: string) {
 
     const prefixPath = (p) => path.join(dir, p);
 
-    await mvdir(
-      path.join(dir, "/%APPNAME%"),
-      path.join(dir, `/${name}`)
-    );
+    // await mvdir(
+    //   path.join(dir, "/%ACCOUNT_ID%"),
+    //   path.join(dir, `/${name}`)
+    // );
 
     await replace({
       files: [
         "README.md",
-        `bos.workspace.json`,
-        `${name}/bos.config.json`,
-        `${name}/widget/app.${ts ? "tsx" : "jsx"}`,
+        `bos.config.json`,
+        `widget/app.${ts ? "tsx" : "jsx"}`,
         `.github/workflows/release.yml`,
       ].map(prefixPath),
-      from: /%APPNAME%/g,
+      from: /%ACCOUNT_ID%/g,
       to: name,
     });
 
     await replace({
-      files: ["README.md", `${name}/bos.config.json`, "package.json"].map(
+      files: ["README.md", `bos.config.json`, "package.json"].map(
         prefixPath
       ),
-      from: /%APPNAME%/g,
+      from: /%ACCOUNT_ID%/g,
       to: slug,
     });
 
     console.log('Project initialization complete.');
     console.log(`To get started, cd into the ${res.dir || slug} directory, then run:
-    bw ws dev`);
+    yarn install
+    yarn dev`);
     console.log("Be the BOS!");
   } catch (err) {
     console.error(err);
@@ -84,7 +84,7 @@ async function hasDirectory(dir) {
   }
 }
 
-function getDir(appName) {
-  const slug = slugify(appName, { lower: true });
+function getDir(ACCOUNT_ID) {
+  const slug = slugify(ACCOUNT_ID, { lower: true });
   return path.join(".", slug);
 }

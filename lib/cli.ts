@@ -15,7 +15,6 @@ const [name, description, version] = [
   "0.0.1",
 ];
 
-
 async function run() {
   program.name(name).description(description).version(version);
 
@@ -87,7 +86,7 @@ async function run() {
   program
     .command("init")
     .description("Initialize a new project")
-    .option("-p, --path <path>", "where to init the project", ".")
+    .option("-p, --path <path>", "path to init project", ".")
     .option("-t, --template <template>", "template to use (js, ts etc.)", "js")
     .action(async (opts) => {
       await initProject(opts.path, opts.template);

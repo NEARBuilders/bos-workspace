@@ -1,0 +1,1 @@
+return <p>{"Hello ${config_account}!"}</p>;
