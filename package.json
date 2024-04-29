@@ -34,7 +34,10 @@
     "glob": "^10.3.10",
     "joi": "^17.11.0",
     "multilang-extract-comments": "^0.4.0",
+    "mvdir": "^1.0.21",
     "prettier": "^2.8.8",
+    "replace-in-file": "^7.1.0",
+    "slugify": "^1.6.6",
     "socket.io": "^4.7.3",
     "sucrase": "^3.34.0"
   },

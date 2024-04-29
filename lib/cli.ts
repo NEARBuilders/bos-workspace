@@ -16,7 +16,6 @@ const [name, description, version] = [
   "0.0.1",
 ];
 
-
 async function run() {
   program.name(name).description(description).version(version);
 
@@ -88,14 +87,10 @@ async function run() {
   program
     .command("init")
     .description("Initialize a new project")
-    .argument("[path]", "where to init the project")
-    .option("-t, --template <template>", "template to use (js-single, js-multi)", "js-single")
-    .action(async (path, opts) => {
-      if (!path) {
-        log.error(`[path] argument is required`);
-        log.log(`Usage example: init ./example\n`);
-      }
-      await initProject(path, opts.template);
+    .option("-p, --path <path>", "path to init project", ".")
+    .option("-t, --template <template>", "template to use (js, ts etc.)", "js")
+    .action(async (opts) => {
+      await initProject(opts.path, opts.template);
     });
 
   program

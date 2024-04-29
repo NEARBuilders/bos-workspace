@@ -1,0 +1,18 @@
+name: Deploy '%ACCOUNT_ID%' Components to Mainnet
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy-mainnet:
+    uses: nearbuilders/bos-workspace/.github/workflows/deploy.yml@main
+    with:
+      bw-legacy: false
+      deploy-env: "mainnet"
+      app-name: "%ACCOUNT_ID%"
+      deploy-account-address: "%ACCOUNT_ID%"
+      signer-account-address: "%ACCOUNT_ID%"
+      signer-public-key: ${{ vars.BOS_SIGNER_PUBLIC_KEY }}
+    secrets: 
+      SIGNER_PRIVATE_KEY: ${{ secrets.BOS_SIGNER_PRIVATE_KEY }}
