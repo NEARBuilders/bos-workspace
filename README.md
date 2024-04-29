@@ -92,7 +92,7 @@ Commands:
   init [options] [path]                          Initialize a new project
   clone [account] [dest]                         Clone a SocialDB repository
   pull [account]                                 Pull updates from a SocialDB repository
-  deploy [string]                                Deploy the project (not implemented)
+  deploy [options] [appName]                     Deploy the project
   upload [string]                                Upload data to SocialDB (not implemented)
   help [command]                                 display help for command
 ```

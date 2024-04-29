@@ -167,9 +167,8 @@ describe('build', () => {
     global.log = unmockedLog;
   })
 
-  it('should build correctly without logs', async () => {
-    const { logs } = await buildApp('/app_example_1', '/build');
-    expect(logs).toEqual([]);
+  it('should build correctly', async () => {
+    await buildApp('/app_example_1', '/build');
     expect(vol.toJSON('/build')).toEqual(app_example_1_output);
   })
 

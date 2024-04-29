@@ -6,6 +6,7 @@ import path from "path";
 import { dev } from "./dev";
 import { cloneRepository } from "./repository";
 import { buildWorkspace, devWorkspace } from "./workspace";
+import { deploy } from "./deploy";
 
 const program = new Command();
 
@@ -14,7 +15,6 @@ const [name, description, version] = [
   "Build decentralized apps",
   "0.0.1",
 ];
-
 
 async function run() {
   program.name(name).description(description).version(version);
@@ -87,14 +87,10 @@ async function run() {
   program
     .command("init")
     .description("Initialize a new project")
-    .argument("[path]", "where to init the project")
-    .option("-t, --template <template>", "template to use (js-single, js-multi)", "js-single")
-    .action(async (path, opts) => {
-      if (!path) {
-        log.error(`[path] argument is required`);
-        log.log(`Usage example: init ./example\n`);
-      }
-      await initProject(path, opts.template);
+    .option("-p, --path <path>", "path to init project", ".")
+    .option("-t, --template <template>", "template to use (js, ts etc.)", "js")
+    .action(async (opts) => {
+      await initProject(opts.path, opts.template);
     });
 
   program
@@ -122,11 +118,21 @@ async function run() {
 
   program
     .command("deploy")
-    .description("Deploy the project (not implemented)")
-    .argument("[string]", "app name")
-    .action((appName) => {
-      console.log("not yet supported");
+    .description("Deploy the project")
+    .argument("[appName]", "Workspace app name to deploy")
+    .option("--deploy-account-id <deployAccountId>", "Account under which component code should be deployed")
+    .option("--signer-account-id <signerAccountId>", "Account which will be used for signing deploy transaction, frequently the same as deploy-account-id")
+    .option("--signer-public-key <signerPublicKey>", "Public key for signing transactions in the format: `ed25519:<public_key>`")
+    .option("--signer-private-key <signerPrivateKey>", "Private key in `ed25519:<private_key>` format for signing transaction")
+    .option("-n, --network <network>", "network to deploy for", "mainnet")
+    .option("-l, --loglevel <loglevel>", "log level (ERROR, WARN, INFO, DEV, BUILD, DEBUG)")
+    .action(async (appName, opts) => {
+      global.log = new Logger(LogLevel?.[opts?.loglevel?.toUpperCase() as keyof typeof LogLevel] || LogLevel.BUILD);
+      await deploy(appName, opts).catch((e: Error) => {
+        log.error(e.stack || e.message);
+      })
     });
+
   program
     .command("upload")
     .description("Upload data to SocialDB (not implemented)")
