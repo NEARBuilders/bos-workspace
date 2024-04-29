@@ -45,9 +45,21 @@ export async function deployAppCode(src: string, dist: string, opts: DeployOptio
 
     const deploying = log.loading(`[${fullSrc}] Deploying app`, LogLevels.BUILD);
 
-    // Read config
-    const config = await readConfig(path.join(src, "bos.config.json"), opts.network);
+    // Build
+    await buildApp(src, dist, opts.network);
     
+    // Translate for bos cli
+    await log.wait(
+        translateForBosCli(dist),
+        `[${fullDist}] Translating files for bos cli`,
+        `[${fullDist}] Translated successfully`,
+        `[${fullDist}] Failed to translate`,
+        LogLevels.BUILD
+    );
+    
+    // Exec bos-cli;
+    const config = await readConfig(path.join(src, "bos.config.json"), opts.network);
+
     const BOS_DEPLOY_ACCOUNT_ID = config.accounts.deploy || opts.deployAccountId;
     const BOS_SIGNER_ACCOUNT_ID = config.accounts.signer || opts.signerAccountId;
     const BOS_SIGNER_PUBLIC_KEY = opts.signerPublicKey;
@@ -63,20 +75,7 @@ export async function deployAppCode(src: string, dist: string, opts: DeployOptio
         deploying.error(`Necessary values not provided, please provide private & public key for deploy`);
         return;
     }
-    
-    // Build
-    await buildApp(src, dist, opts.network);
-    
-    // Translate for bos cli
-    await log.wait(
-        translateForBosCli(dist),
-        `[${fullDist}] Translating files for bos cli`,
-        `[${fullDist}] Translated successfully`,
-        `[${fullDist}] Failed to translate`,
-        LogLevels.BUILD
-    );
-    
-    // Exec bos-cli;
+        
     exec(
         `cd ${dist} && npx bos components deploy "${BOS_DEPLOY_ACCOUNT_ID}" sign-as "${BOS_SIGNER_ACCOUNT_ID}" network-config "${opts.network}" sign-with-plaintext-private-key --signer-public-key "${BOS_SIGNER_PUBLIC_KEY}" --signer-private-key "${BOS_SIGNER_PRIVATE_KEY}" send`,
         (error: ExecException | null, stdout: string, stderr: string) => {
