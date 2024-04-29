@@ -84,7 +84,7 @@ async function hasDirectory(dir) {
   }
 }
 
-function getDir(ACCOUNT_ID) {
-  const slug = slugify(ACCOUNT_ID, { lower: true });
+function getDir(accountId) {
+  const slug = slugify(accountId, { lower: true });
   return path.join(".", slug);
 }
