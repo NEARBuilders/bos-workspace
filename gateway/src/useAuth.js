@@ -22,6 +22,7 @@ import { flags } from "../config/flags.js";
 
 export const refreshAllowanceObj = {};
 const NetworkId = flags.network;
+const RPC_URL = "http://127.0.0.1:8080/api/proxy-rpc";
 
 export function useAuth() {
   const [connected, setConnected] = useState(false);
@@ -71,7 +72,7 @@ export function useAuth() {
         },
         config: {
           defaultFinality: undefined,
-          nodeUrl: NetworkId === "mainnet" ? "https://near.lava.build" : "https://near-testnet.lava.build",
+          nodeUrl: RPC_URL,
         },
       });
   }, [initNear]);
@@ -82,7 +83,7 @@ export function useAuth() {
     }
     near.selector.then((selector) => {
       setWalletModal(
-        setupModal(selector, { contractId: near.config.contractName }),
+        setupModal(selector, { contractId: near.config.contractName })
       );
     });
   }, [near]);
@@ -93,7 +94,7 @@ export function useAuth() {
       walletModal.show();
       return false;
     },
-    [walletModal],
+    [walletModal]
   );
 
   const logOut = useCallback(async () => {
@@ -109,7 +110,7 @@ export function useAuth() {
 
   const refreshAllowance = useCallback(async () => {
     alert(
-      "You're out of access key allowance. Need sign in again to refresh it",
+      "You're out of access key allowance. Need sign in again to refresh it"
     );
     await logOut();
     requestSignIn();
@@ -129,7 +130,7 @@ export function useAuth() {
     setAvailableStorage(
       account.storageBalance
         ? Big(account.storageBalance.available).div(utils.StorageCostPerByte)
-        : Big(0),
+        : Big(0)
     );
   }, [account]);
 
@@ -150,6 +151,7 @@ export function useAuth() {
 
 import ls from "local-storage";
 import * as nearAPI from "near-api-js";
+import { RPC_URL } from "../data.js";
 
 export async function getSocialKeyPair(accountId) {
   const keyStore = new nearAPI.keyStores.BrowserLocalStorageKeyStore();
@@ -162,7 +164,7 @@ export async function getSocialKeyPair(accountId) {
     const hereKeystore = ls.get("herewallet:keystore");
     if (hereKeystore) {
       return nearAPI.KeyPair.fromString(
-        hereKeystore[NetworkId].accounts[accountId],
+        hereKeystore[NetworkId].accounts[accountId]
       );
     }
   } catch {}

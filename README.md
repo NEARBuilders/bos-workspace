@@ -1,4 +1,4 @@
-<center>
+<div align="center">
 
 # bos-workspace
 
@@ -6,7 +6,7 @@
 
 **If this is not your first time using bos-workspace, read the [migration guide](./MIGRATION_GUIDE.md). The legacy documentation for v0.0.1-alpha.6 can be found [here](https://github.com/NEARBuilders/bos-workspace/tree/version/0.0.1-alpha.6).**
 
-</center>
+</div>
 
 `bos-workspace` is a comprehensive toolset designed to simplify the development and deployment of [NEAR components](https://docs.near.org/bos/tutorial/quickstart) and applications. With support for hot reload, TypeScript, and multiple app management, it caters to developers looking for an efficient and scalable developer environment.
 
@@ -26,7 +26,7 @@ yarn run bos-workspace clone [accountId] [dest]
 
 Or ensure the proper workspace [structure and usage](#usage).
 
-### Usage
+## Usage
 
 `bos-workspace` supports both multi and single app development because of `Apps` and `Workspaces`:
   
@@ -72,8 +72,7 @@ where the content of `bos.workspace.json` is:
 
 **Note:** The "app name" is not required to end in `.near`, and apps don't necessarily have to be stored in a directory named `/apps`. What's important is that the `bos.config.json` is located at the same level as directories such as `/widget`, and that `bos.workspace.json` specifies the directory it resides in.
 
-
-### Commands
+## Commands
 
 You can run `bw` or `bos-workspace` to see the list of commands.
 
@@ -100,3 +99,37 @@ Commands:
 
 > If the gateway can't fetch local components, try disabling brave shields or your adblock.
 > If the commands don't work, try again using Node >=16
+
+## API Endpoints
+
+A running `bos-workspace` server exposes several endpoints for interacting with local data:
+
+### Gateway Frontend
+
+**URL:** `http://127.0.0.1:8080/`
+
+-> Provides a frontend interface for viewing and interacting with widgets.
+
+### Loader API
+
+**URL:** `http://127.0.0.1:8080/api/loader`
+
+**Method:** `POST`
+
+-> Receive all built and served data.
+
+### WebSocket
+
+**URL:** `ws://127.0.0.1:8080/`
+
+-> WebSocket for hot reload, delivers most updated data.
+
+### Proxy RPC
+
+**URL:** `http://127.0.0.1:8080/api/proxy-rpc`
+
+-> Proxies RPC requests, use as rpcUrl in [near-api-js](https://github.com/near/near-api-js).
+
+## Contributing
+
+Read [CONTRIBUTING](./CONTRIBUTING.md)

@@ -29,16 +29,6 @@ function useRedirectMap() {
       return () => {
         socket.disconnect();
       };
-    } else {
-      fetch(flags.bosLoaderUrl)
-        .then((r) => r.json())
-        .then((d) => {
-          console.log("File change detected via HTTP", d);
-          setDevJson(d);
-        })
-        .catch((error) => {
-          console.error("HTTP request failed:", error);
-        });
     }
   }, [uWebSocket]);
 

@@ -1,5 +1,7 @@
 import Joi from 'joi';
 import { readJson } from '@/lib/utils/fs';
+import { Network } from './types';
+import path from 'path';
 
 export interface BaseConfig {
   account?: string;
@@ -100,5 +102,9 @@ function fillInAccounts(config: AppConfig): AppConfig {
       dev: config.accounts?.dev || config.account,
     },
   };
+}
+
+export async function loadConfig(src: string, network?: Network) {
+  return await readConfig(path.join(src, "bos.config.json"), network);
 }
 
