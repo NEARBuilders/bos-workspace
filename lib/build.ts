@@ -1,10 +1,10 @@
-import path from "path";
 import { readConfig } from "@/lib/config";
-import { writeJson, copy, loopThroughFiles, outputFile, readdir, readFile, readJson, remove } from "@/lib/utils/fs";
-import { transpileJS, EvalCustomSyntaxParams } from "@/lib/parser";
-import { Log } from "@/lib/types";
-import { UploadToIPFSOptions, uploadToIPFS } from "@/lib/ipfs";
 import { generateData } from "@/lib/data";
+import { uploadToIPFS, UploadToIPFSOptions } from "@/lib/ipfs";
+import { EvalCustomSyntaxParams, transpileJS } from "@/lib/parser";
+import { Log } from "@/lib/types";
+import { copy, loopThroughFiles, outputFile, readFile, readJson, remove, writeJson } from "@/lib/utils/fs";
+import path from "path";
 
 // - reads all the files in src 
 //   - check for bos.config.js
@@ -67,6 +67,12 @@ export async function buildApp(src: string, dest: string, network: string = "mai
   };
 
   const new_build_files: string[] = [];
+  const original_build_files: string[] = [];
+
+  // we need to keep track of the original build files
+  await loopThroughFiles(path.join(dest, "src", "widget"), async (file: string) => {
+    original_build_files.push(file);
+  })
 
   // module transpilation
   const loadingModules = log.loading(`Transpiling ${modules.length} modules`, LogLevels.BUILD);
@@ -129,7 +135,7 @@ export async function buildApp(src: string, dest: string, network: string = "mai
 
       // write to dest
       let new_file_name = path.relative(path.join(src, "widget"), file).replace(path.sep, ".");
-      new_file_name = new_file_name.substring(0, new_file_name.length - path.extname(file).length);
+      new_file_name = new_file_name.substring(0, new_file_name.length - path.extname(file).length).split(path.sep).join(".");
       new_file_name += ".jsx";
 
       const new_file_path = path.join(dest, "src", "widget", new_file_name);
@@ -144,14 +150,11 @@ export async function buildApp(src: string, dest: string, network: string = "mai
     throw e;
   }
 
-  // remove unnecessary build files
-  const original_build_files = await readdir(path.join(dest, "src", "widget")).catch(() => []);
   for (const file of original_build_files) {
-    const filePath = path.join(dest, "src", "widget", file);
-    if (new_build_files.includes(filePath))
+    if (new_build_files.includes(file))
       continue;
 
-    await remove(filePath);
+    await remove(file);
   }
 
   await log.wait(

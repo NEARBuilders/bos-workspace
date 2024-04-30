@@ -30,6 +30,16 @@ const app_example_1 = {
     name: "Nested Hello",
     description: "Nested Hello world widget",
   }),
+  "./widget/deeply/nested/index.tsx": "type Hello = {}; const hello: Hello = 'hi'; export default hello;",
+  "./widget/deeply/nested/index.metadata.json": JSON.stringify({
+    name: "Deeply nested Hello",
+    description: "Deeply nested Hello world widget",
+  }),
+  "./widget/very/deeply/nested/index.tsx": "type Hello = {}; const hello: Hello = 'hi'; export default hello;",
+  "./widget/very/deeply/nested/index.metadata.json": JSON.stringify({
+    name: "Very deeply nested Hello",
+    description: "Very deeply nested Hello world widget",
+  }),
   "./widget/module.tsx": "VM.require('${module_hello_utils}'); export default hello('world');",
   "./widget/config.jsx": "return <h1>${config_account}${config_account_deploy}</h1>;",
   "./widget/alias.tsx": "export default <h1>Hello ${alias_name}!</h1>;",
@@ -49,6 +59,8 @@ const app_example_1_output = {
   "/build/src/widget/hello.utils.module.js": "const hello = (name) => `Hello, ${name}!`;\nreturn { hello };\n",
   "/build/src/widget/index.jsx": "const hello = \"hi\";\nreturn hello(props);\n",
   "/build/src/widget/nested.index.jsx": "const hello = \"hi\";\nreturn hello(props);\n",
+  "/build/src/widget/deeply.nested.index.jsx": "const hello = \"hi\";\nreturn hello(props);\n",
+  "/build/src/widget/very.deeply.nested.index.jsx": "const hello = \"hi\";\nreturn hello(props);\n",
   "/build/src/widget/module.jsx": "VM.require(\"test.near/widget/hello.utils.module\");\nreturn hello(\"world\");\n",
   "/build/src/widget/config.jsx": "return <h1>test.neartest.near</h1>;\n",
   "/build/src/widget/alias.jsx": "return <h1>Hello world!</h1>;\n",
@@ -64,6 +76,12 @@ const app_example_1_output = {
         })
       },
       widget: {
+        "deeply.nested.index": {
+          metadata: {
+            name: "Deeply nested Hello",
+            description: "Deeply nested Hello world widget",
+          }
+        },
         index: {
           metadata: {
             name: "Hello",
@@ -75,7 +93,12 @@ const app_example_1_output = {
             name: "Nested Hello",
             description: "Nested Hello world widget",
           }
-
+        },
+        "very.deeply.nested.index": {
+          metadata: {
+            name: "Very deeply nested Hello",
+            description: "Very deeply nested Hello world widget",
+          }
         }
       }
     }
