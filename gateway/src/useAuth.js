@@ -22,7 +22,7 @@ import { flags } from "../config/flags.js";
 
 export const refreshAllowanceObj = {};
 const NetworkId = flags.network;
-const RPC_URL = "http://127.0.0.1:8080/api/proxy-rpc";
+const RPC_URL = flags.bosLoaderUrl + "api/proxy-rpc";
 
 export function useAuth() {
   const [connected, setConnected] = useState(false);
@@ -151,7 +151,6 @@ export function useAuth() {
 
 import ls from "local-storage";
 import * as nearAPI from "near-api-js";
-import { RPC_URL } from "../data.js";
 
 export async function getSocialKeyPair(accountId) {
   const keyStore = new nearAPI.keyStores.BrowserLocalStorageKeyStore();
