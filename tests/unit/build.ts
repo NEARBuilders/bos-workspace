@@ -76,6 +76,12 @@ const app_example_1_output = {
         })
       },
       widget: {
+        "deeply.nested.index": {
+          metadata: {
+            name: "Deeply nested Hello",
+            description: "Deeply nested Hello world widget",
+          }
+        },
         index: {
           metadata: {
             name: "Hello",
@@ -86,12 +92,6 @@ const app_example_1_output = {
           metadata: {
             name: "Nested Hello",
             description: "Nested Hello world widget",
-          }
-        },
-        "deeply.nested.index": {
-          metadata: {
-            name: "Deeply nested Hello",
-            description: "Deeply nested Hello world widget",
           }
         },
         "very.deeply.nested.index": {
