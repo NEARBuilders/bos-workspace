@@ -1,6 +1,6 @@
 {
   "name": "bos-workspace",
-  "version": "1.0.0-alpha.12",
+  "version": "1.0.0-alpha.13",
   "description": "",
   "bin": {
     "bos-workspace": "./bin/bw.js",
@@ -40,6 +40,7 @@
     "multilang-extract-comments": "^0.4.0",
     "mvdir": "^1.0.21",
     "prettier": "^2.8.8",
+    "prompts": "^2.4.2",
     "replace-in-file": "^7.1.0",
     "slugify": "^1.6.6",
     "socket.io": "^4.7.3",

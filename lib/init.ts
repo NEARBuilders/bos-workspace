@@ -5,7 +5,6 @@ import prompts from "prompts";
 import replace from "replace-in-file";
 import slugify from "slugify";
 
-
 export async function initProject(pwd: string, template: string) {
   const ts = template === "ts"
   const codebase = ts ? "ts" : "js";
