@@ -64,10 +64,16 @@ const RpcManager = {
     );
 
     const response = await result.json();
+    const parsedResp = RpcManager.parseResponse(response);
+
+    if (!parsedResp[account]) {
+      log.error(`Are you sure this account exists? : ${account}`);
+      return [];
+    }
 
     const {
       [account]: { widget: keys },
-    } = RpcManager.parseResponse(response);
+    } = parsedResp;
 
     return Object.keys(keys || []);
   },
