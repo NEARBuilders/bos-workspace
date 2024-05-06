@@ -12,11 +12,6 @@ on:
         description: "Flag to use legacy BOS Workspace deploy (e.g. 0.0.1-alpha.6)"
         type: boolean
         default : true
-      build-env:
-          required: false
-          description: "Environment to build workspace code to (e.g. staging)"
-          type: string
-          default: "mainnet"
       deploy-env:
         required: false
         description: "Environment to deploy component code to (e.g. mainnet, testnet)"
@@ -53,7 +48,6 @@ jobs:
     runs-on: ubuntu-latest
     name: Deploy Widgets
     env:
-      BW_BUILD_ENV: ${{ inputs.build-env }}
       BOS_DEPLOY_ENV: ${{ inputs.deploy-env }}
       BOS_APP_NAME: ${{ inputs.app-name }}
       WORKING_DIRECTORY: ${{ inputs.working-directory }}
@@ -65,16 +59,6 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
-
-      - name: Install bos-cli-rs
-        run: |
-          curl --proto '=https' --tlsv1.2 -LsSf https://github.com/FroVolod/bos-cli-rs/releases/download/v${{ inputs.cli-version }}/bos-cli-installer.sh | sh
-
-      - name: Configure Lava Network RPC endpoint
-        run: |
-          mkdir -p ~/.config/near-cli
-          touch ~/.config/near-cli/config.toml
-          echo -e "credentials_home_dir = \"/home/runner/.near-credentials\"\n[network_connection.mainnet]\nnetwork_name = \"mainnet\"\nrpc_url = \"https://near.lava.build/\"\nwallet_url = \"https://app.mynearwallet.com/\"\nexplorer_transaction_url = \"https://nearblocks.io/txns/\"\n[network_connection.testnet]\nnetwork_name = \"testnet\"\nrpc_url = \"https://near-testnet.lava.build/\"\nwallet_url = \"https://wallet.testnet.near.org/\"\nexplorer_transaction_url = \"https://explorer.testnet.near.org/transactions/\"\nlinkdrop_account_id = \"testnet\"\nfaucet_url = \"https://helper.nearprotocol.com/account\"" > ~/.config/near-cli/config.toml
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
@@ -89,40 +73,8 @@ jobs:
             yarn global add bos-workspace
           fi
 
-      - name: Build and deploy the workspace
+      - name: Deploy the workspace
         run: |
           cd "$WORKING_DIRECTORY"
-          if [ "${{ inputs.bw-legacy }}" = "true" ]; then
-            BUILD_COMMAND="bos-workspace build"
-            BUILD_PATH="$WORKING_DIRECTORY/build/$BOS_APP_NAME"
-          else
-            if [ -f "bos.workspace.json" ]; then
-              echo "Found bos.workspace.json"
-              BUILD_COMMAND="bos-workspace ws build -n $BW_BUILD_ENV"
-              BUILD_PATH="$WORKING_DIRECTORY/dist/apps/$BOS_APP_NAME"
-            elif [ -f "bos.config.json" ]; then
-              echo "Found bos.config.json"
-              BUILD_COMMAND="bos-workspace build -n $BW_BUILD_ENV"
-              BUILD_PATH="$WORKING_DIRECTORY/dist"
-            else
-              echo "Neither bos.workspace.json nor bos.config.json found, aborting"
-              exit 1
-            fi
-          fi
-
-          echo "BUILD_COMMAND: $BUILD_COMMAND"
-          echo "BUILD_PATH: $BUILD_PATH"
-
-          $BUILD_COMMAND
-
-          cd $BUILD_PATH
-
-          # workaround because bos-cli-rs puts all widgets in src
-          if [ "${{ inputs.bw-legacy }}" = "false" ]; then
-            find src/widget/* -maxdepth 0 -exec mv -t ./src '{}' +
-            if [ -z "$(ls -A src/widget)" ]; then
-              rm -r src/widget
-            fi
-          fi
-
-          bos components deploy "$BOS_DEPLOY_ACCOUNT_ID" sign-as "$BOS_SIGNER_ACCOUNT_ID" network-config "$BOS_DEPLOY_ENV" sign-with-plaintext-private-key --signer-public-key "$BOS_SIGNER_PUBLIC_KEY" --signer-private-key "$BOS_SIGNER_PRIVATE_KEY" send
+          bos-workspace deploy "$BOS_APP_NAME" --deploy-account-id "$BOS_DEPLOY_ACCOUNT_ID" --signer-account-id "$BOS_SIGNER_ACCOUNT_ID" --signer-public-key "$BOS_SIGNER_PUBLIC_KEY" --signer-private-key "$BOS_SIGNER_PRIVATE_KEY" -n "$BOS_DEPLOY_ENV"
+          
