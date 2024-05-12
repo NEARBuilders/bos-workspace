@@ -69,6 +69,8 @@ jobs:
         run: |
           if [ "${{ inputs.bw-legacy }}" = "true" ]; then
             yarn global add bos-workspace@0.0.1-alpha.6
+
+            curl --proto '=https' --tlsv1.2 -LsSf https://github.com/FroVolod/bos-cli-rs/releases/download/v${{ inputs.cli-version }}/bos-cli-installer.sh | sh
           else
             yarn global add bos-workspace
           fi
@@ -76,5 +78,11 @@ jobs:
       - name: Deploy the workspace
         run: |
           cd "$WORKING_DIRECTORY"
-          bos-workspace deploy "$BOS_APP_NAME" --deploy-account-id "$BOS_DEPLOY_ACCOUNT_ID" --signer-account-id "$BOS_SIGNER_ACCOUNT_ID" --signer-public-key "$BOS_SIGNER_PUBLIC_KEY" --signer-private-key "$BOS_SIGNER_PRIVATE_KEY" -n "$BOS_DEPLOY_ENV"
-          
+          if [ "${{ inputs.bw-legacy }}" = "true" ]; then
+            BUILD_COMMAND="bos-workspace build"
+            BUILD_PATH="$WORKING_DIRECTORY/build/$BOS_APP_NAME"
+            
+            bos components deploy "$BOS_DEPLOY_ACCOUNT_ID" sign-as "$BOS_SIGNER_ACCOUNT_ID" network-config "$BOS_DEPLOY_ENV" sign-with-plaintext-private-key --signer-public-key "$BOS_SIGNER_PUBLIC_KEY" --signer-private-key "$BOS_SIGNER_PRIVATE_KEY" send
+          else
+            bos-workspace deploy "$BOS_APP_NAME" -n "$BOS_DEPLOY_ENV" --deploy-account-id "$BOS_DEPLOY_ACCOUNT_ID" --signer-account-id "$BOS_SIGNER_ACCOUNT_ID" --signer-public-key "$BOS_SIGNER_PUBLIC_KEY" --signer-private-key "$BOS_SIGNER_PRIVATE_KEY"
+          fi
