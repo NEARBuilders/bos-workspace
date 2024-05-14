@@ -6,6 +6,7 @@ import express, { Request, Response } from 'express';
 import { existsSync, readJson } from "fs-extra";
 import http from 'http';
 import path from "path";
+import { handleReplacements } from './gateway';
 import { readFile } from "./utils/fs";
 
 // the gateway dist path in node_modules
@@ -27,7 +28,7 @@ const SOCIAL_CONTRACT = {
  * @param opts DevOptions
  * @returns http server
  */
-export function startDevServer(devJsonPath: string, opts: DevOptions,): http.Server {
+export function startDevServer(devJsonPath: string, opts: DevOptions): http.Server {
   const app = createApp(devJsonPath, opts);
   const server = http.createServer(app);
   startServer(server, opts);
@@ -143,7 +144,9 @@ export function createApp(devJsonPath: string, opts: DevOptions): Express.Applic
   app.all('/api/proxy-rpc', proxyMiddleware(RPC_URL[opts.network]));
 
   if (!opts.NoGateway) {
+    // do things with gateway
     const gatewayPath = (opts.gateway && path.resolve(opts.gateway)) ?? GATEWAY_PATH;
+
     // let's check if gateway/dist/index.html exists
     if (!(existsSync(path.join(gatewayPath, "index.html")))) {
       log.error("Gateway not found. Skipping...");
@@ -154,7 +157,7 @@ export function createApp(devJsonPath: string, opts: DevOptions): Express.Applic
         if (req.path === "/") {
           return next();
         }
-        express.static(gatewayPath)(req, res, next);
+        express.static(gatewayPath)(req, res, next); // serve static files
       });
       app.get("*", (_, res) => {
         // Inject Gateway with Environment Variables
@@ -162,14 +165,8 @@ export function createApp(devJsonPath: string, opts: DevOptions): Express.Applic
           path.join(gatewayPath, "index.html"),
           "utf8",
         ).then((data) => {
-          const envConfig = JSON.stringify({
-            bosLoaderWs: `ws://127.0.0.1:${opts.port}`,
-            bosLoaderUrl: `http://127.0.0.1:${opts.port}/api/loader`,
-            enableHotReload: opts.NoHot ? false : true,
-            network: opts.network,
-          });
-          const withEnv = injectHTML(data, { ENV_CONFIG: envConfig });
-          res.send(withEnv);
+          const modifiedDist = handleReplacements(data, opts);
+          res.send(modifiedDist);
         }).catch((err) => {
           log.error(err);
           return res.status(404).send("Something went wrong.");
@@ -214,7 +211,7 @@ export function startServer(server, opts) {
   │ ➜ Bos Loader WebSocket: \u001b[32mws://127.0.0.1:${opts.port}\u001b[0m                 │`
         : ""
       }
-  │ ➜ Proxy RPC: \u001b[32mhttp://127.0.0.1:${opts.port}/api/proxy-rpc\u001b[0m         │
+  │ ➜ Proxy RPC: \u001b[32mhttp://127.0.0.1:${opts.port}/api/proxy-rpc\u001b[0m            │
   │                                                             │
   │ Optionaly, to open local widgets:                           │
   │ 1. Visit either of the following sites:                     │
@@ -231,10 +228,3 @@ export function startServer(server, opts) {
       process.exit(1);
     });
 }
-
-function injectHTML(html: string, injections: Record<string, string>) {
-  Object.keys(injections).forEach((key) => {
-    html = html.replace(`%${key}%`, injections[key]);
-  });
-  return html;
-};
