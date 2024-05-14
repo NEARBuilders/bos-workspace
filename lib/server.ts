@@ -211,7 +211,7 @@ export function startServer(server, opts) {
   │ ➜ Bos Loader WebSocket: \u001b[32mws://127.0.0.1:${opts.port}\u001b[0m                 │`
         : ""
       }
-  │ ➜ Proxy RPC: \u001b[32mhttp://127.0.0.1:${opts.port}/api/proxy-rpc\u001b[0m         │
+  │ ➜ Proxy RPC: \u001b[32mhttp://127.0.0.1:${opts.port}/api/proxy-rpc\u001b[0m            │
   │                                                             │
   │ Optionaly, to open local widgets:                           │
   │ 1. Visit either of the following sites:                     │
