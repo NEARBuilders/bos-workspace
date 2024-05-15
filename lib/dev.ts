@@ -13,12 +13,13 @@ import { startFileWatcher } from "./watcher";
 const DEV_DIST_FOLDER = "build";
 
 export type DevOptions = {
-  port?: number;
-  NoGateway?: boolean;
-  NoHot?: boolean;
-  NoOpen?: boolean;
-  network?: Network;
-  gateway?: string;
+  port?: number; // port to run dev server
+  NoGateway?: boolean; // disable local gateway
+  NoHot?: boolean; // disable hot reloading
+  NoOpen?: boolean; // do not open browser
+  network?: Network; // network to use
+  gateway?: string; // path to custom gateway dist
+  index?: string; // widget to use as index
 };
 
 /**
@@ -38,6 +39,11 @@ export async function dev(src: string, opts: DevOptions) {
   // Build the app for the first time
   let devJson = await generateApp(src, dist, config, opts, devJsonPath);
   await writeJson(devJsonPath, devJson);
+
+  // set index widget (temp, this can be done better)
+  if (!opts.index && config.index) {
+    opts.index = config.index;
+  }
 
   // Start the dev server
   const server = startDevServer(devJsonPath, opts);

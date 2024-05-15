@@ -1,10 +1,12 @@
 {
   "account": "quickstart.near",
   "aliases": ["./aliases.mainnet.json"],
+  "index": "quickstart.near/widget/home",
   "overrides": {
     "testnet": {
       "account": "quickstart.testnet",
-      "aliases": ["./aliases.testnet.json"]
+      "aliases": ["./aliases.testnet.json"],
+      "index": "quickstart.testnet/widget/home"
     }
   }
 }

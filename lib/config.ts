@@ -17,6 +17,7 @@ export interface BaseConfig {
   };
   format?: boolean;
   aliases?: string[];
+  index?: string;
 }
 
 interface NetworkConfig {
@@ -56,6 +57,7 @@ const baseConfigSchema = Joi.object({
   }).default(DEFAULT_CONFIG.ipfs),
   format: Joi.boolean().default(DEFAULT_CONFIG.format),
   aliases: Joi.array().items(Joi.string()).default(DEFAULT_CONFIG.aliases),
+  index: Joi.string().allow(null),
 });
 
 const networkConfigSchema = Joi.object({
