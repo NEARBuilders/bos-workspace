@@ -8,6 +8,7 @@ export interface BaseConfig {
   accounts?: { // account configuration (used for deploy command)
     deploy?: string; // account to deploy widgets to
     signer?: string; // account to sign transactions (such as deployment)
+    dev?: string; 
   };
   ipfs?: { // ipfs configuration
     gateway?: string; // ipfs gateway to use
@@ -43,6 +44,7 @@ export const DEFAULT_CONFIG = {
 const accountConfigSchema = Joi.object({
   deploy: Joi.string().allow(null),
   signer: Joi.string().allow(null),
+  dev: Joi.string().allow(null),
 });
 
 const baseConfigSchema = Joi.object({
@@ -99,6 +101,7 @@ function fillInAccounts(config: AppConfig): AppConfig {
     accounts: {
       deploy: config.accounts?.deploy || config.account,
       signer: config.accounts?.signer || config.account,
+      dev: config.accounts?.dev || config.account,
     },
   };
 }
