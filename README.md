@@ -129,6 +129,7 @@ The `bos.config.json` file consists of a base configuration that defines default
   * `uploadApiHeaders`: Any additional headers to send with IPFS upload API requests.
 * `format`: (Optional) Indicates whether to format code on build. Default value is `true`.
 * `aliases`: (Optional) Provides a list of alias files to use for replacing network-specific values with correct overrides.
+* `index`: (Optional) Default widget src to use when using a custom gateway dist.  
 
 ---
 
