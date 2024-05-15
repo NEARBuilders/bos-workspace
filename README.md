@@ -8,13 +8,13 @@
 
 </div>
 
-`bos-workspace` is a comprehensive toolset designed to simplify the development and deployment of [NEAR components](https://docs.near.org/bos/tutorial/quickstart) and applications. With support for hot reload, TypeScript, and multiple app management, it caters to developers looking for an efficient and scalable developer environment.
+`bos-workspace` is a comprehensive toolset designed to simplify the development and deployment of [NEAR components](https://docs.near.org/bos/tutorial/quickstart) and applications. With support for hot reload, TypeScript, and multi-app management, it caters to developers looking for an efficient and scalable developer environment.
 
 ## Quickstart
 
 To begin, either:
 
-* [Use the template repository](https://github.com/new?template_name=quickstart&template_owner=NEARBuilders) with quickstart app, preconfigured git workflows, playwright test suite
+* [Use the template repository](https://github.com/new?template_name=quickstart&template_owner=NEARBuilders) with quickstart app, preconfigured git workflows, and playwright test suite
 
 * Use the init command for an empty workspace:
 
@@ -82,7 +82,7 @@ where the content of `bos.workspace.json` is:
 
 **Note:** The "app name" is not required to end in `.near`, and apps don't necessarily have to be stored in a directory named `/apps`. What's important is that the `bos.config.json` is located at the same level as directories such as `/widget`, and that `bos.workspace.json` specifies the directory it resides in.
 
-## bos.config.json
+## Configuration
 
 The `bos.config.json` file serves as the configuration file for managing various settings and options related to the workspace.
 
@@ -133,7 +133,7 @@ The `bos.config.json` file consists of a base configuration that defines default
 
 ---
 
-### Network Configuration Overrides
+### Network Overrides
 
 The `bos.config.json` file supports network configuration overrides of this base configuration, allowing developers to specify different settings for specific networks (e.g., mainnet, testnet).
 
@@ -145,12 +145,12 @@ The `bos.config.json` file supports network configuration overrides of this base
 
 ### Aliases
 
-When working with values that differ accross different networks, developers can define aliases in separate JSON files according to environment.
+When working with values that differ accross different networks, developers can define aliases in separate JSON files according to environment. These aliases are replaced during build.
 
 * **Account**: Defines the "owner" of the widgets in the workspace, according to network.
-  * Pattern: `{CONFIG_ACCOUNT}`
+  * Pattern: `{config_account}`
 * **Aliases**: Defines patterns for replacing other account and contract references. These are particularly useful for widget sources accross environments, such as using mob.near for mainnet, and mike.testnet for testnet.
-  * Pattern: `${ALIAS_KEY}`
+  * Pattern: `${alias_key}`
   * Example:
 
     ```json
