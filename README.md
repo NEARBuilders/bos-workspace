@@ -26,6 +26,7 @@ npx bos-workspace init
 
 ```cmd
 npx bos-workspace clone [accountId] [dest]
+npx bos-workspace dev [dest | accountId]
 ```
 
 * Or install `bos-workspace` within an existing project:
