@@ -19,7 +19,7 @@ To begin, either:
 * Use the init command for an empty workspace:
 
 ```cmd
-npx bos-workspace init [configAccount]
+npx bos-workspace init
 ```
 
 * Clone widgets from an existing [account](https://near.social/mob.near/widget/Everyone):
