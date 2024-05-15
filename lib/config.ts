@@ -4,20 +4,19 @@ import { Network } from './types';
 import path from 'path';
 
 export interface BaseConfig {
-  account?: string;
-  accounts?: {
-    deploy?: string;
-    signer?: string;
-    dev?: string;
+  account?: string; // default account to serve widgets from
+  accounts?: { // account configuration (used for deploy command)
+    deploy?: string; // account to deploy widgets to
+    signer?: string; // account to sign transactions (such as deployment)
   };
-  ipfs?: {
-    gateway?: string;
-    uploadApi?: string;
-    uploadApiHeaders?: Record<string, string>;
+  ipfs?: { // ipfs configuration
+    gateway?: string; // ipfs gateway to use
+    uploadApi?: string; // ipfs upload api
+    uploadApiHeaders?: Record<string, string>; // headers to send with ipfs upload api
   };
-  format?: boolean;
-  aliases?: string[];
-  index?: string;
+  format?: boolean; // option to format code on build (default true)
+  aliases?: string[]; // list of alias to use
+  index?: string; // widget to use as index
 }
 
 interface NetworkConfig {
@@ -44,7 +43,6 @@ export const DEFAULT_CONFIG = {
 const accountConfigSchema = Joi.object({
   deploy: Joi.string().allow(null),
   signer: Joi.string().allow(null),
-  dev: Joi.string().allow(null),
 });
 
 const baseConfigSchema = Joi.object({
@@ -101,7 +99,6 @@ function fillInAccounts(config: AppConfig): AppConfig {
     accounts: {
       deploy: config.accounts?.deploy || config.account,
       signer: config.accounts?.signer || config.account,
-      dev: config.accounts?.dev || config.account,
     },
   };
 }
