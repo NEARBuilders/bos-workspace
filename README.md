@@ -217,20 +217,17 @@ Commands:
 
 ## Deployment
 
+### Usage (CLI)
+
 **Command:** `deploy`
 
 Deploys an app in the workspace via a convenient wrapper to [bos-cli-rs](https://github.com/bos-cli-rs/bos-cli-rs).
-
-### Usage (CLI)
-
-Deploy the project with the option to specify an app name (must be the name of the folder in the /apps directory):
 
 ```cmd
 bos-workspace deploy [app name] --deploy-account-id [deployAccountId] --signer-account-id [signerAccountId] --signer-public-key [signerPublicKey] --signer-private-key [signerPrivateKey]
 ```
 
-### Options
-
+* `[app name]`: Name of the app to be deployed. Assumed to be the current app in App structure (bos.config.json), but is required when using the Workspace structure (bos.workspace.json); this should match the name of the App's directory.
 * `--deploy-account-id <deployAccountId>` (Optional): Account under which component code should be deployed. Defaults to `config.account`, or will use `config.accounts.deploy` if specified.
 
 * `--signer-account-id <signerAccountId>` (Optional): Account which will be used for signing deploy transactions, frequently the same as deploy-account-id. Defaults to `config.account`, or will use `config.accounts.deploy` if specified.
@@ -241,15 +238,14 @@ bos-workspace deploy [app name] --deploy-account-id [deployAccountId] --signer-a
 
 * `-n, --network <network>` (Optional): Network to deploy for (default: "mainnet").
 
-## Configuring git workflows
+### Usage (Git Workflow)
 
-### Prerequisites
+#### Prerequisites
 
 1. Must be upgraded to bos-workspace v1, see the [migration guide](?page=getting_started/migration_guide)
 2. Specify testnet [overrides + aliases](?page=usage/aliases) in bos.config.json.
 
-
-### Mainnet
+#### Mainnet
 
 1. Create `.github/workflow/release-mainnet.yml`
 
@@ -272,7 +268,7 @@ jobs:
       SIGNER_PRIVATE_KEY: ${{ secrets.SIGNER_PRIVATE_KEY }} // then configure this in your Github/Settings/Actions
 ```
 
-### Testnet
+#### Testnet
 
 1. Create `.github/workflow/release-testnet.yml`
 
