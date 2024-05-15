@@ -4,19 +4,20 @@ import { Network } from './types';
 import path from 'path';
 
 export interface BaseConfig {
-  account?: string;
-  accounts?: {
-    deploy?: string;
-    signer?: string;
-    dev?: string;
+  account?: string; // default account to serve widgets from
+  accounts?: { // account configuration (used for deploy command)
+    deploy?: string; // account to deploy widgets to
+    signer?: string; // account to sign transactions (such as deployment)
+    dev?: string; 
   };
-  ipfs?: {
-    gateway?: string;
-    uploadApi?: string;
-    uploadApiHeaders?: Record<string, string>;
+  ipfs?: { // ipfs configuration
+    gateway?: string; // ipfs gateway to use
+    uploadApi?: string; // ipfs upload api
+    uploadApiHeaders?: Record<string, string>; // headers to send with ipfs upload api
   };
-  format?: boolean;
-  aliases?: string[];
+  format?: boolean; // option to format code on build (default true)
+  aliases?: string[]; // list of alias to use
+  index?: string; // widget to use as index
 }
 
 interface NetworkConfig {
@@ -56,6 +57,7 @@ const baseConfigSchema = Joi.object({
   }).default(DEFAULT_CONFIG.ipfs),
   format: Joi.boolean().default(DEFAULT_CONFIG.format),
   aliases: Joi.array().items(Joi.string()).default(DEFAULT_CONFIG.aliases),
+  index: Joi.string().allow(null),
 });
 
 const networkConfigSchema = Joi.object({

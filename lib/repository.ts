@@ -4,14 +4,6 @@ import fs, { existsSync, outputFile, writeFile } from "fs-extra";
 import path from "path";
 import { SHA256 } from "crypto-js";
 
-/*
-// Implement cloneRepository, pullRepository, and removeRepository functions
-// pull from repository.js
-// cloneRepository(account, dest);
-// pullRepository(account, dest);
-// removeRepository(account, dest);
-*/
-
 const NEAR_MAINNET_RPC = "https://rpc.mainnet.near.org/";
 const TREE_DIR = "./tree.json";
 

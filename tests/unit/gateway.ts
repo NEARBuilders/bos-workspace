@@ -20,6 +20,7 @@ describe("gateway", () => {
     port: 8080,
     NoHot: false,
     network: 'testnet' as Network,
+    index: "test/widget/index"
   };
 
   // Test replacement of environment configuration
@@ -40,7 +41,7 @@ describe("gateway", () => {
   // Test replacement of the near-social-viewer component with an RPC attribute
   it("should replace <near-social-viewer></near-social-viewer> with near-social-viewer having an RPC attribute", () => {
     const htmlInput = "<html><head></head><body><near-social-viewer></near-social-viewer></body></html>";
-    const expectedHtmlOutput = `<html><head></head><body><near-social-viewer rpc="http://127.0.0.1:8080/api/proxy-rpc"></near-social-viewer></body></html>`;
+    const expectedHtmlOutput = `<html><head></head><body><near-social-viewer src="${mockOpts.index}" rpc="http://127.0.0.1:${mockOpts.port}/api/proxy-rpc"></near-social-viewer></body></html>`;
 
     const result = handleReplacements(htmlInput, mockOpts);
     expect(result).toBe(expectedHtmlOutput);
