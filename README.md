@@ -187,6 +187,26 @@ When working with values that differ accross different networks, developers can 
     }
     ```
 
+## Customizing the Gateway
+
+Running the bos-workspace dev server will start a local gateway with a standard [near-social-vm](https://github.com/NearSocial/VM) installed unless the `--no-gateway` flag is provided in your dev command:
+
+```cmd
+bw dev --no-gateway
+```
+
+However, there is an option to override this default gateway with a custom `/dist`. This is helpful when building widgets that utilize [custom VM elements](https://github.com/NEARBuilders/near-bos-webcomponent?tab=readme-ov-file#configuring-vm-custom-elements). To use this feature, use the `-g` flag with a path to the local custom distribution:
+
+```cmd
+bw dev -g path/to/dist
+```
+
+This will automatically start the local gateway, but using the provided dist.
+
+It is easy to build and distribute a custom gateway using the [near-bos-webcomponent](https://github.com/nearbuilders/near-bos-webcomponent), see ["Configuring VM Custom Elements"](https://github.com/NEARBuilders/near-bos-webcomponent?tab=readme-ov-file#configuring-vm-custom-elements).
+
+The bos-workspace dev server is specially configured with the near-bos-webcomponent to automatically set the `rpc` attribute with the [proxy-rpc](#proxy-rpc) when provided.
+
 ## Commands
 
 You can run `bw` or `bos-workspace` to see the list of commands.
@@ -224,7 +244,7 @@ Commands:
 Deploys an app in the workspace via a convenient wrapper to [bos-cli-rs](https://github.com/bos-cli-rs/bos-cli-rs).
 
 ```cmd
-bos-workspace deploy [app name] --deploy-account-id [deployAccountId] --signer-account-id [signerAccountId] --signer-public-key [signerPublicKey] --signer-private-key [signerPrivateKey]
+bw deploy [app name] --deploy-account-id [deployAccountId] --signer-account-id [signerAccountId] --signer-public-key [signerPublicKey] --signer-private-key [signerPrivateKey]
 ```
 
 * `[app name]`: Name of the app to be deployed. Assumed to be the current app in App structure (bos.config.json), but is required when using the Workspace structure (bos.workspace.json); this should match the name of the App's directory.
@@ -242,8 +262,8 @@ bos-workspace deploy [app name] --deploy-account-id [deployAccountId] --signer-a
 
 #### Prerequisites
 
-1. Must be upgraded to bos-workspace v1, see the [migration guide](?page=getting_started/migration_guide)
-2. Specify testnet [overrides + aliases](?page=usage/aliases) in bos.config.json.
+1. Must be upgraded to bos-workspace v1, see the [migration guide](./MIGRATION_GUIDE.md)
+2. Specify testnet [overrides + aliases](#aliases) in bos.config.json.
 
 #### Mainnet
 
