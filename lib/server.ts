@@ -3,11 +3,12 @@ import { fetchJson } from "@near-js/providers";
 import bodyParser from "body-parser";
 import { exec } from "child_process";
 import express, { Request, Response } from 'express';
-import { existsSync, readJson } from "fs-extra";
+import { existsSync, readJson, writeJson } from "fs-extra";
 import http from 'http';
 import path from "path";
 import { handleReplacements } from './gateway';
 import { readFile } from "./utils/fs";
+import { mergeDeep } from "./utils/objects";
 
 // the gateway dist path in node_modules
 const GATEWAY_PATH = path.join(__dirname, "../..", "gateway", "dist");
@@ -31,7 +32,7 @@ const SOCIAL_CONTRACT = {
 export function startDevServer(devJsonPath: string, opts: DevOptions): http.Server {
   const app = createApp(devJsonPath, opts);
   const server = http.createServer(app);
-  startServer(server, opts);
+  startServer(server, devJsonPath, opts);
   return server;
 }
 
@@ -80,6 +81,22 @@ export function createApp(devJsonPath: string, opts: DevOptions): Express.Applic
         log.error(err.stack || err.message);
         return res.status(500).send("Error reading redirect map.");
       })
+  });
+
+  /**
+   * Adds the loader json
+   */
+  app.post("/api/loader", (req, res) => {
+    console.log(`Request: ${JSON.stringify(req.body)}`);
+
+    readJson(devJsonPath).then((devJson: DevJson) => {
+      const newDevJson = mergeDeep(devJson, req.body);
+      writeJson(devJsonPath, newDevJson);
+      res.json(newDevJson);
+    }).catch((err: Error) => {
+      log.error(err.stack || err.message);
+      return res.status(500).send("Error reading redirect map.");
+    })
   });
 
   function proxyMiddleware(proxyUrl: string) {
@@ -184,7 +201,7 @@ export function createApp(devJsonPath: string, opts: DevOptions): Express.Applic
  * @param server http server
  * @param opts DevOptions
  */
-export function startServer(server, opts) {
+export function startServer(server, devJsonPath, opts) {
   server.listen(opts.port, "127.0.0.1", () => {
     if (!opts.NoGateway && !opts.NoOpen) {
       // open gateway in browser
@@ -223,8 +240,51 @@ export function startServer(server, opts) {
 `);
     log.success(`bos-workspace running on port ${opts.port}!`);
   })
-    .on("error", (err: Error) => {
-      log.error(err.message);
-      process.exit(1);
+    .on("error", async (err: any) => {
+      if (err.code === "EADDRINUSE") {
+        log.warn(err.message);
+
+        const devJson = await readJson(devJsonPath, { throws: false });
+
+        const postData = JSON.stringify(devJson);
+        const options = {
+          hostname: '127.0.0.1',
+          port: opts.port,
+          path: `/api/loader`,
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Content-Length': Buffer.byteLength(postData),
+          },
+        };
+
+        const req = http.request(options, (res) => {
+          console.log(`STATUS: ${res.statusCode}`);
+          console.log(`HEADERS: ${JSON.stringify(res.headers)}`);
+
+          res.setEncoding('utf8');
+          let data = '';
+
+          res.on('data', (chunk) => {
+              data += chunk;
+          });
+
+          res.on('end', () => {
+            console.log(`Response: ${data}`);
+          });
+        });
+
+        req.on('error', (e) => {
+          console.log(`problem with request: ${e.message}`);
+        });
+        
+        // Write data to request body
+        req.write(postData);
+        req.end();
+
+      } else {
+        log.error(err.message);
+        process.exit(1);
+      }
     });
 }
