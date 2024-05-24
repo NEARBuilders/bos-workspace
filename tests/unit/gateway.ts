@@ -1,6 +1,6 @@
 import { DevOptions } from '@/lib/dev';
-import { Logger, LogLevel } from "@/lib/logger";
 import { handleReplacements } from '@/lib/gateway';
+import { Logger, LogLevel } from "@/lib/logger";
 import { Network } from '@/lib/types';
 
 const unmockedLog = global.log;
@@ -41,7 +41,7 @@ describe("gateway", () => {
   // Test replacement of the near-social-viewer component with an RPC attribute
   it("should replace <near-social-viewer></near-social-viewer> with near-social-viewer having an RPC attribute", () => {
     const htmlInput = "<html><head></head><body><near-social-viewer></near-social-viewer></body></html>";
-    const expectedHtmlOutput = `<html><head></head><body><near-social-viewer src="${mockOpts.index}" rpc="http://127.0.0.1:${mockOpts.port}/api/proxy-rpc"></near-social-viewer></body></html>`;
+    const expectedHtmlOutput = `<html><head></head><body><near-social-viewer src="${mockOpts.index}" rpc="http://127.0.0.1:${mockOpts.port}/api/proxy-rpc" network="${mockOpts.network}"></near-social-viewer></body></html>`;
 
     const result = handleReplacements(htmlInput, mockOpts);
     expect(result).toBe(expectedHtmlOutput);
