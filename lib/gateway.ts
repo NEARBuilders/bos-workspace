@@ -31,7 +31,9 @@ export const handleReplacements = (html: string, opts: DevOptions): string => {
       replacement: true
         ? `<near-social-viewer
         ${renderAttribute("src", opts.index)}
-        ${renderAttribute("rpc", `http://127.0.0.1:${opts.port}/api/proxy-rpc`)}></near-social-viewer>`
+        ${renderAttribute("rpc", `http://127.0.0.1:${opts.port}/api/proxy-rpc`)}
+        ${renderAttribute("network", opts.network)}
+        ></near-social-viewer>`
         : "<near-social-viewer></near-social-viewer>",
     }
   }));
