@@ -1,5 +1,6 @@
 import { DevJson, DevOptions } from '@/lib/dev';
 import { fetchJson } from "@near-js/providers";
+import axios from "axios";
 import bodyParser from "body-parser";
 import { exec } from "child_process";
 import express, { Request, Response } from 'express';
@@ -143,41 +144,123 @@ export function createApp(devJsonPath: string, opts: DevOptions): Express.Applic
    */
   app.all('/api/proxy-rpc', proxyMiddleware(RPC_URL[opts.network]));
 
-  if (!opts.NoGateway) {
-    // do things with gateway
-    const gatewayPath = (opts.gateway && path.resolve(opts.gateway)) ?? GATEWAY_PATH;
+  const isLocalPath = (path: string) => !path.startsWith("http");
 
-    // let's check if gateway/dist/index.html exists
-    if (!(existsSync(path.join(gatewayPath, "index.html")))) {
-      log.error("Gateway not found. Skipping...");
-      opts.NoGateway = true;
+  if (!opts.NoGateway) {
+    let gatewayPath = opts.gateway ?? GATEWAY_PATH;
+
+    if (isLocalPath(gatewayPath)) {
+      // serve local distribution
+      gatewayPath = path.resolve(gatewayPath);
+
+      // let's check if gateway/dist/index.html exists
+      if (!(existsSync(path.join(gatewayPath, "index.html")))) {
+        log.error("Gateway not found. Skipping...");
+        opts.NoGateway = true;
+      } else {
+        // everything else is redirected to the gateway/dist
+        app.use((req, res, next) => {
+          if (req.path === "/") {
+            return next();
+          }
+          express.static(gatewayPath)(req, res, next); // serve static files
+        });
+        app.get("*", (_, res) => {
+          // Inject Gateway with Environment Variables
+          readFile(
+            path.join(gatewayPath, "index.html"),
+            "utf8",
+          ).then((data) => {
+            const modifiedDist = handleReplacements(data, opts);
+            res.send(modifiedDist);
+          }).catch((err) => {
+            log.error(err);
+            return res.status(404).send("Something went wrong.");
+          })
+        });
+        log.success("Gateway setup successfully.");
+      }
     } else {
-      // everything else is redirected to the gateway/dist
-      app.use((req, res, next) => {
-        if (req.path === "/") {
-          return next();
+
+      async function fetchIPFSFile(ipfsURL) {
+        try {
+          const response = await axios.get(ipfsURL, { responseType: 'arraybuffer' });
+          return response.data; // Return file content as a buffer
+        } catch (error) {
+          throw new Error(`Error fetching file from IPFS: ${error.message}`);
         }
-        express.static(gatewayPath)(req, res, next); // serve static files
+      }
+
+      async function fetchIPFSFileText(ipfsURL) {
+        try {
+          const response = await axios.get(ipfsURL);
+          return response.data; // Return file content as text
+        } catch (error) {
+          throw new Error(`Error fetching file from IPFS: ${error.message}`);
+        }
+      }
+      // Handle requests for IPFS published distribution
+      async function handleIPFSRequest(req, res, next) {
+        try {
+          const ipfsPath = `${gatewayPath}${req.path === '/' ? '/index.html' : req.path}`;
+          const ipfsFile = req.path === '/' ? await fetchIPFSFileText(ipfsPath) : await fetchIPFSFile(ipfsPath);
+
+          if (req.path === '/' || req.path.endsWith('.html')) {
+            const modifiedDist = handleReplacements(ipfsFile, opts);
+            res.send(modifiedDist);
+          } else {
+            res.set('Content-Type', getMimeType(req.path));
+            res.send(ipfsFile);
+          }
+        } catch (error) {
+          console.error(error);
+          res.status(404).send("Something went wrong.");
+        }
+      }
+
+      app.use((req, res, next) => {
+        if (req.path === '/' || req.path.endsWith('.html') || req.path.endsWith('.js') || req.path.endsWith('.css')) {
+          handleIPFSRequest(req, res, next);
+        } else {
+          next();
+        }
       });
-      app.get("*", (_, res) => {
-        // Inject Gateway with Environment Variables
-        readFile(
-          path.join(gatewayPath, "index.html"),
-          "utf8",
-        ).then((data) => {
-          const modifiedDist = handleReplacements(data, opts);
-          res.send(modifiedDist);
-        }).catch((err) => {
-          log.error(err);
-          return res.status(404).send("Something went wrong.");
-        })
-      });
-      log.success("Gateway setup successfully.");
+
+      app.get("*", handleIPFSRequest);
+
+      console.log("IPFS distribution setup successfully.");
     }
   }
 
   return app;
 };
+
+function getMimeType(filePath) {
+  const ext = path.extname(filePath).toLowerCase();
+  switch (ext) {
+    case '.js':
+      return 'application/javascript';
+    case '.css':
+      return 'text/css';
+    case '.html':
+      return 'text/html';
+    case '.json':
+      return 'application/json';
+    case '.png':
+      return 'image/png';
+    case '.jpg':
+    case '.jpeg':
+      return 'image/jpeg';
+    case '.gif':
+      return 'image/gif';
+    case '.svg':
+      return 'image/svg+xml';
+    case '.ico':
+      return 'image/x-icon';
+    default:
+      return 'application/octet-stream';
+  }
+}
 
 /**
  * Starts BosLoader Server and optionally opens gateway in browser
