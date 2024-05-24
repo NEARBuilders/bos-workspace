@@ -46,7 +46,7 @@ export async function dev(src: string, opts: DevOptions) {
   }
 
   // Start the dev server
-  const server = startDevServer(devJsonPath, opts);
+  const server = startDevServer([src], [dist], devJsonPath, opts);
 
   // Start the socket server if hot reload is enabled
   if (hotReloadEnabled) {
@@ -95,7 +95,10 @@ export async function devMulti(root: string, srcs: string[], opts: DevOptions) {
   let devJson = { components: {}, data: {} };
 
   // Build all apps for the first time and merge devJson
+  let dists = [];
   for (const src of srcs) {
+    dists.push(path.join(dist, path.relative(root, src)));
+
     const appDevJson = await generateApp(
       src,
       path.join(dist, path.relative(root, src)),
@@ -107,7 +110,7 @@ export async function devMulti(root: string, srcs: string[], opts: DevOptions) {
   }
 
   // Start the dev server
-  const server = startDevServer(devJsonPath, opts);
+  const server = startDevServer(srcs, dists, devJsonPath, opts);
 
   // Start the socket server if hot reload is enabled
   if (!opts.NoHot) {
@@ -142,6 +145,48 @@ export async function devMulti(root: string, srcs: string[], opts: DevOptions) {
     if (io) {
       io.emit("fileChange", devJson);
     }
+  });
+}
+
+export async function addApps(srcs: string[], dists: string[], devJsonPath: string, opts: DevOptions) {
+  let devJson = await readJson(devJsonPath, { throws: false });
+
+  for (let i = 0; i < srcs.length; i ++) {
+    const src = srcs[i];
+    const dist = dists[i];
+
+    const appDevJson = await generateApp(
+      src,
+      dist,
+      await loadConfig(src, opts.network),
+      opts,
+      devJsonPath
+    );
+    await writeJson(devJsonPath, mergeDeep(devJson, appDevJson))
+  }
+
+  startFileWatcher(srcs.map((src) => [path.join(src, "widget/**/*"), path.join(src, "module/**/*"), path.join(src, "ipfs/**/*"), path.join(src, "bos.config.json"), path.join(src, "aliases.json")]).flat(), async (_: string, file: string) => {
+    // find which app this file belongs to
+    const index = srcs.findIndex((src) => file.includes(src));
+    if (index == -1) {
+      return;
+    }
+
+    const src = srcs[index];
+    const dist = dists[index];
+
+    log.info(`[${file}] changed: rebuilding app...`, LogLevels.DEV);
+    // rebuild app
+    const appDevJson = await generateApp(
+      src,
+      dist,
+      await loadConfig(src, opts.network),
+      opts,
+      devJsonPath
+    );
+    
+    // write to redirect map
+    await writeJson(devJsonPath, mergeDeep(devJson, appDevJson))
   });
 }
 

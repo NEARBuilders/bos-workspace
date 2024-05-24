@@ -1,4 +1,4 @@
-import { DevJson, DevOptions } from '@/lib/dev';
+import { DevJson, DevOptions, addApps } from '@/lib/dev';
 import { fetchJson } from "@near-js/providers";
 import bodyParser from "body-parser";
 import { exec } from "child_process";
@@ -29,10 +29,46 @@ const SOCIAL_CONTRACT = {
  * @param opts DevOptions
  * @returns http server
  */
-export function startDevServer(devJsonPath: string, opts: DevOptions): http.Server {
+export function startDevServer(srcs: string[], dists: string[], devJsonPath: string, opts: DevOptions): http.Server {
   const app = createApp(devJsonPath, opts);
   const server = http.createServer(app);
-  startServer(server, devJsonPath, opts);
+  startServer(server, opts, () => {
+    const postData = JSON.stringify({srcs: srcs.map((src) => path.resolve(src)), dists: dists.map((dist) => path.resolve(dist))});
+    const options = {
+      hostname: '127.0.0.1',
+      port: opts.port,
+      path: `/api/apps`,
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Content-Length': Buffer.byteLength(postData),
+      },
+    };
+
+    const req = http.request(options, (res) => {
+      console.log(`STATUS: ${res.statusCode}`);
+      console.log(`HEADERS: ${JSON.stringify(res.headers)}`);
+
+      res.setEncoding('utf8');
+      let data = '';
+
+      res.on('data', (chunk) => {
+          data += chunk;
+      });
+
+      res.on('end', () => {
+        console.log(`Response: ${data}`);
+      });
+    });
+
+    req.on('error', (e) => {
+      console.log(`problem with request: ${e.message}`);
+    });
+    
+    // Write data to request body
+    req.write(postData);
+    req.end();
+  });
   return server;
 }
 
@@ -86,13 +122,13 @@ export function createApp(devJsonPath: string, opts: DevOptions): Express.Applic
   /**
    * Adds the loader json
    */
-  app.post("/api/loader", (req, res) => {
+  app.post("/api/apps", (req, res) => {
     console.log(`Request: ${JSON.stringify(req.body)}`);
+    const srcs = req.body.srcs;
+    const dists = req.body.dists;
 
-    readJson(devJsonPath).then((devJson: DevJson) => {
-      const newDevJson = mergeDeep(devJson, req.body);
-      writeJson(devJsonPath, newDevJson);
-      res.json(newDevJson);
+    addApps(srcs, dists, devJsonPath, opts).then(() => {
+      res.status(200).send("Success");
     }).catch((err: Error) => {
       log.error(err.stack || err.message);
       return res.status(500).send("Error reading redirect map.");
@@ -201,7 +237,7 @@ export function createApp(devJsonPath: string, opts: DevOptions): Express.Applic
  * @param server http server
  * @param opts DevOptions
  */
-export function startServer(server, devJsonPath, opts) {
+export function startServer(server, opts, sendAddApps) {
   server.listen(opts.port, "127.0.0.1", () => {
     if (!opts.NoGateway && !opts.NoOpen) {
       // open gateway in browser
@@ -243,45 +279,7 @@ export function startServer(server, devJsonPath, opts) {
     .on("error", async (err: any) => {
       if (err.code === "EADDRINUSE") {
         log.warn(err.message);
-
-        const devJson = await readJson(devJsonPath, { throws: false });
-
-        const postData = JSON.stringify(devJson);
-        const options = {
-          hostname: '127.0.0.1',
-          port: opts.port,
-          path: `/api/loader`,
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Content-Length': Buffer.byteLength(postData),
-          },
-        };
-
-        const req = http.request(options, (res) => {
-          console.log(`STATUS: ${res.statusCode}`);
-          console.log(`HEADERS: ${JSON.stringify(res.headers)}`);
-
-          res.setEncoding('utf8');
-          let data = '';
-
-          res.on('data', (chunk) => {
-              data += chunk;
-          });
-
-          res.on('end', () => {
-            console.log(`Response: ${data}`);
-          });
-        });
-
-        req.on('error', (e) => {
-          console.log(`problem with request: ${e.message}`);
-        });
-        
-        // Write data to request body
-        req.write(postData);
-        req.end();
-
+        sendAddApps();
       } else {
         log.error(err.message);
         process.exit(1);
