@@ -191,44 +191,59 @@ export function createApp(devJsonPath: string, opts: DevOptions): Express.Applic
         }
       }
 
-      async function fetchIPFSFileText(ipfsURL) {
-        try {
-          const response = await axios.get(ipfsURL);
-          return response.data; // Return file content as text
-        } catch (error) {
-          throw new Error(`Error fetching file from IPFS: ${error.message}`);
-        }
-      }
-      // Handle requests for IPFS published distribution
-      async function handleIPFSRequest(req, res, next) {
-        try {
-          const ipfsPath = `${gatewayPath}${req.path === '/' ? '/index.html' : req.path}`;
-          const ipfsFile = req.path === '/' ? await fetchIPFSFileText(ipfsPath) : await fetchIPFSFile(ipfsPath);
+      function buildIndexHTML(data) {
+        // Extract data from the JSON structure
+        const distUrl = data.data.dist;
+        const runtimeFile = data.data.runtime;
+        const mainFile = data.data.main;
+        const customElementName = data.name;
 
-          if (req.path === '/' || req.path.endsWith('.html')) {
-            const modifiedDist = handleReplacements(ipfsFile, opts);
-            res.send(modifiedDist);
-          } else {
-            res.set('Content-Type', getMimeType(req.path));
-            res.send(ipfsFile);
-          }
-        } catch (error) {
-          console.error(error);
-          res.status(404).send("Something went wrong.");
-        }
+        // Build the HTML content
+        const htmlContent = `<!DOCTYPE html>
+      <html lang="en">
+        <head>
+          <meta charset="utf-8" />
+          <meta name="viewport" content="width=device-width, initial-scale=1" />
+          <base href="/" />
+          <title>Near social</title>
+          <script src="https://unpkg.com/react/umd/react.production.min.js"></script>
+          <script src="https://unpkg.com/react-dom/umd/react-dom.production.min.js"></script>
+          <script defer src="${distUrl}${runtimeFile}"></script>
+          <script defer src="${distUrl}${mainFile}"></script>
+        </head>
+        <body>
+          <${customElementName}></${customElementName}>
+        <script src="${distUrl}/webcomponentapp.js" type="module"></script>
+        </body>
+      </html>`;
+
+        return htmlContent;
       }
 
-      app.use((req, res, next) => {
-        if (req.path === '/' || req.path.endsWith('.html') || req.path.endsWith('.js') || req.path.endsWith('.css')) {
-          handleIPFSRequest(req, res, next);
+      // Example usage
+      const data = {
+        name: "near-social-viewer",
+        version: "0.0.1",
+        data: {
+          dist: "https://ipfs.web4.near.page/ipfs/bafybeidtmbm46nidbkv6smep4lwi6tw7ps7adluwfkv7ahqx4shl3ll4si",
+          runtime: "/runtime.c65d685da4393669cb99.bundle.js",
+          main: "/main.c7fee9a4c5c074be8c45.bundle.js",
+        }
+      };
+
+      const indexHTML = buildIndexHTML(data);
+      const modifiedDist = handleReplacements(indexHTML, opts);
+
+      app.get("*", (req, res) => {
+        if (req.path === '/' || req.path.endsWith('.html')) {
+          res.send(modifiedDist);
         } else {
-          next();
+          res.set('Content-Type', getMimeType(req.path));
+          res.send(ipfsFile);
         }
       });
 
-      app.get("*", handleIPFSRequest);
-
-      console.log("IPFS distribution setup successfully.");
+      // SERVE
     }
   }
 
