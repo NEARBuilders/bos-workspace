@@ -1,16 +1,25 @@
 import { readJson, writeJson } from "fs-extra";
 import path from "path";
 import { Server as IoServer } from "socket.io";
+import { Gaze } from "gaze";
 import { buildApp } from "./build";
 import { BaseConfig, loadConfig, readConfig } from "./config";
 import { startDevServer } from "./server";
 import { startSocket } from "./socket";
 import { Network } from "./types";
 import { loopThroughFiles, readFile } from "./utils/fs";
-import { mergeDeep } from "./utils/objects";
+import { mergeDeep, substractDeep } from "./utils/objects";
 import { startFileWatcher } from "./watcher";
+import { optional } from "joi";
 
 const DEV_DIST_FOLDER = "build";
+
+var appSrcs = [], appDists = [];
+var appDevJsons = [];
+var appDevJsonPath = "bos-loader.json";
+var appDevOptions: null | DevOptions = null;
+let io: null | IoServer = null;
+let fileWatcher: null | Gaze = null;
 
 export type DevOptions = {
   port?: number; // port to run dev server
@@ -29,15 +38,12 @@ export type DevOptions = {
  * @param opts DevOptions
  */
 export async function dev(src: string, opts: DevOptions) {
-  let io: null | IoServer = null;
-
-  let config = await loadConfig(src, opts.network);
   const dist = path.join(src, DEV_DIST_FOLDER);
   const devJsonPath = path.join(dist, "bos-loader.json");
-  const hotReloadEnabled = !opts.NoHot;
-
+  
   // Build the app for the first time
-  let devJson = await generateApp(src, dist, config, opts, devJsonPath);
+  const config = await loadConfig(src, opts.network);
+  let devJson = await generateApp(src, dist, config, opts);
   await writeJson(devJsonPath, devJson);
 
   // set index widget (temp, this can be done better)
@@ -46,10 +52,15 @@ export async function dev(src: string, opts: DevOptions) {
   }
 
   // Start the dev server
-  const server = startDevServer([src], [dist], devJsonPath, opts);
+  appSrcs = [src];
+  appDists = [dist];
+  appDevJsons = [devJson];
+  appDevJsonPath = devJsonPath;
+  appDevOptions = opts;
+  const server = startDevServer(appSrcs, appDists, appDevJsonPath, appDevOptions);
 
   // Start the socket server if hot reload is enabled
-  if (hotReloadEnabled) {
+  if (!opts.NoHot) {
     io = startSocket(server, (io: IoServer) => {
       readJson(devJsonPath).then((devJson: DevJson) => {
         io?.emit("fileChange", devJson);
@@ -61,24 +72,15 @@ export async function dev(src: string, opts: DevOptions) {
   }
 
   // Watch for changes in the src folder and rebuild the app on changes
-  startFileWatcher([
-    path.join(src, "widget/**/*"),
-    path.join(src, "module/**/*"),
-    path.join(src, "ipfs/**/*"),
-    path.join(src, "bos.config.json"),
-    path.join(src, "aliases.json")
-  ], async (_: string, file: string) => {
-    if (file.includes("bos.config.json")) {
-      config = await loadConfig(src, opts.network);
-    }
-    log.info(`[${path.relative(src, file)}] changed: rebuilding app...`, LogLevels.DEV);
-    devJson = await generateApp(src, dist, config, opts, devJsonPath);
-    await writeJson(devJsonPath, devJson);
-
-    if (hotReloadEnabled && io) {
-      io.emit("fileChange", devJson);
-    }
-  });
+  fileWatcher = startFileWatcher([
+      path.join(src, "widget/**/*"),
+      path.join(src, "module/**/*"),
+      path.join(src, "ipfs/**/*"),
+      path.join(src, "bos.config.json"),
+      path.join(src, "aliases.json")
+    ],
+    fileWatcherCallback
+  );
 }
 
 /**
@@ -89,28 +91,26 @@ export async function dev(src: string, opts: DevOptions) {
  * @param opts DevOptions
  */
 export async function devMulti(root: string, srcs: string[], opts: DevOptions) {
-  let io: null | IoServer = null;
   const dist = path.join(root, DEV_DIST_FOLDER);
   const devJsonPath = path.join(dist, "bos-loader.json");
-  let devJson = { components: {}, data: {} };
-
+  
   // Build all apps for the first time and merge devJson
-  let dists = [];
+  let appDevJson = { components: {}, data: {} };
+  
   for (const src of srcs) {
-    dists.push(path.join(dist, path.relative(root, src)));
+    const config = await loadConfig(src, opts.network);
+    const devJson = await generateApp(src, path.join(dist, path.relative(root, src)), config, opts);
+    await writeJson(devJsonPath, mergeDeep(appDevJson, devJson));
 
-    const appDevJson = await generateApp(
-      src,
-      path.join(dist, path.relative(root, src)),
-      await loadConfig(src, opts.network),
-      opts,
-      devJsonPath
-    );
-    await writeJson(devJsonPath, mergeDeep(devJson, appDevJson))
+    appSrcs.push(src);
+    appDists.push(path.join(dist, path.relative(root, src)));
+    appDevJsons.push(devJson);
   }
 
   // Start the dev server
-  const server = startDevServer(srcs, dists, devJsonPath, opts);
+  appDevJsonPath = devJsonPath;
+  appDevOptions = opts;
+  const server = startDevServer(appSrcs, appDists, appDevJsonPath, appDevOptions);
 
   // Start the socket server if hot reload is enabled
   if (!opts.NoHot) {
@@ -125,72 +125,77 @@ export async function devMulti(root: string, srcs: string[], opts: DevOptions) {
   }
 
   // Watch for changes in the mutliple srcs folder and rebuild apps on changes
-  startFileWatcher(srcs.map((src) => [path.join(src, "widget/**/*"), path.join(src, "module/**/*"), path.join(src, "ipfs/**/*"), path.join(src, "bos.config.json"), path.join(src, "aliases.json")]).flat(), async (_: string, file: string) => {
-    // find which app this file belongs to
-    const src = srcs.find((src) => file.includes(src));
-    if (!src) {
-      return;
-    }
-    log.info(`[${path.relative(src, file)}] changed: rebuilding app...`, LogLevels.DEV);
-    // rebuild app
-    const appDevJson = await generateApp(
-      src,
-      path.join(dist, path.relative(root, src)),
-      await loadConfig(src, opts.network),
-      opts,
-      devJsonPath
-    );
-    // write to redirect map
-    await writeJson(devJsonPath, mergeDeep(devJson, appDevJson))
-    if (io) {
-      io.emit("fileChange", devJson);
-    }
-  });
+  fileWatcher = startFileWatcher(
+    srcs.map((src) => [
+      path.join(src, "widget/**/*"),
+      path.join(src, "module/**/*"),
+      path.join(src, "ipfs/**/*"),
+      path.join(src, "bos.config.json"),
+      path.join(src, "aliases.json")
+    ]).flat(),
+    fileWatcherCallback
+  );
 }
 
-export async function addApps(srcs: string[], dists: string[], devJsonPath: string, opts: DevOptions) {
-  let devJson = await readJson(devJsonPath, { throws: false });
+export async function addApps(srcs: string[], dists: string[]) {
+  let appDevJson = await readJson(appDevJsonPath, { throws: false });
 
   for (let i = 0; i < srcs.length; i ++) {
     const src = srcs[i];
     const dist = dists[i];
 
-    const appDevJson = await generateApp(
-      src,
-      dist,
-      await loadConfig(src, opts.network),
-      opts,
-      devJsonPath
-    );
-    await writeJson(devJsonPath, mergeDeep(devJson, appDevJson))
+    const config = await loadConfig(src, appDevOptions.network);
+    const devJson = await generateApp(src, dist, config, appDevOptions);
+    await writeJson(appDevJsonPath, mergeDeep(appDevJson, devJson));
+
+    appSrcs.push(src);
+    appDists.push(dist);
+    appDevJsons.push(devJson);
   }
 
-  startFileWatcher(srcs.map((src) => [path.join(src, "widget/**/*"), path.join(src, "module/**/*"), path.join(src, "ipfs/**/*"), path.join(src, "bos.config.json"), path.join(src, "aliases.json")]).flat(), async (_: string, file: string) => {
-    // find which app this file belongs to
-    const index = srcs.findIndex((src) => file.includes(src));
-    if (index == -1) {
-      return;
-    }
+  if (io) {
+    io.emit("fileChange", appDevJson);
+  }
 
-    const src = srcs[index];
-    const dist = dists[index];
-
-    log.info(`[${file}] changed: rebuilding app...`, LogLevels.DEV);
-    // rebuild app
-    const appDevJson = await generateApp(
-      src,
-      dist,
-      await loadConfig(src, opts.network),
-      opts,
-      devJsonPath
-    );
-    
-    // write to redirect map
-    await writeJson(devJsonPath, mergeDeep(devJson, appDevJson))
-  });
+  fileWatcher.add(srcs.map((src) => [
+      path.join(src, "widget/**/*"),
+      path.join(src, "module/**/*"),
+      path.join(src, "ipfs/**/*"),
+      path.join(src, "bos.config.json"),
+      path.join(src, "aliases.json")
+    ]).flat()
+  );
 }
 
-async function generateApp(src: string, appDist: string, config: BaseConfig, opts: DevOptions, distDevJson: string): Promise<DevJson> {
+async function fileWatcherCallback(action: string, file: string) {
+  let appDevJson = await readJson(appDevJsonPath, { throws: false });
+  
+  // find which app this file belongs to
+  const index = appSrcs.findIndex((src) => file.includes(src));
+  if (index == -1) {
+    return;
+  }
+
+  const src = appSrcs[index];
+  const dist = appDists[index];
+  
+  let devJson = appDevJsons[index];
+  substractDeep(appDevJson, devJson);
+
+  // rebuild app
+  log.info(`[${path.relative(src, file)}] changed: rebuilding app...`, LogLevels.DEV);
+  const config = await loadConfig(src, appDevOptions.network);
+  devJson = await generateApp(src, dist, config, appDevOptions);
+  
+  // write to redirect map
+  await writeJson(appDevJsonPath, mergeDeep(appDevJson, devJson));
+  appDevJsons[index] = devJson;
+  if (io) {
+    io.emit("fileChange", appDevJson);
+  }
+}
+
+async function generateApp(src: string, appDist: string, config: BaseConfig, opts: DevOptions): Promise<DevJson> {
   await buildApp(src, appDist, opts.network);
   return await generateDevJson(appDist, config);
 };

@@ -8,7 +8,6 @@ import http from 'http';
 import path from "path";
 import { handleReplacements } from './gateway';
 import { readFile } from "./utils/fs";
-import { mergeDeep } from "./utils/objects";
 
 // the gateway dist path in node_modules
 const GATEWAY_PATH = path.join(__dirname, "../..", "gateway", "dist");
@@ -127,7 +126,7 @@ export function createApp(devJsonPath: string, opts: DevOptions): Express.Applic
     const srcs = req.body.srcs;
     const dists = req.body.dists;
 
-    addApps(srcs, dists, devJsonPath, opts).then(() => {
+    addApps(srcs, dists).then(() => {
       res.status(200).send("Success");
     }).catch((err: Error) => {
       log.error(err.stack || err.message);
