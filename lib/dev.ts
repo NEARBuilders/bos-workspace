@@ -157,21 +157,23 @@ export async function addApps(srcs: string[], dists: string[]) {
     io.emit("fileChange", appDevJson);
   }
 
-  fileWatcher.add(srcs.map((src) => [
-      path.join(src, "widget/**/*"),
-      path.join(src, "module/**/*"),
-      path.join(src, "ipfs/**/*"),
-      path.join(src, "bos.config.json"),
-      path.join(src, "aliases.json")
-    ]).flat()
-  );
+  if (fileWatcher) {
+    fileWatcher.add(srcs.map((src) => [
+        path.join(src, "widget/**/*"),
+        path.join(src, "module/**/*"),
+        path.join(src, "ipfs/**/*"),
+        path.join(src, "bos.config.json"),
+        path.join(src, "aliases.json")
+      ]).flat()
+    );
+  }
 }
 
 async function fileWatcherCallback(action: string, file: string) {
   let appDevJson = await readJson(appDevJsonPath, { throws: false });
   
   // find which app this file belongs to
-  const index = appSrcs.findIndex((src) => file.includes(src));
+  const index = appSrcs.findIndex((src) => file.includes(path.resolve(src)));
   if (index == -1) {
     return;
   }
