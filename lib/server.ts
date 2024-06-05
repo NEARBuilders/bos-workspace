@@ -1,9 +1,9 @@
-import { DevJson, DevOptions } from '@/lib/dev';
+import { DevJson, DevOptions, addApps } from '@/lib/dev';
 import { fetchJson } from "@near-js/providers";
 import bodyParser from "body-parser";
 import { exec } from "child_process";
 import express, { Request, Response } from 'express';
-import { existsSync, readJson } from "fs-extra";
+import { existsSync, readJson, writeJson } from "fs-extra";
 import http from 'http';
 import path from "path";
 import { handleReplacements } from './gateway';
@@ -28,10 +28,44 @@ const SOCIAL_CONTRACT = {
  * @param opts DevOptions
  * @returns http server
  */
-export function startDevServer(devJsonPath: string, opts: DevOptions): http.Server {
+export function startDevServer(srcs: string[], dists: string[], devJsonPath: string, opts: DevOptions): http.Server {
   const app = createApp(devJsonPath, opts);
   const server = http.createServer(app);
-  startServer(server, opts);
+  startServer(server, opts, () => {
+    const postData = JSON.stringify({srcs: srcs.map((src) => path.resolve(src)), dists: dists.map((dist) => path.resolve(dist))});
+    const options = {
+      hostname: '127.0.0.1',
+      port: opts.port,
+      path: `/api/apps`,
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Content-Length': Buffer.byteLength(postData),
+      },
+    };
+
+    log.info(`Adding workspace to already existing dev server...`);
+    const req = http.request(options, (res) => {
+      res.setEncoding('utf8');
+      let data = '';
+
+      res.on('data', (chunk) => {
+          data += chunk;
+      });
+
+      res.on('end', () => {
+        log.info(`${data}`);
+      });
+    });
+
+    req.on('error', (e) => {
+      log.error(`problem with request: ${e.message}`);
+    });
+    
+    // Write data to request body
+    req.write(postData);
+    req.end();
+  });
   return server;
 }
 
@@ -80,6 +114,27 @@ export function createApp(devJsonPath: string, opts: DevOptions): Express.Applic
         log.error(err.stack || err.message);
         return res.status(500).send("Error reading redirect map.");
       })
+  });
+
+  /**
+   * Adds the loader json
+   */
+  app.post("/api/apps", (req, res) => {
+    const srcs = req.body.srcs;
+    const dists = req.body.dists;
+    if (srcs.length != dists.length) {
+      log.info("Number of apps don't match. Aborting.");
+      return res.status(500).send("Error adding apps to dev server.");
+    }
+
+    log.info(`adding ${srcs} to watch list...`);
+    addApps(srcs, dists).then(() => {
+      log.info("New apps added successfully.");
+      res.status(200).send("New apps added successfully.");
+    }).catch((err: Error) => {
+      log.error(err.stack || err.message);
+      return res.status(500).send("Error adding apps to dev server.");
+    });
   });
 
   function proxyMiddleware(proxyUrl: string) {
@@ -139,7 +194,7 @@ export function createApp(devJsonPath: string, opts: DevOptions): Express.Applic
 
   /**
    * Proxy middleware for RPC requests
-   * @param proxyUrl 
+   * @param proxyUrl
    */
   app.all('/api/proxy-rpc', proxyMiddleware(RPC_URL[opts.network]));
 
@@ -184,7 +239,7 @@ export function createApp(devJsonPath: string, opts: DevOptions): Express.Applic
  * @param server http server
  * @param opts DevOptions
  */
-export function startServer(server, opts) {
+export function startServer(server, opts, sendAddApps) {
   server.listen(opts.port, "127.0.0.1", () => {
     if (!opts.NoGateway && !opts.NoOpen) {
       // open gateway in browser
@@ -223,8 +278,13 @@ export function startServer(server, opts) {
 `);
     log.success(`bos-workspace running on port ${opts.port}!`);
   })
-    .on("error", (err: Error) => {
-      log.error(err.message);
-      process.exit(1);
+    .on("error", async (err: any) => {
+      if (err.code === "EADDRINUSE") {
+        log.warn(err.message);
+        sendAddApps();
+      } else {
+        log.error(err.message);
+        process.exit(1);
+      }
     });
 }
