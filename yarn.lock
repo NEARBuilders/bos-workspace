@@ -1247,10 +1247,10 @@ borsh@1.0.0:
   resolved "https://registry.npmjs.org/borsh/-/borsh-1.0.0.tgz"
   integrity sha512-fSVWzzemnyfF89EPwlUNsrS5swF5CrtiN4e+h0/lLf4dz2he4L3ndM20PS9wj7ICSkXJe/TQUHdaPTq15b1mNQ==
 
-bos-cli@^0.3.13:
-  version "0.3.13"
-  resolved "https://registry.npmjs.org/bos-cli/-/bos-cli-0.3.13.tgz"
-  integrity sha512-pXBjeiBxxBuBCX/q5nIa0/Kqx8813axfVRHfLGATHM7g5RFLVqR7+A/zJ4tMvSwmV5fC2AL0Oamve8/HZkSRyA==
+bos-cli@^0.3.14:
+  version "0.3.14"
+  resolved "https://registry.npmjs.org/bos-cli/-/bos-cli-0.3.14.tgz#661ee2bc4361cd6a41844ecf16b9864b48abfab9"
+  integrity sha512-88HU47YSV91tFLFBDgv2L9n2O765Fr2+7XAhdBv0J60LvZcQt1AnOCSzrTOWDObtaVs0KZb38Ns1wl+Cz8Alqg==
   dependencies:
     axios-proxy-builder "^0.1.1"
     binary-install "^1.0.6"
