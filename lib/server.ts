@@ -44,10 +44,8 @@ export function startDevServer(srcs: string[], dists: string[], devJsonPath: str
       },
     };
 
+    log.info(`Adding ${srcs} to already existing dev server...`);
     const req = http.request(options, (res) => {
-      console.log(`STATUS: ${res.statusCode}`);
-      console.log(`HEADERS: ${JSON.stringify(res.headers)}`);
-
       res.setEncoding('utf8');
       let data = '';
 
@@ -56,12 +54,12 @@ export function startDevServer(srcs: string[], dists: string[], devJsonPath: str
       });
 
       res.on('end', () => {
-        console.log(`Response: ${data}`);
+        log.info(`${data}`);
       });
     });
 
     req.on('error', (e) => {
-      console.log(`problem with request: ${e.message}`);
+      log.error(`problem with request: ${e.message}`);
     });
     
     // Write data to request body
@@ -122,16 +120,21 @@ export function createApp(devJsonPath: string, opts: DevOptions): Express.Applic
    * Adds the loader json
    */
   app.post("/api/apps", (req, res) => {
-    console.log(`Request: ${JSON.stringify(req.body)}`);
     const srcs = req.body.srcs;
     const dists = req.body.dists;
+    if (srcs.length != dists.length) {
+      log.info("Number of apps isn't coutable.");
+      return res.status(500).send("Error adding apps to dev server.");
+    }
 
+    log.info(`adding ${srcs} to watch list...`);
     addApps(srcs, dists).then(() => {
-      res.status(200).send("Success");
+      log.info("New apps added successfully.");
+      res.status(200).send("New apps added successfully.");
     }).catch((err: Error) => {
       log.error(err.stack || err.message);
-      return res.status(500).send("Error reading redirect map.");
-    })
+      return res.status(500).send("Error adding apps to dev server.");
+    });
   });
 
   function proxyMiddleware(proxyUrl: string) {
@@ -191,7 +194,7 @@ export function createApp(devJsonPath: string, opts: DevOptions): Express.Applic
 
   /**
    * Proxy middleware for RPC requests
-   * @param proxyUrl 
+   * @param proxyUrl
    */
   app.all('/api/proxy-rpc', proxyMiddleware(RPC_URL[opts.network]));
 

@@ -92,7 +92,6 @@ describe("dev", () => {
     const mockedGazeAdd = jest.spyOn(Gaze.prototype, 'add');
     
     const mockHotOpts: DevOptions = { NoHot: true };
-    console.log("dev", dev);
     await dev(mockSrc, mockHotOpts);
 
     const mockSrc2 = "/app_example_2";
