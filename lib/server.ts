@@ -44,7 +44,7 @@ export function startDevServer(srcs: string[], dists: string[], devJsonPath: str
       },
     };
 
-    log.info(`Adding ${srcs} to already existing dev server...`);
+    log.info(`Adding workspace to already existing dev server...`);
     const req = http.request(options, (res) => {
       res.setEncoding('utf8');
       let data = '';
@@ -123,7 +123,7 @@ export function createApp(devJsonPath: string, opts: DevOptions): Express.Applic
     const srcs = req.body.srcs;
     const dists = req.body.dists;
     if (srcs.length != dists.length) {
-      log.info("Number of apps isn't coutable.");
+      log.info("Number of apps don't match. Aborting.");
       return res.status(500).send("Error adding apps to dev server.");
     }
 
