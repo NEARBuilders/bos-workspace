@@ -18,6 +18,8 @@ export interface BaseConfig {
   format?: boolean; // option to format code on build (default true)
   aliases?: string[]; // list of alias to use
   index?: string; // widget to use as index
+  aliasPrefix?: string; // prefix to use for aliases, default is "alias"
+  aliasesContainsPrefix?: boolean; // aliases keys contains prefix (default is false)
 }
 
 interface NetworkConfig {
@@ -57,6 +59,8 @@ const baseConfigSchema = Joi.object({
   }).default(DEFAULT_CONFIG.ipfs),
   format: Joi.boolean().default(DEFAULT_CONFIG.format),
   aliases: Joi.array().items(Joi.string()).default(DEFAULT_CONFIG.aliases),
+  aliasPrefix: Joi.string().allow(null),
+  aliasesContainsPrefix: Joi.boolean().allow(null),
   index: Joi.string().allow(null),
 });
 

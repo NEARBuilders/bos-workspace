@@ -154,12 +154,13 @@ export function evalIPFS(path: string[], ipfsMap: IPFSMap, ipfsGateway: string):
 };
 
 // Replace the alias keywords with the alias value
-export function evalAlias(path: string[], aliases: Aliases): Output {
+export function evalAlias(path: string[], aliases: Aliases, prefix="alias", includePrefixInPath = false): Output {
   const logs: Log[] = [];
-  const alias_path = path.join(SYNTAX.separator);
+  
+  const alias_path = includePrefixInPath ? ([prefix].concat(path)).join(SYNTAX.separator) : path.join(SYNTAX.separator);
   let value = aliases?.[alias_path];
   if (!aliases.hasOwnProperty(alias_path)) {
-    value = wrap(alias_path, "alias");
+    value = wrap(alias_path, prefix);
     logs.push({
       message: `Imported alias not found: ${value}`,
       level: 'warn',
@@ -177,7 +178,7 @@ export interface EvalCustomSyntaxParams {
   modules: Modules,
   ipfsMap: IPFSMap,
   ipfsGateway: string,
-  aliases: Aliases,
+  aliases: Aliases
 };
 
 // Replace all the custom syntax keywords with the actual values
@@ -193,8 +194,8 @@ export function evalCustomSyntax(code: Code, params: EvalCustomSyntaxParams): Ou
     const keyword = expression[0];
     const path = expression.slice(1);
 
-
     let evl: Output;
+    const aliasPrefix = params.config.aliasPrefix ?? 'alias';
     switch (keyword) {
       case 'config':
         evl = evalConfig(path, params.config);
@@ -205,8 +206,8 @@ export function evalCustomSyntax(code: Code, params: EvalCustomSyntaxParams): Ou
       case 'ipfs':
         evl = evalIPFS(path, params.ipfsMap, params.ipfsGateway);
         break;
-      case 'alias':
-        evl = evalAlias(path, params.aliases);
+      case aliasPrefix:
+        evl = evalAlias(path, params.aliases, aliasPrefix, params.config.aliasesContainsPrefix);
         break;
       default:
         return _match;
