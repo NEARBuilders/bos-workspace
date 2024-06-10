@@ -151,7 +151,7 @@ When working with values that differ accross different networks, developers can 
 * **Account**: Defines the "owner" of the widgets in the workspace, according to network.
   * Pattern: `{config_account}`
 * **Aliases**: Defines patterns for replacing other account and contract references. These are particularly useful for widget sources accross environments, such as using mob.near for mainnet, and mike.testnet for testnet.
-  * Pattern: `${alias_key}`
+  * Pattern: `${alias_key}` ( note that you may also have other prefixes than `alias_` by configuring the `aliasPrefix` property )
   * Example:
 
     ```json
@@ -186,6 +186,40 @@ When working with values that differ accross different networks, developers can 
       "mob": "mike.testnet"
     }
     ```
+
+#### Custom alias prefix
+
+If your aliases are prefixed with another keyword than `alias`, you may configure this using the `aliasPrefix` property. You may also include the prefix in the keys of your alias json file. Here is an example:
+
+ ```json
+  {
+    "account": "[MAINNET_ACCOUNT_ID]",
+    "aliases": ["./aliases.mainnet.json"],
+    "aliasPrefix": "REPL",
+    "aliasesContainsPrefix": true,
+  }
+```
+
+and then with your `aliases.mainnet.json` like this:
+
+
+```json
+{
+  "REPL_NAME": "world"
+}
+```
+
+If your widget file looks like this:
+
+```tsx
+export default <h1>Hello ${REPL_NAME}!</h1>;
+```
+
+Then the alias will be replaced like this:
+
+```tsx
+export default <h1>Hello world!</h1>;
+```
 
 ## Customizing the Gateway
 
