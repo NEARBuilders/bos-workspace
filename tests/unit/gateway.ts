@@ -18,7 +18,7 @@ describe("gateway", () => {
   // Mocked input options
   const mockOpts: DevOptions = {
     port: 8080,
-    NoHot: false,
+    hot: true,
     network: 'testnet' as Network,
     index: "test/widget/index"
   };
@@ -29,7 +29,7 @@ describe("gateway", () => {
     const expectedConfig = JSON.stringify({
       bosLoaderWs: `ws://127.0.0.1:8080`,
       bosLoaderUrl: `http://127.0.0.1:8080/api/loader`,
-      enableHotReload: !mockOpts.NoHot,
+      enableHotReload: mockOpts.hot,
       network: mockOpts.network,
     });
     const expectedHtmlOutput = `<html><head>${expectedConfig}</head><body></body></html>`;

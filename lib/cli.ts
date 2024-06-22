@@ -26,10 +26,10 @@ async function run() {
     .option("-n, --network <network>", "network to build for", "mainnet")
     .option("-l, --loglevel <loglevel>", "log level (ERROR, WARN, INFO, DEV, BUILD, DEBUG)", "DEV")
     .option("-p, --port <port>", "Port to run the server on", "8080")
-    .option("-g, --gateway <gateway>", "Path to custom gateway dist", undefined)
-    .option("--no-gateway", "Disable the gateway", false)
-    .option("--no-hot", "Disable hot reloading", false)
-    .option("--no-open", "Disable opening the browser", false)
+    .option("-g, --gateway <gateway>", "Path to custom gateway dist", true)
+    .option("--no-gateway", "Disable the gateway")
+    .option("--no-hot", "Disable hot reloading")
+    .option("--no-open", "Disable opening the browser")
     .action((src, opts) => {
       global.log = new Logger(LogLevel[opts.loglevel.toUpperCase() as keyof typeof LogLevel]);
       dev(src, opts).catch((e: Error) => {
@@ -63,10 +63,10 @@ async function run() {
     .option("-n, --network <network>", "network to build for", "mainnet")
     .option("-l, --loglevel <loglevel>", "log level (ERROR, WARN, INFO, DEV, BUILD, DEBUG)")
     .option("-p, --port <port>", "Port to run the server on", "8080")
-    .option("-g, --gateway <gateway>", "Path to custom gateway dist", undefined)
-    .option("--no-gateway", "Disable the gateway", false)
-    .option("--no-hot", "Disable hot reloading", false)
-    .option("--no-open", "Disable opening the browser", false)
+    .option("-g, --gateway <gateway>", "Path to custom gateway dist", true)
+    .option("--no-gateway", "Disable the gateway")
+    .option("--no-hot", "Disable hot reloading")
+    .option("--no-open", "Disable opening the browser")
     .action(async (command, src, dest, opts) => {
       dest = dest || path.join(src, "dist")
       if (command === "build") {

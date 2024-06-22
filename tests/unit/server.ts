@@ -23,11 +23,11 @@ const app_example_1 = {
 describe('createApp', () => {
   let app;
   const mockSrc = "/app_example_1";
-  const devJsonPath = `${mockSrc}/build/bos-loader.json`; // Replace with your path
+  const devJsonPath = `${mockSrc}/build/bos-loader.json`;
   const opts = {
-    NoGateway: false,
+    gateway: true,
     port: 3000,
-    NoHot: false,
+    hot: true,
     network: 'testnet' as Network,
   };
 

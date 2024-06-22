@@ -198,14 +198,14 @@ export function createApp(devJsonPath: string, opts: DevOptions): Express.Applic
    */
   app.all('/api/proxy-rpc', proxyMiddleware(RPC_URL[opts.network]));
 
-  if (!opts.NoGateway) {
+  if (opts.gateway) {
     // do things with gateway
-    const gatewayPath = (opts.gateway && path.resolve(opts.gateway)) ?? GATEWAY_PATH;
+    const gatewayPath = typeof opts.gateway === "string" ? path.resolve(opts.gateway) : GATEWAY_PATH;
 
     // let's check if gateway/dist/index.html exists
     if (!(existsSync(path.join(gatewayPath, "index.html")))) {
       log.error("Gateway not found. Skipping...");
-      opts.NoGateway = true;
+      opts.gateway = false;
     } else {
       // everything else is redirected to the gateway/dist
       app.use((req, res, next) => {
@@ -241,7 +241,7 @@ export function createApp(devJsonPath: string, opts: DevOptions): Express.Applic
  */
 export function startServer(server, opts, sendAddApps) {
   server.listen(opts.port, "127.0.0.1", () => {
-    if (!opts.NoGateway && !opts.NoOpen) {
+    if (opts.gateway && opts.open) {
       // open gateway in browser
       let start =
         process.platform == "darwin"
@@ -255,13 +255,13 @@ export function startServer(server, opts, sendAddApps) {
     log.log(`
   ┌─────────────────────────────────────────────────────────────┐
   │ BosLoader Server is Up and Running                          │
-  │                                                             │${!opts.NoGateway
+  │                                                             │${opts.gateway
         ? `
   │ ➜ Local Gateway: \u001b[32mhttp://127.0.0.1:${opts.port}\u001b[0m                      │`
         : ""
       }
   │                                                             │
-  │ ➜ Bos Loader Http: \u001b[32mhttp://127.0.0.1:${opts.port}/api/loader\u001b[0m         │${!opts.NoHot
+  │ ➜ Bos Loader Http: \u001b[32mhttp://127.0.0.1:${opts.port}/api/loader\u001b[0m         │${opts.hot
         ? `
   │ ➜ Bos Loader WebSocket: \u001b[32mws://127.0.0.1:${opts.port}\u001b[0m                 │`
         : ""
