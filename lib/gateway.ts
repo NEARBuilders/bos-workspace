@@ -17,7 +17,7 @@ export const handleReplacements = (html: string, opts: DevOptions): string => {
   const envConfig = JSON.stringify({
     bosLoaderWs: `ws://127.0.0.1:${opts.port}`,
     bosLoaderUrl: `http://127.0.0.1:${opts.port}/api/loader`,
-    enableHotReload: opts.NoHot ? false : true,
+    enableHotReload: opts.hot,
     network: opts.network,
   });
 

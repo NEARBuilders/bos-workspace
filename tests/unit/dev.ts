@@ -65,14 +65,14 @@ describe("dev", () => {
   });
 
   it("should start the socket server if hot reload is enabled", async () => {
-    const mockHotOpts: DevOptions = { NoHot: false };
-    await dev(mockSrc, mockHotOpts);
+    const mockOpts: DevOptions = { hot: true };
+    await dev(mockSrc, mockOpts);
     expect(startSocket).toHaveBeenCalled();
   });
 
   it("should not start the socket server if hot reload is disabled", async () => {
-    const mockNoHotOpts: DevOptions = { NoHot: true };
-    await dev(mockSrc, mockNoHotOpts);
+    const mockOpts: DevOptions = { hot: false };
+    await dev(mockSrc, mockOpts);
     expect(startSocket).not.toHaveBeenCalled();
   });
 
@@ -91,8 +91,8 @@ describe("dev", () => {
   it("should add correct watch paths after adding apps", async () => {
     const mockedGazeAdd = jest.spyOn(Gaze.prototype, 'add');
     
-    const mockHotOpts: DevOptions = { NoHot: true };
-    await dev(mockSrc, mockHotOpts);
+    const mockOpts: DevOptions = { hot: false };
+    await dev(mockSrc, mockOpts);
 
     const mockSrc2 = "/app_example_2";
     vol.fromJSON(app_example_2, mockSrc2);

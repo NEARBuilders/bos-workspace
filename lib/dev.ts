@@ -23,11 +23,10 @@ let fileWatcher: null | Gaze = null;
 
 export type DevOptions = {
   port?: number; // port to run dev server
-  NoGateway?: boolean; // disable local gateway
-  NoHot?: boolean; // disable hot reloading
-  NoOpen?: boolean; // do not open browser
+  hot?: boolean; // enable hot reloading
+  open?: boolean; // open browser
   network?: Network; // network to use
-  gateway?: string; // path to custom gateway dist
+  gateway?: string | boolean; // path to custom gateway dist, or false to disable
   index?: string; // widget to use as index
 };
 
@@ -60,7 +59,7 @@ export async function dev(src: string, opts: DevOptions) {
   const server = startDevServer(appSrcs, appDists, appDevJsonPath, appDevOptions);
 
   // Start the socket server if hot reload is enabled
-  if (!opts.NoHot) {
+  if (opts.hot) {
     io = startSocket(server, (io: IoServer) => {
       readJson(devJsonPath).then((devJson: DevJson) => {
         io?.emit("fileChange", devJson);
@@ -113,7 +112,7 @@ export async function devMulti(root: string, srcs: string[], opts: DevOptions) {
   const server = startDevServer(appSrcs, appDists, appDevJsonPath, appDevOptions);
 
   // Start the socket server if hot reload is enabled
-  if (!opts.NoHot) {
+  if (opts.hot) {
     io = startSocket(server, (io: IoServer) => {
       readJson(devJsonPath).then((devJson: DevJson) => {
         io?.emit("fileChange", devJson);
