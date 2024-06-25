@@ -1,4 +1,7 @@
 import { DevOptions } from "./dev";
+import axios from "axios";
+
+import { JSDOM } from "jsdom";
 
 function renderAttribute(name, value) {
   return value !== undefined ? `${name}="${value}"` : "";
@@ -49,4 +52,28 @@ function injectHTML(html: string, injections: Record<string, any>) {
 
 function normalizeHtml(html) {
   return html.replace(/\s+/g, ' ').trim();
+}
+
+const contentCache = {};
+
+export async function fetchAndCacheContent(url) {
+  if (!contentCache[url]) {
+    const response = await axios.get(url);
+    contentCache[url] = response.data;
+  }
+  return contentCache[url];
+}
+
+export function modifyIndexHtml(content: string, opts: DevOptions) {
+  const dom = new JSDOM(content);
+  const document = dom.window.document;
+
+  // Find the near-social-vm script tag
+  const scriptTag = document.querySelector('near-social-viewer');
+
+  if (scriptTag) {
+    scriptTag.setAttribute('src', opts.index);
+  }
+
+  return dom.serialize();
 }

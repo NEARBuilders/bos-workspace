@@ -6,7 +6,7 @@ import express, { Request, Response } from 'express';
 import { existsSync, readJson, writeJson } from "fs-extra";
 import http from 'http';
 import path from "path";
-import { handleReplacements } from './gateway';
+import { fetchAndCacheContent, handleReplacements, modifyIndexHtml } from './gateway';
 import { readFile } from "./utils/fs";
 
 // the gateway dist path in node_modules
@@ -32,7 +32,7 @@ export function startDevServer(srcs: string[], dists: string[], devJsonPath: str
   const app = createApp(devJsonPath, opts);
   const server = http.createServer(app);
   startServer(server, opts, () => {
-    const postData = JSON.stringify({srcs: srcs.map((src) => path.resolve(src)), dists: dists.map((dist) => path.resolve(dist))});
+    const postData = JSON.stringify({ srcs: srcs.map((src) => path.resolve(src)), dists: dists.map((dist) => path.resolve(dist)) });
     const options = {
       hostname: '127.0.0.1',
       port: opts.port,
@@ -50,7 +50,7 @@ export function startDevServer(srcs: string[], dists: string[], devJsonPath: str
       let data = '';
 
       res.on('data', (chunk) => {
-          data += chunk;
+        data += chunk;
       });
 
       res.on('end', () => {
@@ -61,7 +61,7 @@ export function startDevServer(srcs: string[], dists: string[], devJsonPath: str
     req.on('error', (e) => {
       log.error(`problem with request: ${e.message}`);
     });
-    
+
     // Write data to request body
     req.write(postData);
     req.end();
@@ -199,40 +199,74 @@ export function createApp(devJsonPath: string, opts: DevOptions): Express.Applic
   app.all('/api/proxy-rpc', proxyMiddleware(RPC_URL[opts.network]));
 
   if (opts.gateway) {
+    let gatewayPath = GATEWAY_PATH;
     // do things with gateway
-    const gatewayPath = typeof opts.gateway === "string" ? path.resolve(opts.gateway) : GATEWAY_PATH;
+    if (typeof opts.gateway === "string") {
+      if (opts.gateway.startsWith("http")) {
+        app.use(async (req, res) => {
+          try {
+            let filePath = req.path === '/' ? '/index.html' : req.path;
+            const fullUrl = (opts.gateway as string).replace(/\/$/, '');
 
-    // let's check if gateway/dist/index.html exists
-    if (!(existsSync(path.join(gatewayPath, "index.html")))) {
-      log.error("Gateway not found. Skipping...");
-      opts.gateway = false;
-    } else {
-      // everything else is redirected to the gateway/dist
-      app.use((req, res, next) => {
-        if (req.path === "/") {
-          return next();
+            let content = await fetchAndCacheContent(fullUrl);
+
+            const ext = path.extname(filePath);
+            switch (ext) {
+              case '.js':
+                res.type('application/javascript');
+                break;
+              case '.css':
+                res.type('text/css');
+                break;
+              case '.html':
+                content = modifyIndexHtml(content, opts)
+                res.type('text/html');
+                break;
+              default:
+                res.type('text/plain');
+            }
+
+            res.send(content);
+          } catch (error) {
+            console.error('Error fetching content:', error);
+            res.status(404).send('Not found');
+          }
+        });
+      } else {
+        gatewayPath = path.resolve(opts.gateway);
+        // let's check if gateway/dist/index.html exists
+        if (!(existsSync(path.join(gatewayPath, "index.html")))) {
+          log.error("Gateway not found. Skipping...");
+          opts.gateway = false;
+        } else {
+          // everything else is redirected to the gateway/dist
+          app.use((req, res, next) => {
+            if (req.path === "/") {
+              return next();
+            }
+            express.static(gatewayPath)(req, res, next); // serve static files
+          });
+          app.get("*", (_, res) => {
+            // Inject Gateway with Environment Variables
+            readFile(
+              path.join(gatewayPath, "index.html"),
+              "utf8",
+            ).then((data) => {
+              const modifiedDist = handleReplacements(data, opts);
+              res.send(modifiedDist);
+            }).catch((err) => {
+              log.error(err);
+              return res.status(404).send("Something went wrong.");
+            })
+          });
         }
-        express.static(gatewayPath)(req, res, next); // serve static files
-      });
-      app.get("*", (_, res) => {
-        // Inject Gateway with Environment Variables
-        readFile(
-          path.join(gatewayPath, "index.html"),
-          "utf8",
-        ).then((data) => {
-          const modifiedDist = handleReplacements(data, opts);
-          res.send(modifiedDist);
-        }).catch((err) => {
-          log.error(err);
-          return res.status(404).send("Something went wrong.");
-        })
-      });
-      log.success("Gateway setup successfully.");
+        log.success("Gateway setup successfully.");
+      }
     }
-  }
 
-  return app;
-};
+    return app;
+  };
+}
 
 /**
  * Starts BosLoader Server and optionally opens gateway in browser
