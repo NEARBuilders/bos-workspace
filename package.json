@@ -46,7 +46,8 @@
     "replace-in-file": "^7.1.0",
     "slugify": "^1.6.6",
     "socket.io": "^4.7.3",
-    "sucrase": "^3.34.0"
+    "sucrase": "^3.34.0",
+    "web-encoding": "^1.1.5"
   },
   "devDependencies": {
     "@types/crypto-js": "^4.2.2",

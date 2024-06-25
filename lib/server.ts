@@ -228,7 +228,7 @@ export function createApp(devJsonPath: string, opts: DevOptions): Express.Applic
 
             res.send(content);
           } catch (error) {
-            console.error('Error fetching content:', error);
+            log.error(`Error fetching content: ${error}`);
             res.status(404).send('Not found');
           }
         });

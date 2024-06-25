@@ -1,14 +1,18 @@
+import { DevOptions } from './../../lib/dev';
 import { Logger, LogLevel } from "@/lib/logger";
 import { createApp, RPC_URL } from '@/lib/server';
 import supertest from 'supertest';
 import { TextEncoder } from 'util';
 import { Network } from './../../lib/types';
 import { fetchJson } from "@near-js/providers";
+import * as gateway from '@/lib/gateway';
 
 import { vol } from 'memfs';
+import path from 'path';
 jest.mock('fs', () => require('memfs').fs);
 jest.mock('fs/promises', () => require('memfs').fs.promises);
 jest.mock("@near-js/providers");
+jest.mock('@/lib/gateway');
 
 Object.assign(global, { TextEncoder });
 
@@ -24,7 +28,7 @@ describe('createApp', () => {
   let app;
   const mockSrc = "/app_example_1";
   const devJsonPath = `${mockSrc}/build/bos-loader.json`;
-  const opts = {
+  const opts: DevOptions = {
     gateway: true,
     port: 3000,
     hot: true,
@@ -43,6 +47,65 @@ describe('createApp', () => {
     jest.resetAllMocks();
     global.log = unmockedLog;
     global.fetch = unmockedFetch;
+  });
+
+  it('should set up the app correctly when opts.gateway is a valid local path', () => {
+    const mockGatewayPath = "/mock_gateway_1";
+    opts.gateway = `${mockGatewayPath}/dist`;
+    vol.mkdirSync(path.join(mockGatewayPath, 'dist'), { recursive: true });
+    vol.writeFileSync(path.join(mockGatewayPath, 'dist', 'index.html'), '<html></html>');
+    
+    jest.spyOn(gateway, 'handleReplacements').mockReturnValue('<html>modified</html>');
+    
+    app = createApp(devJsonPath, opts);
+    expect(app).toBeDefined();
+    
+    return supertest(app)
+      .get('/')
+      .expect(200)
+      .expect('Content-Type', /html/)
+      .expect('<html>modified</html>');
+  });
+
+  it('should log an error when opts.gateway is an invalid local path', () => {
+    const mockGatewayPath = '/invalid/gateway/path';
+    opts.gateway = mockGatewayPath;
+    
+    const logSpy = jest.spyOn(global.log, 'error');
+    
+    app = createApp(devJsonPath, opts);
+    expect(app).toBeDefined();
+    expect(logSpy).toHaveBeenCalledWith("Gateway not found. Skipping...");
+  });
+
+  it('should set up the app correctly when opts.gateway is a valid http URL', async () => {
+    const mockGatewayUrl = 'http://mock-gateway.com';
+    opts.gateway = mockGatewayUrl;
+    
+    jest.spyOn(gateway, 'fetchAndCacheContent').mockResolvedValue('<html></html>');
+    jest.spyOn(gateway, 'modifyIndexHtml').mockReturnValue('<html>modified</html>');
+    
+    app = createApp(devJsonPath, opts);
+    expect(app).toBeDefined();
+    
+    const response = await supertest(app).get('/');
+    expect(response.status).toBe(200);
+    expect(response.headers['content-type']).toMatch(/html/);
+    expect(response.text).toBe('<html>modified</html>');
+  });
+
+  it('should handle errors when fetching content from http gateway', async () => {
+    const mockGatewayUrl = 'http://mock-gateway.com';
+    opts.gateway = mockGatewayUrl;
+    
+    jest.spyOn(gateway, 'fetchAndCacheContent').mockRejectedValue(new Error('Fetch error'));
+    
+    app = createApp(devJsonPath, opts);
+    expect(app).toBeDefined();
+    
+    const response = await supertest(app).get('/');
+    expect(response.status).toBe(404);
+    expect(response.text).toBe('Not found');
   });
 
   it('/api/loader should return devJson', async () => {

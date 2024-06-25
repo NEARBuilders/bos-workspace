@@ -9,6 +9,7 @@ const config: Config = {
     "^@/(.*)$": "<rootDir>/$1",
   },
   testTimeout: 15000,
+  setupFiles: ['./jest.setup.ts'],
 };
 
 export default config;
