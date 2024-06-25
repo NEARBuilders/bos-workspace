@@ -68,11 +68,12 @@ export function modifyIndexHtml(content: string, opts: DevOptions) {
   const dom = new JSDOM(content);
   const document = dom.window.document;
 
-  // Find the near-social-vm script tag
-  const scriptTag = document.querySelector('near-social-viewer');
+  const viewer = document.querySelector('near-social-viewer');
 
-  if (scriptTag) {
-    scriptTag.setAttribute('src', opts.index);
+  if (viewer) {
+    viewer.setAttribute('src', opts.index);
+    viewer.setAttribute('rpc', `http://127.0.0.1:${opts.port}/api/proxy-rpc`);
+    viewer.setAttribute('network', opts.network);
   }
 
   return dom.serialize();
