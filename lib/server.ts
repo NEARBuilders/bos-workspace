@@ -199,31 +199,34 @@ export function createApp(devJsonPath: string, opts: DevOptions): Express.Applic
   app.all('/api/proxy-rpc', proxyMiddleware(RPC_URL[opts.network]));
 
   if (opts.gateway) {
-    let gatewayPath = GATEWAY_PATH;
     // do things with gateway
     if (typeof opts.gateway === "string") {
       if (opts.gateway.startsWith("http")) {
         app.use(async (req, res) => {
           try {
-            let filePath = req.path === '/' ? '/index.html' : req.path;
-            const fullUrl = (opts.gateway as string).replace(/\/$/, '');
-
-            let content = await fetchAndCacheContent(fullUrl);
-
+            let filePath = req.path;
             const ext = path.extname(filePath);
+
+            let fullUrl = (opts.gateway as string).replace(/\/$/, '');
+
+            let content;
+
             switch (ext) {
               case '.js':
+                fullUrl += filePath;
+                content = await fetchAndCacheContent(fullUrl);
                 res.type('application/javascript');
                 break;
               case '.css':
+                fullUrl += filePath;
+                content = await fetchAndCacheContent(fullUrl);
                 res.type('text/css');
                 break;
-              case '.html':
-                content = modifyIndexHtml(content, opts)
-                res.type('text/html');
-                break;
               default:
-                res.type('text/plain');
+                fullUrl += "/index.html";
+                content = await fetchAndCacheContent(fullUrl);
+                content = modifyIndexHtml(content, opts);
+                res.type('text/html');
             }
 
             res.send(content);
@@ -233,7 +236,7 @@ export function createApp(devJsonPath: string, opts: DevOptions): Express.Applic
           }
         });
       } else {
-        gatewayPath = path.resolve(opts.gateway);
+        let gatewayPath = path.resolve(opts.gateway);
         // let's check if gateway/dist/index.html exists
         if (!(existsSync(path.join(gatewayPath, "index.html")))) {
           log.error("Gateway not found. Skipping...");
@@ -260,8 +263,36 @@ export function createApp(devJsonPath: string, opts: DevOptions): Express.Applic
             })
           });
         }
-        log.success("Gateway setup successfully.");
       }
+    } else {
+      let gatewayPath = GATEWAY_PATH;
+      // let's check if gateway/dist/index.html exists
+      if (!(existsSync(path.join(gatewayPath, "index.html")))) {
+        log.error("Gateway not found. Skipping...");
+        opts.gateway = false;
+      } else {
+        // everything else is redirected to the gateway/dist
+        app.use((req, res, next) => {
+          if (req.path === "/") {
+            return next();
+          }
+          express.static(gatewayPath)(req, res, next); // serve static files
+        });
+        app.get("*", (_, res) => {
+          // Inject Gateway with Environment Variables
+          readFile(
+            path.join(gatewayPath, "index.html"),
+            "utf8",
+          ).then((data) => {
+            const modifiedDist = handleReplacements(data, opts);
+            res.send(modifiedDist);
+          }).catch((err) => {
+            log.error(err);
+            return res.status(404).send("Something went wrong.");
+          })
+        });
+      }
+      log.success("Gateway setup successfully.");
     }
 
     return app;
