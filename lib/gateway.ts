@@ -1,4 +1,7 @@
 import { DevOptions } from "./dev";
+import axios from "axios";
+
+import { JSDOM } from "jsdom";
 
 function renderAttribute(name, value) {
   return value !== undefined ? `${name}="${value}"` : "";
@@ -49,4 +52,29 @@ function injectHTML(html: string, injections: Record<string, any>) {
 
 function normalizeHtml(html) {
   return html.replace(/\s+/g, ' ').trim();
+}
+
+const contentCache = {};
+
+export async function fetchAndCacheContent(url) {
+  if (!contentCache[url]) {
+    const response = await axios.get(url);
+    contentCache[url] = response.data;
+  }
+  return contentCache[url];
+}
+
+export function modifyIndexHtml(content: string, opts: DevOptions) {
+  const dom = new JSDOM(content);
+  const document = dom.window.document;
+
+  const viewer = document.querySelector('near-social-viewer');
+
+  if (viewer) {
+    viewer.setAttribute('src', opts.index);
+    viewer.setAttribute('rpc', `http://127.0.0.1:${opts.port}/api/proxy-rpc`);
+    viewer.setAttribute('network', opts.network);
+  }
+
+  return dom.serialize();
 }

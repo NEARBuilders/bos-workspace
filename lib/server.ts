@@ -6,7 +6,7 @@ import express, { Request, Response } from 'express';
 import { existsSync, readJson, writeJson } from "fs-extra";
 import http from 'http';
 import path from "path";
-import { handleReplacements } from './gateway';
+import { fetchAndCacheContent, handleReplacements, modifyIndexHtml } from './gateway';
 import { readFile } from "./utils/fs";
 
 // the gateway dist path in node_modules
@@ -32,7 +32,7 @@ export function startDevServer(srcs: string[], dists: string[], devJsonPath: str
   const app = createApp(devJsonPath, opts);
   const server = http.createServer(app);
   startServer(server, opts, () => {
-    const postData = JSON.stringify({srcs: srcs.map((src) => path.resolve(src)), dists: dists.map((dist) => path.resolve(dist))});
+    const postData = JSON.stringify({ srcs: srcs.map((src) => path.resolve(src)), dists: dists.map((dist) => path.resolve(dist)) });
     const options = {
       hostname: '127.0.0.1',
       port: opts.port,
@@ -50,7 +50,7 @@ export function startDevServer(srcs: string[], dists: string[], devJsonPath: str
       let data = '';
 
       res.on('data', (chunk) => {
-          data += chunk;
+        data += chunk;
       });
 
       res.on('end', () => {
@@ -61,7 +61,7 @@ export function startDevServer(srcs: string[], dists: string[], devJsonPath: str
     req.on('error', (e) => {
       log.error(`problem with request: ${e.message}`);
     });
-    
+
     // Write data to request body
     req.write(postData);
     req.end();
@@ -198,37 +198,69 @@ export function createApp(devJsonPath: string, opts: DevOptions): Express.Applic
    */
   app.all('/api/proxy-rpc', proxyMiddleware(RPC_URL[opts.network]));
 
-  if (opts.gateway) {
-    // do things with gateway
-    const gatewayPath = typeof opts.gateway === "string" ? path.resolve(opts.gateway) : GATEWAY_PATH;
+  if (opts.gateway) { // Gateway setup, may be string or boolean
 
-    // let's check if gateway/dist/index.html exists
-    if (!(existsSync(path.join(gatewayPath, "index.html")))) {
-      log.error("Gateway not found. Skipping...");
-      opts.gateway = false;
-    } else {
-      // everything else is redirected to the gateway/dist
+    /**
+     * starts gateway from local path
+     */
+    const setupLocalGateway = (gatewayPath: string) => {
+      if (!existsSync(path.join(gatewayPath, "index.html"))) {
+        log.error("Gateway not found. Skipping...");
+        opts.gateway = false;
+        return;
+      }
+
       app.use((req, res, next) => {
-        if (req.path === "/") {
-          return next();
+        if (req.path !== "/") {
+          return express.static(gatewayPath)(req, res, next);
         }
-        express.static(gatewayPath)(req, res, next); // serve static files
+        next();
       });
+
       app.get("*", (_, res) => {
-        // Inject Gateway with Environment Variables
-        readFile(
-          path.join(gatewayPath, "index.html"),
-          "utf8",
-        ).then((data) => {
-          const modifiedDist = handleReplacements(data, opts);
-          res.send(modifiedDist);
-        }).catch((err) => {
-          log.error(err);
-          return res.status(404).send("Something went wrong.");
-        })
+        readFile(path.join(gatewayPath, "index.html"), "utf8")
+          .then(data => {
+            const modifiedDist = modifyIndexHtml(data, opts);
+            res.type('text/html').send(modifiedDist);
+          })
+          .catch(err => {
+            log.error(err);
+            res.status(404).send("Something went wrong.");
+          });
       });
-      log.success("Gateway setup successfully.");
+    };
+
+    if (typeof opts.gateway === "string") { // Gateway is a string, could be local path or remote url
+      if (opts.gateway.startsWith("http")) { // remote url (web4)
+        app.use(async (req, res) => {
+          try { // forward requests to the web4 bundle
+            const filePath = req.path;
+            const ext = path.extname(filePath);
+            let fullUrl = (opts.gateway as string).replace(/\/$/, ''); // remove trailing slash
+
+            if (ext === '.js' || ext === '.css') {
+              fullUrl += filePath;
+              const content = await fetchAndCacheContent(fullUrl);
+              res.type(ext === '.js' ? 'application/javascript' : 'text/css');
+              res.send(content);
+            } else {
+              fullUrl += "/index.html";
+              let content = await fetchAndCacheContent(fullUrl);
+              content = modifyIndexHtml(content, opts);
+              res.type('text/html').send(content);
+            }
+          } catch (error) {
+            log.error(`Error fetching content: ${error}`);
+            res.status(404).send('Not found');
+          }
+        });
+      } else { // local path
+        setupLocalGateway(path.resolve(opts.gateway));
+      }
+    } else { // Gateway is boolean, setup default gateway
+      setupLocalGateway(GATEWAY_PATH);
     }
+    log.success("Gateway setup successfully.");
   }
 
   return app;

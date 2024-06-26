@@ -10,7 +10,6 @@ import { Network } from "./types";
 import { loopThroughFiles, readFile } from "./utils/fs";
 import { mergeDeep, substractDeep } from "./utils/objects";
 import { startFileWatcher } from "./watcher";
-import { optional } from "joi";
 
 const DEV_DIST_FOLDER = "build";
 

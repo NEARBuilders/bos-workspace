@@ -28,6 +28,7 @@
   "dependencies": {
     "@near-js/providers": "^0.2.1",
     "@near-js/types": "^0.2.0",
+    "axios": "^1.7.2",
     "body-parser": "^1.20.2",
     "commander": "^11.1.0",
     "crypto-js": "^4.2.0",
@@ -37,6 +38,7 @@
     "glob": "^10.3.10",
     "https": "^1.0.0",
     "joi": "^17.11.0",
+    "jsdom": "^24.1.0",
     "multilang-extract-comments": "^0.4.0",
     "mvdir": "^1.0.21",
     "prettier": "^2.8.8",
@@ -44,7 +46,8 @@
     "replace-in-file": "^7.1.0",
     "slugify": "^1.6.6",
     "socket.io": "^4.7.3",
-    "sucrase": "^3.34.0"
+    "sucrase": "^3.34.0",
+    "web-encoding": "^1.1.5"
   },
   "devDependencies": {
     "@types/crypto-js": "^4.2.2",
