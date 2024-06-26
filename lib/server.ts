@@ -198,106 +198,73 @@ export function createApp(devJsonPath: string, opts: DevOptions): Express.Applic
    */
   app.all('/api/proxy-rpc', proxyMiddleware(RPC_URL[opts.network]));
 
-  if (opts.gateway) {
-    // do things with gateway
-    if (typeof opts.gateway === "string") {
-      if (opts.gateway.startsWith("http")) {
+  if (opts.gateway) { // Gateway setup, may be string or boolean
+
+    /**
+     * starts gateway from local path
+     */
+    const setupLocalGateway = (gatewayPath: string) => {
+      if (!existsSync(path.join(gatewayPath, "index.html"))) {
+        log.error("Gateway not found. Skipping...");
+        opts.gateway = false;
+        return;
+      }
+
+      app.use((req, res, next) => {
+        if (req.path !== "/") {
+          return express.static(gatewayPath)(req, res, next);
+        }
+        next();
+      });
+
+      app.get("*", (_, res) => {
+        readFile(path.join(gatewayPath, "index.html"), "utf8")
+          .then(data => {
+            const modifiedDist = modifyIndexHtml(data, opts);
+            res.type('text/html').send(modifiedDist);
+          })
+          .catch(err => {
+            log.error(err);
+            res.status(404).send("Something went wrong.");
+          });
+      });
+    };
+
+    if (typeof opts.gateway === "string") { // Gateway is a string, could be local path or remote url
+      if (opts.gateway.startsWith("http")) { // remote url (web4)
         app.use(async (req, res) => {
-          try {
-            let filePath = req.path;
+          try { // forward requests to the web4 bundle
+            const filePath = req.path;
             const ext = path.extname(filePath);
+            let fullUrl = (opts.gateway as string).replace(/\/$/, ''); // remove trailing slash
 
-            let fullUrl = (opts.gateway as string).replace(/\/$/, '');
-
-            let content;
-
-            switch (ext) {
-              case '.js':
-                fullUrl += filePath;
-                content = await fetchAndCacheContent(fullUrl);
-                res.type('application/javascript');
-                break;
-              case '.css':
-                fullUrl += filePath;
-                content = await fetchAndCacheContent(fullUrl);
-                res.type('text/css');
-                break;
-              default:
-                fullUrl += "/index.html";
-                content = await fetchAndCacheContent(fullUrl);
-                content = modifyIndexHtml(content, opts);
-                res.type('text/html');
+            if (ext === '.js' || ext === '.css') {
+              fullUrl += filePath;
+              const content = await fetchAndCacheContent(fullUrl);
+              res.type(ext === '.js' ? 'application/javascript' : 'text/css');
+              res.send(content);
+            } else {
+              fullUrl += "/index.html";
+              let content = await fetchAndCacheContent(fullUrl);
+              content = modifyIndexHtml(content, opts);
+              res.type('text/html').send(content);
             }
-
-            res.send(content);
           } catch (error) {
             log.error(`Error fetching content: ${error}`);
             res.status(404).send('Not found');
           }
         });
-      } else {
-        let gatewayPath = path.resolve(opts.gateway);
-        // let's check if gateway/dist/index.html exists
-        if (!(existsSync(path.join(gatewayPath, "index.html")))) {
-          log.error("Gateway not found. Skipping...");
-          opts.gateway = false;
-        } else {
-          // everything else is redirected to the gateway/dist
-          app.use((req, res, next) => {
-            if (req.path === "/") {
-              return next();
-            }
-            express.static(gatewayPath)(req, res, next); // serve static files
-          });
-          app.get("*", (_, res) => {
-            // Inject Gateway with Environment Variables
-            readFile(
-              path.join(gatewayPath, "index.html"),
-              "utf8",
-            ).then((data) => {
-              const modifiedDist = handleReplacements(data, opts);
-              res.send(modifiedDist);
-            }).catch((err) => {
-              log.error(err);
-              return res.status(404).send("Something went wrong.");
-            })
-          });
-        }
+      } else { // local path
+        setupLocalGateway(path.resolve(opts.gateway));
       }
-    } else {
-      let gatewayPath = GATEWAY_PATH;
-      // let's check if gateway/dist/index.html exists
-      if (!(existsSync(path.join(gatewayPath, "index.html")))) {
-        log.error("Gateway not found. Skipping...");
-        opts.gateway = false;
-      } else {
-        // everything else is redirected to the gateway/dist
-        app.use((req, res, next) => {
-          if (req.path === "/") {
-            return next();
-          }
-          express.static(gatewayPath)(req, res, next); // serve static files
-        });
-        app.get("*", (_, res) => {
-          // Inject Gateway with Environment Variables
-          readFile(
-            path.join(gatewayPath, "index.html"),
-            "utf8",
-          ).then((data) => {
-            const modifiedDist = handleReplacements(data, opts);
-            res.send(modifiedDist);
-          }).catch((err) => {
-            log.error(err);
-            return res.status(404).send("Something went wrong.");
-          })
-        });
-      }
-      log.success("Gateway setup successfully.");
+    } else { // Gateway is boolean, setup default gateway
+      setupLocalGateway(GATEWAY_PATH);
     }
+    log.success("Gateway setup successfully.");
+  }
 
-    return app;
-  };
-}
+  return app;
+};
 
 /**
  * Starts BosLoader Server and optionally opens gateway in browser

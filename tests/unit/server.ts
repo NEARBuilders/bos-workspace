@@ -55,7 +55,7 @@ describe('createApp', () => {
     vol.mkdirSync(path.join(mockGatewayPath, 'dist'), { recursive: true });
     vol.writeFileSync(path.join(mockGatewayPath, 'dist', 'index.html'), '<html></html>');
     
-    jest.spyOn(gateway, 'handleReplacements').mockReturnValue('<html>modified</html>');
+    jest.spyOn(gateway, 'modifyIndexHtml').mockReturnValue('<html>modified</html>');
     
     app = createApp(devJsonPath, opts);
     expect(app).toBeDefined();
