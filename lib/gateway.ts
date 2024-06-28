@@ -74,6 +74,9 @@ export function modifyIndexHtml(content: string, opts: DevOptions) {
     viewer.setAttribute('src', opts.index);
     viewer.setAttribute('rpc', `http://127.0.0.1:${opts.port}/api/proxy-rpc`);
     viewer.setAttribute('network', opts.network);
+    if (opts.hot) {
+      viewer.setAttribute('enablehotreload', "");
+    }
   }
 
   return dom.serialize();
