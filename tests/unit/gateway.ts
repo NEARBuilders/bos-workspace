@@ -1,5 +1,5 @@
 import { DevOptions } from '@/lib/dev';
-import { handleReplacements } from '@/lib/gateway';
+import { handleReplacements, modifyIndexHtml } from '@/lib/gateway';
 import { Logger, LogLevel } from "@/lib/logger";
 import { Network } from '@/lib/types';
 
@@ -18,7 +18,7 @@ describe("gateway", () => {
   // Mocked input options
   const mockOpts: DevOptions = {
     port: 8080,
-    hot: true,
+    hot: false,
     network: 'testnet' as Network,
     index: "test/widget/index"
   };
@@ -41,9 +41,27 @@ describe("gateway", () => {
   // Test replacement of the near-social-viewer component with an RPC attribute
   it("should replace <near-social-viewer></near-social-viewer> with near-social-viewer having an RPC attribute", () => {
     const htmlInput = "<html><head></head><body><near-social-viewer></near-social-viewer></body></html>";
-    const expectedHtmlOutput = `<html><head></head><body><near-social-viewer src="${mockOpts.index}" rpc="http://127.0.0.1:${mockOpts.port}/api/proxy-rpc" network="${mockOpts.network}" ></near-social-viewer></body></html>`;
+    const expectedHtmlOutput = `<html><head></head><body><near-social-viewer src="${mockOpts.index}" rpc="http://127.0.0.1:${mockOpts.port}/api/proxy-rpc" network="${mockOpts.network}"></near-social-viewer></body></html>`;
 
-    const result = handleReplacements(htmlInput, mockOpts);
+    const result = modifyIndexHtml(htmlInput, mockOpts);
+    expect(result).toBe(expectedHtmlOutput);
+  });
+
+  it("should replace <near-social-viewer></near-social-viewer> with hotreload attribute if enabled", () => {
+    mockOpts.hot = true;
+    const htmlInput = "<html><head></head><body><near-social-viewer></near-social-viewer></body></html>";
+    const expectedHtmlOutput = `<html><head></head><body><near-social-viewer src="${mockOpts.index}" rpc="http://127.0.0.1:${mockOpts.port}/api/proxy-rpc" network="${mockOpts.network}" enablehotreload=""></near-social-viewer></body></html>`;
+
+    const result = modifyIndexHtml(htmlInput, mockOpts);
+    expect(result).toBe(expectedHtmlOutput);
+  });
+
+  it("should not replace <near-social-viewer></near-social-viewer> with hotreload attribute if disabled", () => {
+    mockOpts.hot = false;
+    const htmlInput = "<html><head></head><body><near-social-viewer></near-social-viewer></body></html>";
+    const expectedHtmlOutput = `<html><head></head><body><near-social-viewer src="${mockOpts.index}" rpc="http://127.0.0.1:${mockOpts.port}/api/proxy-rpc" network="${mockOpts.network}"></near-social-viewer></body></html>`;
+
+    const result = modifyIndexHtml(htmlInput, mockOpts);
     expect(result).toBe(expectedHtmlOutput);
   });
 });
