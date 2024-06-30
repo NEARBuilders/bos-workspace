@@ -18,8 +18,6 @@ function htmlStringify(json) {
 
 export const handleReplacements = (html: string, opts: DevOptions): string => {
   const envConfig = JSON.stringify({
-    bosLoaderWs: `ws://127.0.0.1:${opts.port}`,
-    bosLoaderUrl: `http://127.0.0.1:${opts.port}/api/loader`,
     enableHotReload: opts.hot,
     network: opts.network,
   });
@@ -29,16 +27,6 @@ export const handleReplacements = (html: string, opts: DevOptions): string => {
       pattern: "%ENV_CONFIG%",
       replacement: envConfig
     },
-    OTHER: {
-      pattern: /<near-social-viewer><\/near-social-viewer>/g,
-      replacement: true
-        ? `<near-social-viewer
-        ${renderAttribute("src", opts.index)}
-        ${renderAttribute("rpc", `http://127.0.0.1:${opts.port}/api/proxy-rpc`)}
-        ${renderAttribute("network", opts.network)}
-        ></near-social-viewer>`
-        : "<near-social-viewer></near-social-viewer>",
-    }
   }));
 }
 

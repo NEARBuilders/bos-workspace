@@ -220,7 +220,10 @@ export function createApp(devJsonPath: string, opts: DevOptions): Express.Applic
       app.get("*", (_, res) => {
         readFile(path.join(gatewayPath, "index.html"), "utf8")
           .then(data => {
-            const modifiedDist = modifyIndexHtml(data, opts);
+            let modifiedDist = modifyIndexHtml(data, opts);
+            if (gatewayPath === GATEWAY_PATH) {
+              modifiedDist = handleReplacements(modifiedDist, opts);
+            }
             res.type('text/html').send(modifiedDist);
           })
           .catch(err => {
