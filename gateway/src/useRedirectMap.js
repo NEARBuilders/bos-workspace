@@ -11,7 +11,7 @@ function useRedirectMap() {
 
   useEffect(() => {
     if (uWebSocket) {
-      const socket = io(flags.bosLoaderWs, {
+      const socket = io(`ws://${window.location.host}`, {
         reconnectionAttempts: 1, // Limit reconnection attempts
       });
 
@@ -21,7 +21,7 @@ function useRedirectMap() {
       });
 
       socket.on("connect_error", () => {
-        console.warning("WebSocket connection error. Switching to HTTP.");
+        console.warn("WebSocket connection error. Disabling WebSocket");
         setUWebSocket(false);
         socket.disconnect();
       });
