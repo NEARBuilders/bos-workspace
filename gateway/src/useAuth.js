@@ -22,7 +22,7 @@ import { flags } from "../config/flags.js";
 
 export const refreshAllowanceObj = {};
 const NetworkId = flags.network;
-const RPC_URL = "http://127.0.0.1:8080/" + "api/proxy-rpc";
+const RPC_URL = `${window.location.origin}/api/proxy-rpc`;
 
 export function useAuth() {
   const [connected, setConnected] = useState(false);
