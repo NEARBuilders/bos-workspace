@@ -81,7 +81,7 @@ export async function buildApp(src: string, dest: string, network: string = "mai
       const content = (await readFile(file)).toString();
       const new_file = await transpileJS(content, params, {
         compileTypeScript: file.endsWith(".ts") || file.endsWith(".tsx"),
-        format: true,
+        format: config.format,
       });
       const new_logs: Log[] = new_file.logs.map((v) => {
         return {
@@ -118,7 +118,7 @@ export async function buildApp(src: string, dest: string, network: string = "mai
       const content = (await readFile(file)).toString();
       const new_file = await transpileJS(content, params, {
         compileTypeScript: file.endsWith(".ts") || file.endsWith(".tsx"),
-        format: true,
+        format: config.format,
       });
       const new_logs: Log[] = new_file.logs.map((v) => {
         return {

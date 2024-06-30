@@ -188,6 +188,44 @@ const app_example_3_output = {
   "/build/src/widget/alias.jsx": "return <h1>Hello world!</h1>;\n",
 };
 
+const unformated_example = {
+  "./bos.config.json": JSON.stringify({
+    ...DEFAULT_CONFIG,
+    account: "test.near",
+    format: false
+  }),
+  "./widget/alias.tsx": "function   add(a,b){return a+b} let result=add(1,2);console.log(result);",
+};
+
+const unformated_output = {
+  "/build/data.json": JSON.stringify({
+    "test.near": {}
+  }, null, 2) + "\n",
+  "/build/src/widget/alias.jsx": "function   add(a,b){return a+b} let result=add(1,2);console.log(result);",
+};
+
+const formated_example = {
+  "./bos.config.json": JSON.stringify({
+    ...DEFAULT_CONFIG,
+    account: "test.near",
+    format: true
+  }),
+  "./widget/alias.tsx": "function   add(a,b){return a+b} let result=add(1,2);console.log(result);",
+};
+
+const formated_output = {
+  "/build/data.json": JSON.stringify({
+    "test.near": {}
+  }, null, 2) + "\n",
+  "/build/src/widget/alias.jsx": `function add(a, b) {
+  return a + b;
+}
+let result = add(1, 2);
+console.log(result);
+`,
+};
+
+
 const unmockedFetch = global.fetch;
 const unmockedLog = global.log;
 
@@ -227,5 +265,17 @@ describe('build', () => {
     vol.fromJSON(app_example_3, '/app_example_3');
     await buildApp('/app_example_3', '/build');
     expect(vol.toJSON('/build')).toEqual(app_example_3_output);
+  })
+
+  it('should format when format enabled', async () => {
+    vol.fromJSON(formated_example, '/formated_example');
+    await buildApp('/formated_example', '/build');
+    expect(vol.toJSON('/build')).toEqual(formated_output);
+  })
+
+  it('should not format when format disabled', async () => {
+    vol.fromJSON(unformated_example, '/unformated_example');
+    await buildApp('/unformated_example', '/build');
+    expect(vol.toJSON('/build')).toEqual(unformated_output);
   })
 })
