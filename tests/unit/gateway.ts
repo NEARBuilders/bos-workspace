@@ -27,8 +27,6 @@ describe("gateway", () => {
   it("should replace the ENV_CONFIG placeholder with correct JSON configuration", () => {
     const htmlInput = "<html><head>%ENV_CONFIG%</head><body></body></html>";
     const expectedConfig = JSON.stringify({
-      bosLoaderWs: `ws://127.0.0.1:8080`,
-      bosLoaderUrl: `http://127.0.0.1:8080/api/loader`,
       enableHotReload: mockOpts.hot,
       network: mockOpts.network,
     });
