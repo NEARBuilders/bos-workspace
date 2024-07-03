@@ -3,15 +3,30 @@ import { deployAppCode } from '@/lib/deploy';
 import { BaseConfig, DEFAULT_CONFIG } from '@/lib/config';
 import * as fs from '@/lib/utils/fs';
 import { LogLevel, Logger } from "@/lib/logger";
+import EventEmitter from "events";
 
 import { vol, } from 'memfs';
 jest.mock('fs', () => require('memfs').fs);
 jest.mock('fs/promises', () => require('memfs').fs.promises);
+
 jest.mock('child_process', () => ({
-  exec: jest.fn((command: string) => {
-    return command;
+  spawn: jest.fn((command, args, options) => {
+    // Create a mock for the ChildProcess object
+    const mockChildProcess = new EventEmitter();
+
+    // Simulate the 'on' method for event handling
+    mockChildProcess.on = jest.fn((event, callback) => {
+      if (event === 'close') {
+        callback(0);
+      }
+      if (event === 'error') {
+        callback(new Error('error'));
+      }
+      return mockChildProcess;
+    });
+    return mockChildProcess;
   }),
-}))
+}));
 
 const app_example = {
   "./bos.config.json": JSON.stringify({
