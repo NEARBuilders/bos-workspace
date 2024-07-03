@@ -1,7 +1,5 @@
-import * as process from "child_process";
+import { DEFAULT_CONFIG } from '@/lib/config';
 import { deployAppCode } from '@/lib/deploy';
-import { BaseConfig, DEFAULT_CONFIG } from '@/lib/config';
-import * as fs from '@/lib/utils/fs';
 import { LogLevel, Logger } from "@/lib/logger";
 import EventEmitter from "events";
 
