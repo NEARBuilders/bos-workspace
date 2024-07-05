@@ -53,12 +53,12 @@ describe("dev", () => {
   });
 
   it("should call loadConfig with src and opts.network", async () => {
-    await dev(mockSrc, mockOpts);
+    await dev(mockSrc, "build", mockOpts);
     expect(loadConfig).toHaveBeenCalledWith(mockSrc, mockOpts.network);
   });
 
   it("should call generateApp with src, dist, config, opts, and devJsonPath", async () => {
-    await dev(mockSrc, mockOpts);
+    await dev(mockSrc, "build", mockOpts);
     const mockDist = path.join(mockSrc, 'build');
     const mockDevJsonPath = path.join(mockSrc, 'build', 'bos-loader.json');
     expect(startDevServer).toHaveBeenCalledWith([mockSrc], [mockDist], mockDevJsonPath, mockOpts);
@@ -66,18 +66,18 @@ describe("dev", () => {
 
   it("should start the socket server if hot reload is enabled", async () => {
     const mockOpts: DevOptions = { hot: true };
-    await dev(mockSrc, mockOpts);
+    await dev(mockSrc, "build", mockOpts);
     expect(startSocket).toHaveBeenCalled();
   });
 
   it("should not start the socket server if hot reload is disabled", async () => {
     const mockOpts: DevOptions = { hot: false };
-    await dev(mockSrc, mockOpts);
+    await dev(mockSrc, "build", mockOpts);
     expect(startSocket).not.toHaveBeenCalled();
   });
 
   it("should call startFileWatcher with correct watch paths", async () => {
-    await dev(mockSrc, mockOpts);
+    await dev(mockSrc, "build", mockOpts);
     const expectedWatchPaths = [
       path.join(mockSrc, 'widget', '**', '*'),
       path.join(mockSrc, 'module', '**', '*'),
@@ -92,7 +92,7 @@ describe("dev", () => {
     const mockedGazeAdd = jest.spyOn(Gaze.prototype, 'add');
     
     const mockOpts: DevOptions = { hot: false };
-    await dev(mockSrc, mockOpts);
+    await dev(mockSrc, "build", mockOpts);
 
     const mockSrc2 = "/app_example_2";
     vol.fromJSON(app_example_2, mockSrc2);

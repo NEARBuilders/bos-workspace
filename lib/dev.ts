@@ -1,17 +1,15 @@
 import { readJson, writeJson } from "fs-extra";
+import { Gaze } from "gaze";
 import path from "path";
 import { Server as IoServer } from "socket.io";
-import { Gaze } from "gaze";
 import { buildApp } from "./build";
-import { BaseConfig, loadConfig, readConfig } from "./config";
+import { BaseConfig, loadConfig } from "./config";
 import { startDevServer } from "./server";
 import { startSocket } from "./socket";
 import { Network } from "./types";
 import { loopThroughFiles, readFile } from "./utils/fs";
 import { mergeDeep, substractDeep } from "./utils/objects";
 import { startFileWatcher } from "./watcher";
-
-const DEV_DIST_FOLDER = "build";
 
 var appSrcs = [], appDists = [];
 var appDevJsons = [];
@@ -33,12 +31,13 @@ export type DevOptions = {
  * Build and watch app according to bos.config.json
  * 
  * @param src path to app source code
+ * @param dest path to build output
  * @param opts DevOptions
  */
-export async function dev(src: string, opts: DevOptions) {
-  const dist = path.join(src, DEV_DIST_FOLDER);
+export async function dev(src: string, dest: string, opts: DevOptions) {
+  const dist = path.join(src, dest);
   const devJsonPath = path.join(dist, "bos-loader.json");
-  
+
   // Build the app for the first time
   const config = await loadConfig(src, opts.network);
   let devJson = await generateApp(src, dist, config, opts);
@@ -71,12 +70,12 @@ export async function dev(src: string, opts: DevOptions) {
 
   // Watch for changes in the src folder and rebuild the app on changes
   fileWatcher = startFileWatcher([
-      path.join(src, "widget/**/*"),
-      path.join(src, "module/**/*"),
-      path.join(src, "ipfs/**/*"),
-      path.join(src, "bos.config.json"),
-      path.join(src, "aliases.json")
-    ],
+    path.join(src, "widget/**/*"),
+    path.join(src, "module/**/*"),
+    path.join(src, "ipfs/**/*"),
+    path.join(src, "bos.config.json"),
+    path.join(src, "aliases.json")
+  ],
     fileWatcherCallback
   );
 }
@@ -86,15 +85,16 @@ export async function dev(src: string, opts: DevOptions) {
  * 
  * @param root bos.workspace.json root directory
  * @param srcs apps to build and watch
+ * @param dest path to build output
  * @param opts DevOptions
  */
-export async function devMulti(root: string, srcs: string[], opts: DevOptions) {
-  const dist = path.join(root, DEV_DIST_FOLDER);
+export async function devMulti(root: string, srcs: string[], dest: string, opts: DevOptions) {
+  const dist = path.join(root, dest);
   const devJsonPath = path.join(dist, "bos-loader.json");
-  
+
   // Build all apps for the first time and merge devJson
   let appDevJson = { components: {}, data: {} };
-  
+
   for (const src of srcs) {
     const config = await loadConfig(src, opts.network);
     const devJson = await generateApp(src, path.join(dist, path.relative(root, src)), config, opts);
@@ -138,7 +138,7 @@ export async function devMulti(root: string, srcs: string[], opts: DevOptions) {
 export async function addApps(srcs: string[], dists: string[]) {
   let appDevJson = await readJson(appDevJsonPath, { throws: false });
 
-  for (let i = 0; i < srcs.length; i ++) {
+  for (let i = 0; i < srcs.length; i++) {
     const src = srcs[i];
     const dist = dists[i];
 
@@ -157,19 +157,19 @@ export async function addApps(srcs: string[], dists: string[]) {
 
   if (fileWatcher) {
     fileWatcher.add(srcs.map((src) => [
-        path.join(src, "widget/**/*"),
-        path.join(src, "module/**/*"),
-        path.join(src, "ipfs/**/*"),
-        path.join(src, "bos.config.json"),
-        path.join(src, "aliases.json")
-      ]).flat()
+      path.join(src, "widget/**/*"),
+      path.join(src, "module/**/*"),
+      path.join(src, "ipfs/**/*"),
+      path.join(src, "bos.config.json"),
+      path.join(src, "aliases.json")
+    ]).flat()
     );
   }
 }
 
 async function fileWatcherCallback(action: string, file: string) {
   let appDevJson = await readJson(appDevJsonPath, { throws: false });
-  
+
   // find which app this file belongs to
   const index = appSrcs.findIndex((src) => file.includes(path.resolve(src)));
   if (index == -1) {
@@ -178,7 +178,7 @@ async function fileWatcherCallback(action: string, file: string) {
 
   const src = appSrcs[index];
   const dist = appDists[index];
-  
+
   let devJson = appDevJsons[index];
   substractDeep(appDevJson, devJson);
 
@@ -186,7 +186,7 @@ async function fileWatcherCallback(action: string, file: string) {
   log.info(`[${path.relative(src, file)}] changed: rebuilding app...`, LogLevels.DEV);
   const config = await loadConfig(src, appDevOptions.network);
   devJson = await generateApp(src, dist, config, appDevOptions);
-  
+
   // write to redirect map
   await writeJson(appDevJsonPath, mergeDeep(appDevJson, devJson));
   appDevJsons[index] = devJson;
