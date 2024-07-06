@@ -229,17 +229,21 @@ Running the bos-workspace dev server will start a local gateway with a standard 
 bw dev --no-gateway
 ```
 
-However, there is an option to override this default gateway with a custom `/dist`. This is helpful when building widgets that utilize [custom VM elements](https://github.com/NEARBuilders/near-bos-webcomponent?tab=readme-ov-file#configuring-vm-custom-elements). To use this feature, use the `-g` flag with a path to the local custom distribution:
+However, there is an option to override this default gateway with a custom `/dist`. This is helpful when building widgets that utilize [custom VM elements](https://github.com/NEARBuilders/near-bos-webcomponent?tab=readme-ov-file#configuring-vm-custom-elements). To use this feature, use the `-g` flag with a path to the local custom distribution or link to package published on [nearfs](https://github.com/vgrichina/nearfs) or via cdn:
 
 ```cmd
 bw dev -g path/to/dist
 ```
 
-This will automatically start the local gateway, but using the provided dist.
+```cmd
+bw dev -g https://ipfs.web4.near.page/ipfs/bafybeiancp5im5nfkdki3cfvo7ownl2knjovqh7bseegk4zvzsl4buryoi
+```
+
+This will automatically start the local gateway serving your widgets through the provided dist.
 
 It is easy to build and distribute a custom gateway using the [near-bos-webcomponent](https://github.com/nearbuilders/near-bos-webcomponent), see ["Configuring VM Custom Elements"](https://github.com/NEARBuilders/near-bos-webcomponent?tab=readme-ov-file#configuring-vm-custom-elements).
 
-The bos-workspace dev server is specially configured with the near-bos-webcomponent to automatically set the `rpc` attribute with the [proxy-rpc](#proxy-rpc) when provided.
+The bos-workspace dev server is specially configured with the near-bos-webcomponent to automatically set the `rpc` attribute with the [proxy-rpc](#proxy-rpc).
 
 ## Commands
 
@@ -285,9 +289,9 @@ bw deploy [app name] --deploy-account-id [deployAccountId] --signer-account-id [
 
 * `--signer-account-id <signerAccountId>` (Optional): Account which will be used for signing deploy transactions, frequently the same as deploy-account-id. Defaults to `config.account`, or will use `config.accounts.deploy` if specified.
 
-* `--signer-public-key <signerPublicKey>` (Required): Public key for signing transactions in the format: `ed25519:<public_key>`.
+* `--signer-public-key <signerPublicKey>` (Optional): Public key for signing transactions in the format: `ed25519:<public_key>`. Will default to interactive [near-cli-rs](https://github.com/near/near-cli-rs) if not provided.
 
-* `--signer-private-key <signerPrivateKey>` (Required): Private key in `ed25519:<private_key>` format for signing transactions.
+* `--signer-private-key <signerPrivateKey>` (Optional): Private key in `ed25519:<private_key>` format for signing transactions. Will default to interactive [near-cli-rs](https://github.com/near/near-cli-rs) if not provided.
 
 * `-n, --network <network>` (Optional): Network to deploy for (default: "mainnet").
 
