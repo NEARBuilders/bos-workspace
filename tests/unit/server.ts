@@ -1,14 +1,15 @@
-import { DevOptions } from './../../lib/dev';
+import { DevOptions } from '@/lib/dev';
 import { Logger, LogLevel } from "@/lib/logger";
-import { createApp, RPC_URL } from '@/lib/server';
+import { createApp, RPC_URL, DEFAULT_GATEWAY_PATH } from '@/lib/server';
 import supertest from 'supertest';
 import { TextEncoder } from 'util';
-import { Network } from './../../lib/types';
+import { Network } from '@/lib/types';
 import { fetchJson } from "@near-js/providers";
 import * as gateway from '@/lib/gateway';
 
 import { vol } from 'memfs';
 import path from 'path';
+
 jest.mock('fs', () => require('memfs').fs);
 jest.mock('fs/promises', () => require('memfs').fs.promises);
 jest.mock("@near-js/providers");
@@ -47,6 +48,25 @@ describe('createApp', () => {
     jest.resetAllMocks();
     global.log = unmockedLog;
     global.fetch = unmockedFetch;
+  });
+
+  it('should use default gateway when path not provided', async () => {
+    opts.gateway = true;
+    jest.spyOn(gateway, 'fetchAndCacheContent').mockResolvedValue('<html></html>');
+    jest.spyOn(gateway, 'modifyIndexHtml').mockReturnValue('<html>modified</html>');
+
+    app = createApp(devJsonPath, opts);
+    expect(app).toBeDefined();
+
+    const response = await supertest(app).get('/');
+    
+    expect(response.status).toBe(200);
+    expect(response.headers['content-type']).toMatch(/html/);
+    expect(response.text).toBe('<html>modified</html>');
+
+    const calls = (gateway.fetchAndCacheContent as jest.MockedFunction<typeof gateway.fetchAndCacheContent>).mock.calls;
+    expect(calls.length).toBe(1);
+    expect(calls[0][0]).toBe(`${DEFAULT_GATEWAY_PATH}/index.html`);
   });
 
   it('should set up the app correctly when opts.gateway is a valid local path', () => {
@@ -92,6 +112,10 @@ describe('createApp', () => {
     expect(response.status).toBe(200);
     expect(response.headers['content-type']).toMatch(/html/);
     expect(response.text).toBe('<html>modified</html>');
+
+    const calls = (gateway.fetchAndCacheContent as jest.MockedFunction<typeof gateway.fetchAndCacheContent>).mock.calls;
+    expect(calls.length).toBe(1);
+    expect(calls[0][0]).toBe(`${mockGatewayUrl}/index.html`);
   });
 
   it('should handle errors when fetching content from http gateway', async () => {

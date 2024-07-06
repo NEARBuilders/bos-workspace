@@ -12,6 +12,8 @@ import { readFile } from "./utils/fs";
 // the gateway dist path in node_modules
 const GATEWAY_PATH = path.join(__dirname, "../..", "gateway", "dist");
 
+export const DEFAULT_GATEWAY_PATH = "https://ipfs.web4.near.page/ipfs/bafybeiancp5im5nfkdki3cfvo7ownl2knjovqh7bseegk4zvzsl4buryoi";
+
 export const RPC_URL = {
   mainnet: "https://rpc.mainnet.near.org",
   testnet: "https://rpc.testnet.near.org",
@@ -233,35 +235,42 @@ export function createApp(devJsonPath: string, opts: DevOptions): Express.Applic
       });
     };
 
+    /**
+     * starts gateway from remote url
+     */
+    const setupRemoteGateway = (url: string) => {
+      app.use(async (req, res) => {
+        try { // forward requests to the web4 bundle
+          const filePath = req.path;
+          const ext = path.extname(filePath);
+          let fullUrl = url.replace(/\/$/, ''); // remove trailing slash
+
+          if (ext === '.js' || ext === '.css') {
+            fullUrl += filePath;
+            const content = await fetchAndCacheContent(fullUrl);
+            res.type(ext === '.js' ? 'application/javascript' : 'text/css');
+            res.send(content);
+          } else {
+            fullUrl += "/index.html";
+            let content = await fetchAndCacheContent(fullUrl);
+            content = modifyIndexHtml(content, opts);
+            res.type('text/html').send(content);
+          }
+        } catch (error) {
+          log.error(`Error fetching content: ${error}`);
+          res.status(404).send('Not found');
+        }
+      });
+    };
+
     if (typeof opts.gateway === "string") { // Gateway is a string, could be local path or remote url
       if (opts.gateway.startsWith("http")) { // remote url (web4)
-        app.use(async (req, res) => {
-          try { // forward requests to the web4 bundle
-            const filePath = req.path;
-            const ext = path.extname(filePath);
-            let fullUrl = (opts.gateway as string).replace(/\/$/, ''); // remove trailing slash
-
-            if (ext === '.js' || ext === '.css') {
-              fullUrl += filePath;
-              const content = await fetchAndCacheContent(fullUrl);
-              res.type(ext === '.js' ? 'application/javascript' : 'text/css');
-              res.send(content);
-            } else {
-              fullUrl += "/index.html";
-              let content = await fetchAndCacheContent(fullUrl);
-              content = modifyIndexHtml(content, opts);
-              res.type('text/html').send(content);
-            }
-          } catch (error) {
-            log.error(`Error fetching content: ${error}`);
-            res.status(404).send('Not found');
-          }
-        });
+        setupRemoteGateway(opts.gateway);
       } else { // local path
         setupLocalGateway(path.resolve(opts.gateway));
       }
     } else { // Gateway is boolean, setup default gateway
-      setupLocalGateway(GATEWAY_PATH);
+      setupRemoteGateway(DEFAULT_GATEWAY_PATH);
     }
     log.success("Gateway setup successfully.");
   }
