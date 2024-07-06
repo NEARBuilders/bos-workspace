@@ -229,17 +229,21 @@ Running the bos-workspace dev server will start a local gateway with a standard 
 bw dev --no-gateway
 ```
 
-However, there is an option to override this default gateway with a custom `/dist`. This is helpful when building widgets that utilize [custom VM elements](https://github.com/NEARBuilders/near-bos-webcomponent?tab=readme-ov-file#configuring-vm-custom-elements). To use this feature, use the `-g` flag with a path to the local custom distribution:
+However, there is an option to override this default gateway with a custom `/dist`. This is helpful when building widgets that utilize [custom VM elements](https://github.com/NEARBuilders/near-bos-webcomponent?tab=readme-ov-file#configuring-vm-custom-elements). To use this feature, use the `-g` flag with a path to the local custom distribution or [nearfs](https://github.com/vgrichina/nearfs) or cdn url:
 
 ```cmd
 bw dev -g path/to/dist
 ```
 
-This will automatically start the local gateway, but using the provided dist.
+```cmd
+bw dev -g https://ipfs.web4.near.page/ipfs/bafybeiancp5im5nfkdki3cfvo7ownl2knjovqh7bseegk4zvzsl4buryoi
+```
+
+This will automatically start the local gateway serving your widgets through the provided dist.
 
 It is easy to build and distribute a custom gateway using the [near-bos-webcomponent](https://github.com/nearbuilders/near-bos-webcomponent), see ["Configuring VM Custom Elements"](https://github.com/NEARBuilders/near-bos-webcomponent?tab=readme-ov-file#configuring-vm-custom-elements).
 
-The bos-workspace dev server is specially configured with the near-bos-webcomponent to automatically set the `rpc` attribute with the [proxy-rpc](#proxy-rpc) when provided.
+The bos-workspace dev server is specially configured with the near-bos-webcomponent to automatically set the `rpc` attribute with the [proxy-rpc](#proxy-rpc).
 
 ## Commands
 
