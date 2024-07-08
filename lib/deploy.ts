@@ -1,12 +1,11 @@
+import { spawn } from 'child_process';
 import path from "path";
-import { exec, ExecException } from "child_process";
 
-import { BaseConfig, readConfig } from "@/lib/config";
 import { buildApp } from "@/lib/build";
+import { BaseConfig, readConfig } from "@/lib/config";
+import { Network } from "@/lib/types";
+import { move, pathExists, readdir, remove } from "@/lib/utils/fs";
 import { readWorkspace } from "@/lib/workspace";
-import { Log, Network } from "@/lib/types";
-import { readdir, remove, move, pathExists } from "@/lib/utils/fs";
-import { Logger } from "./logger";
 
 const DEPLOY_DIST_FOLDER = "build";
 
@@ -22,10 +21,10 @@ export type DeployOptions = {
 export async function translateForBosCli(dist: string) {
     const srcDir = path.join(dist, "src", "widget");
     const targetDir = path.join(dist, "src");
-    
+
     const new_files = await readdir(srcDir).catch(() => ([]));
     const original_files = await readdir(targetDir).catch(() => ([]));
-    
+
     for (const file of new_files) {
         await move(path.join(srcDir, file), path.join(targetDir, file), { overwrite: true });
     }
@@ -47,7 +46,7 @@ export async function deployAppCode(src: string, dist: string, opts: DeployOptio
 
     // Build
     await buildApp(src, dist, opts.network);
-    
+
     // Translate for bos cli
     await log.wait(
         translateForBosCli(dist),
@@ -56,12 +55,12 @@ export async function deployAppCode(src: string, dist: string, opts: DeployOptio
         `[${fullDist}] Failed to translate`,
         LogLevels.BUILD
     );
-    
+
     // Exec bos-cli;
     const config = await readConfig(path.join(src, "bos.config.json"), opts.network);
 
-    const BOS_DEPLOY_ACCOUNT_ID = config.accounts.deploy || opts.deployAccountId;
-    const BOS_SIGNER_ACCOUNT_ID = config.accounts.signer || opts.signerAccountId;
+    const BOS_DEPLOY_ACCOUNT_ID = config.accounts.deploy || opts.deployAccountId || config.account;
+    const BOS_SIGNER_ACCOUNT_ID = config.accounts.signer || opts.signerAccountId || config.account;
     const BOS_SIGNER_PUBLIC_KEY = opts.signerPublicKey;
     const BOS_SIGNER_PRIVATE_KEY = opts.signerPrivateKey;
 
@@ -71,22 +70,40 @@ export async function deployAppCode(src: string, dist: string, opts: DeployOptio
     } else if (!BOS_SIGNER_ACCOUNT_ID) {
         deploying.error(`Necessary values not provided, please provide Signer Account ID for deploy`);
         return;
-    } else if (!BOS_SIGNER_PUBLIC_KEY || !BOS_SIGNER_PRIVATE_KEY) {
-        deploying.error(`Necessary values not provided, please provide private & public key for deploy`);
-        return;
     }
-        
-    exec(
-        `cd ${dist} && npx bos components deploy "${BOS_DEPLOY_ACCOUNT_ID}" sign-as "${BOS_SIGNER_ACCOUNT_ID}" network-config "${opts.network}" sign-with-plaintext-private-key --signer-public-key "${BOS_SIGNER_PUBLIC_KEY}" --signer-private-key "${BOS_SIGNER_PRIVATE_KEY}" send`,
-        (error: ExecException | null, stdout: string, stderr: string) => {
-            if (!error) {
-                deploying.finish(`[${fullSrc}] App deployed successfully`);
-                return;
-            }
 
-            deploying.error(error.message);
+    // Prepare the command and arguments
+    const args = [
+        'bos-cli', 'components', 'deploy', `${BOS_DEPLOY_ACCOUNT_ID}`,
+        'sign-as', `${BOS_SIGNER_ACCOUNT_ID}`,
+        'network-config', `${opts.network}`
+    ];
+
+    if (BOS_SIGNER_PUBLIC_KEY && BOS_SIGNER_PRIVATE_KEY) {
+        args.push(
+            'sign-with-plaintext-private-key',
+            '--signer-public-key', `${BOS_SIGNER_PUBLIC_KEY}`,
+            '--signer-private-key', `${BOS_SIGNER_PRIVATE_KEY}`,
+            'send'
+        );
+    }
+
+    const deployProcess = spawn('npx', args, {
+        cwd: dist,
+        stdio: 'inherit' // This allows the process to inherit the parent process's stdio streams
+    });
+
+    deployProcess.on('close', (code) => {
+        if (code === 0) {
+            deploying.finish(`[${fullSrc}] App deployed successfully`);
+        } else {
+            deploying.error(`Deployment failed with code ${code}`);
         }
-    );
+    });
+
+    deployProcess.on('error', (err) => {
+        deploying.error(`Deployment failed with error: ${err.message}`);
+    });
 }
 
 // publish data.json to SocialDB
@@ -114,7 +131,7 @@ export async function deploy(appName: string, opts: DeployOptions) {
 
     // Deploy workspace app
     const { apps } = await readWorkspace(src);
-    
+
     const findingApp = log.loading(`Finding ${appName} in the workspace`, LogLevels.BUILD);
     const appSrc = apps.find((app) => app.includes(appName));
     if (!appSrc) {

@@ -24,14 +24,14 @@ export async function buildWorkspace(src: string, dest: string, network: string 
   loading.finish(`Built workspace ${path.resolve(src)} to ${path.resolve(dest)}`);
 };
 
-export async function devWorkspace(src: string, devOpts: DevOptions): Promise<any> {
+export async function devWorkspace(src: string, dest: string, devOpts: DevOptions): Promise<any> {
   const loading = log.loading(`Starting workspace ${src}`, LogLevels.BUILD);
 
   const { apps } = await readWorkspace(src);
 
   log.info(`Found ${apps.length} apps\n`);
 
-  await devMulti(src, apps.map((app) => path.join(src, app)), devOpts);
+  await devMulti(src, apps.map((app) => path.join(src, app)), dest, devOpts);
 
   loading.finish(`Started workspace ${path.resolve(src)}`);
 }

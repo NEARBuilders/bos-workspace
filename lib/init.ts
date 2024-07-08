@@ -30,12 +30,12 @@ export async function initProject(pwd: string, template: string) {
   const dir = res.dir || path.join(pwd, slug);
   const templateDir = path.join(__dirname, '..', '..', 'templates')
   try {
-    await mvdir(path.join(templateDir, codebase), dir, { copy: true });
-    await mvdir(path.join(dir, "_gitignore"), path.join(dir, ".gitignore"));
+    await mvdir(path.resolve(templateDir, codebase), path.resolve(dir), { copy: true });
+    await mvdir(path.resolve(dir, "_gitignore"), path.resolve(dir, ".gitignore"));
 
-    await mvdir(path.join(dir, "_github"), path.join(dir, ".github"));
+    await mvdir(path.resolve(dir, "_github"), path.resolve(dir, ".github"));
 
-    const prefixPath = (p) => path.join(dir, p);
+    const prefixPath = (p) => path.resolve(dir, p);
 
     // await mvdir(
     //   path.join(dir, "/%ACCOUNT_ID%"),

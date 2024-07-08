@@ -23,16 +23,17 @@ async function run() {
     .command("dev")
     .description("Run the development server")
     .argument("[src]", "path to the app source code", ".")
+    .argument("[dest]", "destination path", "build")
     .option("-n, --network <network>", "network to build for", "mainnet")
     .option("-l, --loglevel <loglevel>", "log level (ERROR, WARN, INFO, DEV, BUILD, DEBUG)", "DEV")
     .option("-p, --port <port>", "Port to run the server on", "8080")
-    .option("-g, --gateway <gateway>", "Path to custom gateway dist", undefined)
-    .option("--no-gateway", "Disable the gateway", false)
-    .option("--no-hot", "Disable hot reloading", false)
-    .option("--no-open", "Disable opening the browser", false)
-    .action((src, opts) => {
+    .option("-g, --gateway <gateway>", "Path to custom gateway dist", true)
+    .option("--no-gateway", "Disable the gateway")
+    .option("--no-hot", "Disable hot reloading")
+    .option("--no-open", "Disable opening the browser")
+    .action((src, dest, opts) => {
       global.log = new Logger(LogLevel[opts.loglevel.toUpperCase() as keyof typeof LogLevel]);
-      dev(src, opts).catch((e: Error) => {
+      dev(src, dest, opts).catch((e: Error) => {
         log.error(e.stack || e.message);
       })
     });
@@ -42,11 +43,10 @@ async function run() {
     .command("build")
     .description("Build the project")
     .argument("[src]", "path to the app source code", ".")
-    .argument("[dest]", "destination path")
+    .argument("[dest]", "destination path", "build")
     .option("-n, --network <network>", "network to build for", "mainnet")
     .option("-l, --loglevel <loglevel>", "log level (ERROR, WARN, INFO, DEV, BUILD, DEBUG)", "BUILD")
     .action(async (src, dest, opts) => {
-      dest = dest || path.join(src, "dist")
       global.log = new Logger(LogLevel[opts.loglevel.toUpperCase() as keyof typeof LogLevel]);
       await buildApp(src, dest, opts.network).catch((e: Error) => {
         log.error(e.stack || e.message);
@@ -59,16 +59,15 @@ async function run() {
     .description("Work with multiple apps")
     .argument("[command]", "command to run")
     .argument("[src]", "path to the workspace", ".")
-    .argument("[dest]", "destination path")
+    .argument("[dest]", "destination path", "build")
     .option("-n, --network <network>", "network to build for", "mainnet")
     .option("-l, --loglevel <loglevel>", "log level (ERROR, WARN, INFO, DEV, BUILD, DEBUG)")
     .option("-p, --port <port>", "Port to run the server on", "8080")
-    .option("-g, --gateway <gateway>", "Path to custom gateway dist", undefined)
-    .option("--no-gateway", "Disable the gateway", false)
-    .option("--no-hot", "Disable hot reloading", false)
-    .option("--no-open", "Disable opening the browser", false)
+    .option("-g, --gateway <gateway>", "Path to custom gateway dist", true)
+    .option("--no-gateway", "Disable the gateway")
+    .option("--no-hot", "Disable hot reloading")
+    .option("--no-open", "Disable opening the browser")
     .action(async (command, src, dest, opts) => {
-      dest = dest || path.join(src, "dist")
       if (command === "build") {
         global.log = new Logger(LogLevel?.[opts?.loglevel?.toUpperCase() as keyof typeof LogLevel] || LogLevel.BUILD);
         await buildWorkspace(src, dest, opts.network).catch((e: Error) => {
@@ -76,7 +75,7 @@ async function run() {
         });
       } else if (command === "dev") {
         global.log = new Logger(LogLevel?.[opts?.loglevel?.toUpperCase() as keyof typeof LogLevel] || LogLevel.DEV);
-        await devWorkspace(src, opts).catch((e: Error) => {
+        await devWorkspace(src, dest, opts).catch((e: Error) => {
           log.error(e.stack || e.message);
         });
       } else {
@@ -105,15 +104,6 @@ async function run() {
       }
       dest = dest || account;
       cloneRepository(account, dest);
-    });
-
-  program
-    .command("pull")
-    .description("Pull updates from a SocialDB repository")
-    .argument("[account]", "accountId")
-    .action(async (account: string | undefined) => {
-      console.log("not yet supported");
-      // pullRepository(account);
     });
 
   program

@@ -25,3 +25,6 @@ dist/**/*
 
 # tests
 __app_example_1/
+
+*/temp/**/*
+**/data.json
