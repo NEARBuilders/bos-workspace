@@ -52,19 +52,71 @@ export async function fetchAndCacheContent(url) {
   return contentCache[url];
 }
 
-export function modifyIndexHtml(content: string, opts: DevOptions) {
+export async function modifyIndexHtml(content: string, opts: DevOptions, manifest: any) {
   const dom = new JSDOM(content);
   const document = dom.window.document;
 
-  const viewer = document.querySelector('near-social-viewer');
+  const loadedScripts = new Set();
 
-  if (viewer) {
-    viewer.setAttribute('src', opts.index);
-    viewer.setAttribute('rpc', `http://127.0.0.1:${opts.port}/api/proxy-rpc`);
-    viewer.setAttribute('network', opts.network);
-    if (opts.hot) {
-      viewer.setAttribute('enablehotreload', "");
-    }
+  function loadScript(src) {
+    return new Promise<void>((resolve, reject) => {
+      if (loadedScripts.has(src)) {
+        resolve();
+        return;
+      }
+      const script = document.createElement("script");
+      script.src = src;
+      script.onload = () => {
+        loadedScripts.add(src);
+        resolve();
+      };
+      script.onerror = reject;
+      document.head.appendChild(script);
+    });
+  }
+
+  const container = document.getElementById("bw-root");
+
+  let elementTag = "near-social-viewer";
+
+  let elementSrc = opts.gateway as string;
+  const url = elementSrc.replace(/\/$/, "");
+
+  try {
+    // Fetch and cache the manifest if not already cached
+    // manifest = await fetchAndCacheContent(`${url}/asset-manifest.json`);
+    // console.debug(`Received manifest: ${manifest}`);
+
+    const runtimeSrc = `${url}/${manifest.entrypoints[0]}`;
+    const mainSrc = `${url}/${manifest.entrypoints[1]}`;
+
+    await loadScript(runtimeSrc);
+    await loadScript(mainSrc);
+
+    const element = document.createElement(elementTag);
+    container.appendChild(element);
+    element.setAttribute("src", opts.index);
+    element.setAttribute("rpc", `http://127.0.0.1:${opts.port}/api/proxy-rpc`);
+    element.setAttribute("network", opts.network);
+
+    const config = {
+      dev: {
+        hotreload: {
+          enabled: opts.hot
+        }
+      },
+      vm: {
+        features: {
+          enableComponentSrcDataKey: true
+        }
+      }
+    };
+
+    element.setAttribute('config', JSON.stringify(config));
+  } catch (error) {
+    log.error(`Error fetching or processing manifest: ${error}`);
+    // Handle error appropriately, e.g., log or throw
+    throw error;
   }
 
   return dom.serialize();

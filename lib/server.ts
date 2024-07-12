@@ -3,19 +3,20 @@ import { fetchJson } from "@near-js/providers";
 import bodyParser from "body-parser";
 import { exec } from "child_process";
 import express, { Request, Response } from 'express';
-import { existsSync, readJson, writeJson } from "fs-extra";
+import { existsSync, readJson } from "fs-extra";
 import http from 'http';
 import path from "path";
-import { fetchAndCacheContent, handleReplacements, modifyIndexHtml } from './gateway';
+import { fetchAndCacheContent, modifyIndexHtml } from './gateway';
+import axios from 'axios';
 import { readFile } from "./utils/fs";
 
 // the gateway dist path in node_modules
 const GATEWAY_PATH = path.join(__dirname, "../..", "gateway", "dist");
 
-export const DEFAULT_GATEWAY_PATH = "https://ipfs.web4.near.page/ipfs/bafybeiancp5im5nfkdki3cfvo7ownl2knjovqh7bseegk4zvzsl4buryoi";
+export const DEFAULT_GATEWAY_PATH = "https://ipfs.web4.near.page/ipfs/bafybeiftqwg2qdfhjwuxt5cjvvsxflp6ghhwgz5db3i4tqipocvyzhn2bq";
 
 export const RPC_URL = {
-  mainnet: "https://rpc.mainnet.near.org",
+  mainnet: "https://free.rpc.fastnear.com",
   testnet: "https://rpc.testnet.near.org",
 };
 
@@ -205,33 +206,52 @@ export function createApp(devJsonPath: string, opts: DevOptions): Express.Applic
     /**
      * starts gateway from local path
      */
-    const setupLocalGateway = (gatewayPath: string) => {
-      if (!existsSync(path.join(gatewayPath, "index.html"))) {
-        log.error("Gateway not found. Skipping...");
-        opts.gateway = false;
-        return;
-      }
+    const setupLocalGateway = async (gatewayPath: string) => {
+      // if (!existsSync(path.join(gatewayPath, "/dist/index.html"))) {
+      //   log.error("Gateway not found. Skipping...");
+      //   opts.gateway = false;
+      //   return;
+      // }
 
-      app.use((req, res, next) => {
-        if (req.path !== "/") {
-          return express.static(gatewayPath)(req, res, next);
+      opts.gateway = gatewayPath;
+
+
+
+      app.use(async (req, res) => {
+        let manifest = { "entrypoints": ["runtime.690e8259ae304caef4f9.bundle.js", "main.c21c43cdd4b62c5173d8.bundle.js"] };
+
+        // try {
+        //   const response = await axios.get(`${gatewayPath}/asset-manifest.json`);
+        //   manifest = response.data;
+        //   log.debug(`Received manifest: ${JSON.stringify(manifest)}`);
+
+        // } catch (error) {
+        //   console.error("Error fetching asset manifest:", error);
+        // }
+
+        try { // forward requests to the web4 bundle
+          const filePath = req.path;
+          const ext = path.extname(filePath);
+          if (ext === '.js' || ext === '.css') {
+            gatewayPath += filePath;
+            const content = await fetchAndCacheContent(gatewayPath);
+            res.type(ext === '.js' ? 'application/javascript' : 'text/css');
+            res.send(content);
+          } else {
+            readFile(path.join(__dirname, "../../gateway/public", "index.html"), "utf8")
+              .then(async (data) => {
+                let modifiedDist = await modifyIndexHtml(data, opts, manifest);
+                res.type('text/html').send(modifiedDist);
+              })
+              .catch(err => {
+                log.error(err);
+                res.status(404).send("Something went wrong.");
+              });
+          }
+        } catch (error) {
+          log.error(`Error fetching content: ${error}`);
+          res.status(404).send('Not found');
         }
-        next();
-      });
-
-      app.get("*", (_, res) => {
-        readFile(path.join(gatewayPath, "index.html"), "utf8")
-          .then(data => {
-            let modifiedDist = modifyIndexHtml(data, opts);
-            if (gatewayPath === GATEWAY_PATH) {
-              modifiedDist = handleReplacements(modifiedDist, opts);
-            }
-            res.type('text/html').send(modifiedDist);
-          })
-          .catch(err => {
-            log.error(err);
-            res.status(404).send("Something went wrong.");
-          });
       });
     };
 
@@ -253,7 +273,7 @@ export function createApp(devJsonPath: string, opts: DevOptions): Express.Applic
           } else {
             fullUrl += "/index.html";
             let content = await fetchAndCacheContent(fullUrl);
-            content = modifyIndexHtml(content, opts);
+            content = modifyIndexHtml(content, opts, {});
             res.type('text/html').send(content);
           }
         } catch (error) {
@@ -265,12 +285,14 @@ export function createApp(devJsonPath: string, opts: DevOptions): Express.Applic
 
     if (typeof opts.gateway === "string") { // Gateway is a string, could be local path or remote url
       if (opts.gateway.startsWith("http")) { // remote url (web4)
-        setupRemoteGateway(opts.gateway);
+        const url = opts.gateway;
+
+        setupRemoteGateway(url.replace(/\/$/, ''));
       } else { // local path
         setupLocalGateway(path.resolve(opts.gateway));
       }
     } else { // Gateway is boolean, setup default gateway
-      setupRemoteGateway(DEFAULT_GATEWAY_PATH);
+      setupLocalGateway(DEFAULT_GATEWAY_PATH);
     }
     log.success("Gateway setup successfully.");
   }
