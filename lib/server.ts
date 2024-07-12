@@ -1,19 +1,36 @@
 import { DevJson, DevOptions, addApps } from '@/lib/dev';
 import { fetchJson } from "@near-js/providers";
+import axios from 'axios';
 import bodyParser from "body-parser";
 import { exec } from "child_process";
-import express, { Request, Response } from 'express';
-import { existsSync, readJson } from "fs-extra";
+import express, { NextFunction, Request, Response } from 'express';
+import { readJson } from "fs-extra";
 import http from 'http';
+import httpProxy from 'http-proxy';
+import * as https from 'https';
+import NodeCache from 'node-cache';
 import path from "path";
-import { fetchAndCacheContent, modifyIndexHtml } from './gateway';
-import axios from 'axios';
-import { readFile } from "./utils/fs";
+import { modifyIndexHtml } from './gateway';
+import * as fs from "./utils/fs";
 
-// the gateway dist path in node_modules
-const GATEWAY_PATH = path.join(__dirname, "../..", "gateway", "dist");
+const httpsAgent = new https.Agent({
+  secureProtocol: 'TLSv1_2_method'
+});
 
-export const DEFAULT_GATEWAY_PATH = "https://ipfs.web4.near.page/ipfs/bafybeiftqwg2qdfhjwuxt5cjvvsxflp6ghhwgz5db3i4tqipocvyzhn2bq";
+const proxy = httpProxy.createProxyServer({
+  secure: false,
+  changeOrigin: true,
+  logLevel: 'debug',
+});
+
+proxy.on('error', (err, req, res) => {
+  console.error('Proxy error:', err);
+  res.status(500).send('Proxy error');
+});
+
+
+export const DEFAULT_GATEWAY_URL = "https://ipfs.web4.near.page/ipfs/bafybeiftqwg2qdfhjwuxt5cjvvsxflp6ghhwgz5db3i4tqipocvyzhn2bq/";
+const cache = new NodeCache({ stdTTL: 600 });
 
 export const RPC_URL = {
   mainnet: "https://free.rpc.fastnear.com",
@@ -24,6 +41,9 @@ const SOCIAL_CONTRACT = {
   mainnet: "social.near",
   testnet: "v1.social08.testnet",
 }
+
+let modifiedHtml: string | null = null;
+let gatewayInitPromise: Promise<void> | null = null;
 
 /**
  * Starts the dev server
@@ -201,104 +221,139 @@ export function createApp(devJsonPath: string, opts: DevOptions): Express.Applic
    */
   app.all('/api/proxy-rpc', proxyMiddleware(RPC_URL[opts.network]));
 
-  if (opts.gateway) { // Gateway setup, may be string or boolean
+  if (opts.gateway) {
+    let gatewayUrl = typeof opts.gateway === 'string' ? opts.gateway : DEFAULT_GATEWAY_URL;
+    const isLocalPath = !gatewayUrl.startsWith('http');
+    gatewayUrl = gatewayUrl.replace(/\/$/, ''); // remove trailing slash
+    opts.gateway = gatewayUrl; // standardize to url string
 
-    /**
-     * starts gateway from local path
-     */
-    const setupLocalGateway = async (gatewayPath: string) => {
-      // if (!existsSync(path.join(gatewayPath, "/dist/index.html"))) {
-      //   log.error("Gateway not found. Skipping...");
-      //   opts.gateway = false;
-      //   return;
-      // }
+    initializeGateway(gatewayUrl, isLocalPath, opts, devJsonPath);
 
-      opts.gateway = gatewayPath;
-
-
-
-      app.use(async (req, res) => {
-        let manifest = { "entrypoints": ["runtime.690e8259ae304caef4f9.bundle.js", "main.c21c43cdd4b62c5173d8.bundle.js"] };
-
-        // try {
-        //   const response = await axios.get(`${gatewayPath}/asset-manifest.json`);
-        //   manifest = response.data;
-        //   log.debug(`Received manifest: ${JSON.stringify(manifest)}`);
-
-        // } catch (error) {
-        //   console.error("Error fetching asset manifest:", error);
-        // }
-
-        try { // forward requests to the web4 bundle
-          const filePath = req.path;
-          const ext = path.extname(filePath);
-          if (ext === '.js' || ext === '.css') {
-            gatewayPath += filePath;
-            const content = await fetchAndCacheContent(gatewayPath);
-            res.type(ext === '.js' ? 'application/javascript' : 'text/css');
-            res.send(content);
-          } else {
-            readFile(path.join(__dirname, "../../gateway/public", "index.html"), "utf8")
-              .then(async (data) => {
-                let modifiedDist = await modifyIndexHtml(data, opts, manifest);
-                res.type('text/html').send(modifiedDist);
-              })
-              .catch(err => {
-                log.error(err);
-                res.status(404).send("Something went wrong.");
-              });
-          }
+    // Middleware to ensure gateway is initialized before handling requests
+    app.use(async (req, res, next) => {
+      if (gatewayInitPromise) {
+        try {
+          await gatewayInitPromise;
         } catch (error) {
-          log.error(`Error fetching content: ${error}`);
-          res.status(404).send('Not found');
+          return next(error);
         }
-      });
-    };
-
-    /**
-     * starts gateway from remote url
-     */
-    const setupRemoteGateway = (url: string) => {
-      app.use(async (req, res) => {
-        try { // forward requests to the web4 bundle
-          const filePath = req.path;
-          const ext = path.extname(filePath);
-          let fullUrl = url.replace(/\/$/, ''); // remove trailing slash
-
-          if (ext === '.js' || ext === '.css') {
-            fullUrl += filePath;
-            const content = await fetchAndCacheContent(fullUrl);
-            res.type(ext === '.js' ? 'application/javascript' : 'text/css');
-            res.send(content);
-          } else {
-            fullUrl += "/index.html";
-            let content = await fetchAndCacheContent(fullUrl);
-            content = modifyIndexHtml(content, opts, {});
-            res.type('text/html').send(content);
-          }
-        } catch (error) {
-          log.error(`Error fetching content: ${error}`);
-          res.status(404).send('Not found');
-        }
-      });
-    };
-
-    if (typeof opts.gateway === "string") { // Gateway is a string, could be local path or remote url
-      if (opts.gateway.startsWith("http")) { // remote url (web4)
-        const url = opts.gateway;
-
-        setupRemoteGateway(url.replace(/\/$/, ''));
-      } else { // local path
-        setupLocalGateway(path.resolve(opts.gateway));
       }
-    } else { // Gateway is boolean, setup default gateway
-      setupLocalGateway(DEFAULT_GATEWAY_PATH);
-    }
+      next();
+    });
+
+    app.use(async (req, res, next) => {
+      try {
+        if (req.path === '/' || req.path === '/index.html') {
+          // Serve the modified HTML
+          res.type('text/html').send(modifiedHtml);
+        } else if (path.extname(req.path) === '.js' || path.extname(req.path) === '.css') {
+          // Proxy requests for JS and CSS files
+          log.debug(`Request for: ${req.path}`);
+
+          if (isLocalPath) {
+            try {
+              log.debug(`Gateway url: ${gatewayUrl}`);
+              log.debug(`Path: ${req.path}`);
+              log.debug(`Joining path: ${path.join(__dirname, gatewayUrl, req.path)}`);
+              log.debug(`Resolving path: ${path.resolve(__dirname, gatewayUrl, req.path)}`);
+              const fullUrl = path.join(__dirname, gatewayUrl, req.path);
+              log.debug(`Attempting to serve file from local path: ${fullUrl}`);
+              // Attempt to serve the file from the local path
+              await fs.promises.access(fullUrl);
+              res.sendFile(fullUrl);
+            } catch (err) {
+              if (err.code === 'ENOENT') {
+                // File not found, continue to next middleware
+                log.debug(`File not found: `);
+                next();
+              } else {
+                // Other error, handle it
+                next(err);
+              }
+            }
+          } else {
+            log.debug(`Proxying request to: ${gatewayUrl}${req.path}`);
+            // Proxy the request to the remote gateway
+            proxy.web(req, res, { target: `${gatewayUrl}${req.path}`, agent: httpsAgent });
+          }
+        } else {
+          // what about images?
+          next();
+        }
+      } catch (error) {
+        next(error);
+      }
+    });
+
+    // To handle client side routing
+    app.use('*', (req, res) => {
+      res.type('text/html').send(modifiedHtml);
+    });
+
     log.success("Gateway setup successfully.");
   }
 
+  // Error handling middleware
+  app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
+    log.error(`Error: ${err.message}`);
+    res.status(500).json({
+      error: 'Internal Server Error',
+      message: err.message
+    });
+  });
+
   return app;
 };
+
+function initializeGateway(gatewayUrl: string, isLocalPath: boolean, opts: DevOptions, devJsonPath: string) {
+  gatewayInitPromise = setupGateway(gatewayUrl, isLocalPath, opts, devJsonPath)
+    .then(() => {
+      log.success("Gateway initialized successfully.");
+    })
+    .catch((error) => {
+      log.error(`Failed to initialize gateway: ${error}`);
+      throw error;
+    });
+}
+
+async function setupGateway(gatewayUrl: string, isLocalPath: boolean, opts: DevOptions, devJsonPath: string) {
+  log.debug(`Setting up ${isLocalPath && "local "}gateway: ${gatewayUrl}`);
+
+  const manifestUrl = isLocalPath
+    ? path.join(gatewayUrl, "/asset-manifest.json")
+    : `${gatewayUrl}/asset-manifest.json`;
+
+  try {
+    log.debug(`Fetching manifest from: ${manifestUrl}`);
+    const manifest = await fetchManifest(manifestUrl);
+    log.debug(`Received manifest. Modifying HTML...`);
+    const htmlContent = await fs.readFile(path.join(__dirname, '../../public/index.html'), 'utf8');
+
+    const dependencies = manifest.entrypoints.map((entrypoint: string) => isLocalPath ? `${entrypoint}` : `${gatewayUrl}/${entrypoint}`);
+    modifiedHtml = modifyIndexHtml(htmlContent, opts, dependencies);
+    log.debug(`Modified index.html: ${modifiedHtml}`);
+    log.debug(`Modified HTML generated successfully`);
+  } catch (error) {
+    log.error(`Error setting up gateway: ${error}`);
+    throw error;
+  }
+}
+
+
+async function fetchManifest(url: string): Promise<any> {
+  try {
+    if (url.startsWith('http')) {
+      const response = await axios.get(url);
+      return response.data;
+    } else {
+      return JSON.parse(await fs.readFile(url, 'utf8'));
+    }
+  } catch (error) {
+    log.error(`Error fetching manifest from: ${url}`);
+    throw new Error('Failed to fetch manifest');
+  }
+}
+
 
 /**
  * Starts BosLoader Server and optionally opens gateway in browser
