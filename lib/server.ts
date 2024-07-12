@@ -13,7 +13,7 @@ import { readFile } from "./utils/fs";
 const GATEWAY_PATH = path.join(__dirname, "../..", "gateway", "dist");
 
 export const RPC_URL = {
-  mainnet: "https://rpc.mainnet.near.org",
+  mainnet: "https://free.rpc.fastnear.com",
   testnet: "https://rpc.testnet.near.org",
 };
 
