@@ -8,7 +8,6 @@ import { readJson } from "fs-extra";
 import http from 'http';
 import httpProxy from 'http-proxy';
 import * as https from 'https';
-import NodeCache from 'node-cache';
 import path from "path";
 import { modifyIndexHtml } from './gateway';
 import * as fs from "./utils/fs";
@@ -30,7 +29,6 @@ proxy.on('error', (err, req, res) => {
 
 
 export const DEFAULT_GATEWAY_URL = "https://ipfs.web4.near.page/ipfs/bafybeiftqwg2qdfhjwuxt5cjvvsxflp6ghhwgz5db3i4tqipocvyzhn2bq/";
-const cache = new NodeCache({ stdTTL: 600 });
 
 export const RPC_URL = {
   mainnet: "https://free.rpc.fastnear.com",
@@ -326,12 +324,12 @@ async function setupGateway(gatewayUrl: string, isLocalPath: boolean, opts: DevO
   try {
     log.debug(`Fetching manifest from: ${manifestUrl}`);
     const manifest = await fetchManifest(manifestUrl);
+
     log.debug(`Received manifest. Modifying HTML...`);
     const htmlContent = await fs.readFile(path.join(__dirname, '../../public/index.html'), 'utf8');
 
     const dependencies = manifest.entrypoints.map((entrypoint: string) => isLocalPath ? `${entrypoint}` : `${gatewayUrl}/${entrypoint}`);
     modifiedHtml = modifyIndexHtml(htmlContent, opts, dependencies);
-    log.debug(`Modified index.html: ${modifiedHtml}`);
     log.debug(`Modified HTML generated successfully`);
   } catch (error) {
     log.error(`Error setting up gateway: ${error}`);

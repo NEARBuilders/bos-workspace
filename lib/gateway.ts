@@ -2,7 +2,6 @@ import { DevOptions } from "./dev";
 
 import { JSDOM } from "jsdom";
 
-
 export function modifyIndexHtml(content: string, opts: DevOptions, dependencies: string[]) {
   const dom = new JSDOM(content);
   const document = dom.window.document;
@@ -10,7 +9,7 @@ export function modifyIndexHtml(content: string, opts: DevOptions, dependencies:
   // Add script tags for each dependency
   dependencies.forEach((dependency: string) => {
     const script = document.createElement('script');
-    script.src = dependency; 
+    script.src = dependency;
     script.defer = true;
     document.head.appendChild(script);
   });
