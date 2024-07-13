@@ -12,6 +12,37 @@ import path from "path";
 import { modifyIndexHtml } from './gateway';
 import * as fs from "./utils/fs";
 
+/**
+ * TESTS TO WRITE
+ * 
+ * should use default gateway path when not provided
+ * should use provided gateway path
+ * 
+ * should modify index.html
+ * should set src
+ * should set rpc
+ * should set network
+ * should set hot reload
+ * should set config
+ * 
+ * add playwright
+ * 
+ * should load gateway from path to local dist
+ * should load gateway from path to local dist with trailing slash
+ * should load assets from local dist
+ * 
+ * should load gateway from remote url
+ * should load gateway from remote url with trailing slash
+ * should load assets from remote url
+ * 
+ * 
+ * Pull in latest version of web component?
+ * 
+ * Next steps, maybe smallweb to handle the gateway
+ * a customizable RPC proxy tool would be nice (does that exist already?)
+ * 
+ */
+
 const httpsAgent = new https.Agent({
   secureProtocol: 'TLSv1_2_method'
 });
@@ -249,12 +280,9 @@ export function createApp(devJsonPath: string, opts: DevOptions): Express.Applic
           log.debug(`Request for: ${req.path}`);
 
           if (isLocalPath) {
+            const fullUrl = path.join(__dirname, gatewayUrl, req.path);
+            
             try {
-              log.debug(`Gateway url: ${gatewayUrl}`);
-              log.debug(`Path: ${req.path}`);
-              log.debug(`Joining path: ${path.join(__dirname, gatewayUrl, req.path)}`);
-              log.debug(`Resolving path: ${path.resolve(__dirname, gatewayUrl, req.path)}`);
-              const fullUrl = path.join(__dirname, gatewayUrl, req.path);
               log.debug(`Attempting to serve file from local path: ${fullUrl}`);
               // Attempt to serve the file from the local path
               await fs.promises.access(fullUrl);
@@ -262,7 +290,7 @@ export function createApp(devJsonPath: string, opts: DevOptions): Express.Applic
             } catch (err) {
               if (err.code === 'ENOENT') {
                 // File not found, continue to next middleware
-                log.debug(`File not found: `);
+                log.debug(`File not found: ${fullUrl}`);
                 next();
               } else {
                 // Other error, handle it
@@ -276,6 +304,7 @@ export function createApp(devJsonPath: string, opts: DevOptions): Express.Applic
           }
         } else {
           // what about images?
+          // Do we need to express static local bundle if it references images or other assets?
           next();
         }
       } catch (error) {
@@ -302,6 +331,7 @@ export function createApp(devJsonPath: string, opts: DevOptions): Express.Applic
 
   return app;
 };
+
 
 function initializeGateway(gatewayUrl: string, isLocalPath: boolean, opts: DevOptions, devJsonPath: string) {
   gatewayInitPromise = setupGateway(gatewayUrl, isLocalPath, opts, devJsonPath)
