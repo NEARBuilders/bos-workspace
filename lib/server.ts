@@ -12,37 +12,6 @@ import path from "path";
 import { modifyIndexHtml } from './gateway';
 import * as fs from "./utils/fs";
 
-/**
- * TESTS TO WRITE
- * 
- * should use default gateway path when not provided
- * should use provided gateway path
- * 
- * should modify index.html
- * should set src
- * should set rpc
- * should set network
- * should set hot reload
- * should set config
- * 
- * add playwright
- * 
- * should load gateway from path to local dist
- * should load gateway from path to local dist with trailing slash
- * should load assets from local dist
- * 
- * should load gateway from remote url
- * should load gateway from remote url with trailing slash
- * should load assets from remote url
- * 
- * 
- * Pull in latest version of web component?
- * 
- * Next steps, maybe smallweb to handle the gateway
- * a customizable RPC proxy tool would be nice (does that exist already?)
- * 
- */
-
 const httpsAgent = new https.Agent({
   secureProtocol: 'TLSv1_2_method'
 });
