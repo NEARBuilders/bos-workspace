@@ -110,6 +110,64 @@ export async function deployAppCode(src: string, dist: string, opts: DeployOptio
 export async function deployAppData(src: string, config: BaseConfig) {
 }
 
+// publish data.json to SocialDB
+export async function deployAppData(src: string, config: BaseConfig) {
+  if (!config.account) {
+    console.log(`App account is not defined for ${src}. Skipping data upload`);
+    return;
+  }
+
+  const exampleJSON = {
+    metadata: "this is test metadata",
+  };
+
+  const dataJSON = JSON.stringify(exampleJSON);
+
+  // const dataJSON = fs.readFileSync(
+  //   path.join(distFolder, appFolder, "data.json"),
+  //   "utf8"
+  // );
+
+  const args = { data: { [config.account]: JSON.parse(dataJSON) } };
+
+  const argsBase64 = Buffer.from(JSON.stringify(args)).toString("base64");
+
+  const command = [
+    "contract",
+    "call-function",
+    "as-transaction",
+    "social.near",
+    "set",
+    "base64-args",
+    `'${argsBase64}'`,
+    "prepaid-gas",
+    "'300.000 TeraGas'",
+    "attached-deposit",
+    "'0.001 NEAR'",
+    "sign-as",
+    config.account,
+    "network-config",
+    "mainnet",
+  ];
+
+  const deployProcess = spawn("npx", command, {
+    cwd: path.join(DEPLOY_DIST_FOLDER, src),
+    stdio: "inherit",
+  });
+
+  deployProcess.on("close", (code) => {
+    if (code === 0) {
+      console.log(`Uploaded data for ${src}`);
+    } else {
+      console.error(`Data upload failed with code ${code}`);
+    }
+  });
+
+  deployProcess.on("error", (err) => {
+    console.error(`Error uploading data for ${src}:\n${err.message}`);
+  });
+}
+
 export async function deploy(appName: string, opts: DeployOptions) {
     const src = '.';
 
