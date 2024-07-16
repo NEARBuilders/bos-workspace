@@ -11,6 +11,7 @@ import * as https from 'https';
 import path from "path";
 import { modifyIndexHtml } from './gateway';
 import * as fs from "./utils/fs";
+import { Social } from '@builddao/near-social-js';
 
 const httpsAgent = new https.Agent({
   secureProtocol: 'TLSv1_2_method'
@@ -323,12 +324,16 @@ async function setupGateway(gatewayUrl: string, isLocalPath: boolean, opts: DevO
   try {
     log.debug(`Fetching manifest from: ${manifestUrl}`);
     const manifest = await fetchManifest(manifestUrl);
+    let metadata = {};
+    if (opts.index) {
+      metadata = await getIndexMetadata(opts.index);
+    }
 
     log.debug(`Received manifest. Modifying HTML...`);
     const htmlContent = await fs.readFile(path.join(__dirname, '../../public/index.html'), 'utf8');
 
     const dependencies = manifest.entrypoints.map((entrypoint: string) => isLocalPath ? `${entrypoint}` : `${gatewayUrl}/${entrypoint}`);
-    modifiedHtml = modifyIndexHtml(htmlContent, opts, dependencies);
+    modifiedHtml = modifyIndexHtml(htmlContent, opts, dependencies, metadata);
     
     // log.debug(`Importing packages...`); <-- this used jpsm to create import map for wallet selector
     // modifiedHtml = await importPackages(modifiedHtml); // but didn't want it to run each time dev server started, so commented out
@@ -364,6 +369,18 @@ async function fetchManifest(url: string): Promise<any> {
     throw new Error('Failed to fetch manifest');
   }
 }
+
+async function getIndexMetadata(src: string): Promise<any> {
+  const { account, type, key } = src.split('/');
+  const social = new Social();
+  const result = await social.get({
+    keys: [
+      src,
+    ],
+    signer, // an initialized near-api-js account
+  });
+  return result[account][type][key]["metadata"];
+};
 
 
 /**

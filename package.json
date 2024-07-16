@@ -24,6 +24,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@builddao/near-social-js": "^1.0.1",
     "@near-js/providers": "^0.2.1",
     "@near-js/types": "^0.2.0",
     "axios": "^1.7.2",
