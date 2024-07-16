@@ -2,9 +2,54 @@ import { DevOptions } from "./dev";
 
 import { JSDOM } from "jsdom";
 
-export function modifyIndexHtml(content: string, opts: DevOptions, dependencies: string[]) {
+
+type IpfsCid = string;
+
+interface Image {
+  ipfs_cid: IpfsCid;
+}
+
+interface Linktree {
+  twitter?: string;
+  github?: string;
+  telegram?: string;
+  website?: string;
+  [key: string]: string | undefined; // For any additional social links
+}
+
+interface Tags {
+  [key: string]: string | undefined;
+}
+
+export interface Metadata {
+  name: string;
+  description: string;
+  image: Image;
+  backgroundImage: Image;
+  linktree: Linktree;
+  tags: Tags;
+}
+export function modifyIndexHtml(content: string, opts: DevOptions, dependencies: string[], metadata: Metadata) {
   const dom = new JSDOM(content);
   const document = dom.window.document;
+
+  // Metadata replacements
+  document.title = metadata.name;
+  document.querySelector('meta[name="description"]').setAttribute('content', metadata.description);
+  document.querySelector('meta[name="keywords"]').setAttribute('content', Object.keys(metadata.tags).join(', '));
+  document.querySelector('meta[name="author"]').setAttribute('content', metadata.name);
+
+  document.querySelector('meta[property="og:title"]').setAttribute('content', metadata.name);
+  document.querySelector('meta[property="og:description"]').setAttribute('content', metadata.description);
+  document.querySelector('meta[property="og:image"]').setAttribute('content', `https://ipfs.io/ipfs/${metadata.image.ipfs_cid}`);
+  document.querySelector('meta[property="og:site_name"]').setAttribute('content', metadata.name);
+
+  document.querySelector('meta[name="twitter:site"]').setAttribute('content', `@${metadata.linktree.twitter || ''}`);
+  document.querySelector('meta[name="twitter:title"]').setAttribute('content', metadata.name);
+  document.querySelector('meta[name="twitter:description"]').setAttribute('content', metadata.description);
+  document.querySelector('meta[name="twitter:image"]').setAttribute('content', `https://ipfs.io/ipfs/${metadata.image.ipfs_cid}`);
+
+  document.querySelector('link[rel="icon"]').setAttribute('href', `https://ipfs.io/ipfs/${metadata.image.ipfs_cid}`);
 
   // Add script tags for each dependency
   dependencies.forEach((dependency: string) => {
