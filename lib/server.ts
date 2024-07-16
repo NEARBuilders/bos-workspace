@@ -28,10 +28,10 @@ proxy.on('error', (err, req, res) => {
 });
 
 
-export const DEFAULT_GATEWAY_URL = "https://ipfs.web4.near.page/ipfs/bafybeiftqwg2qdfhjwuxt5cjvvsxflp6ghhwgz5db3i4tqipocvyzhn2bq/";
+export const DEFAULT_GATEWAY_URL = "https://ipfs.web4.near.page/ipfs/bafybeibe63hqugbqr4writdxgezgl5swgujay6t5uptw2px7q63r7crk2q/";
 
 export const RPC_URL = {
-  mainnet: "https://free.rpc.fastnear.com",
+  mainnet: "https://rpc.mainnet.near.org",
   testnet: "https://rpc.testnet.near.org",
 };
 
@@ -168,7 +168,7 @@ export function createApp(devJsonPath: string, opts: DevOptions): Express.Applic
         // Make a request to the target rpc
         json = await fetchJson(proxyUrl, JSON.stringify(req.body));
 
-        log.debug(`RPC Response: ${json}`);
+        log.debug(`RPC Response: ${JSON.stringify(json)}`);
       } catch (err) {
         log.error(err.stack || err.message);
         return res.status(500).send('Proxy request failed');
@@ -250,7 +250,7 @@ export function createApp(devJsonPath: string, opts: DevOptions): Express.Applic
 
           if (isLocalPath) {
             const fullUrl = path.join(__dirname, gatewayUrl, req.path);
-            
+
             try {
               log.debug(`Attempting to serve file from local path: ${fullUrl}`);
               // Attempt to serve the file from the local path
@@ -314,7 +314,7 @@ function initializeGateway(gatewayUrl: string, isLocalPath: boolean, opts: DevOp
 }
 
 async function setupGateway(gatewayUrl: string, isLocalPath: boolean, opts: DevOptions, devJsonPath: string) {
-  log.debug(`Setting up ${isLocalPath && "local "}gateway: ${gatewayUrl}`);
+  log.debug(`Setting up ${isLocalPath ? "local " : ""}gateway: ${gatewayUrl}`);
 
   const manifestUrl = isLocalPath
     ? path.join(gatewayUrl, "/asset-manifest.json")
@@ -329,6 +329,9 @@ async function setupGateway(gatewayUrl: string, isLocalPath: boolean, opts: DevO
 
     const dependencies = manifest.entrypoints.map((entrypoint: string) => isLocalPath ? `${entrypoint}` : `${gatewayUrl}/${entrypoint}`);
     modifiedHtml = modifyIndexHtml(htmlContent, opts, dependencies);
+
+    // log.debug(`Importing packages...`);
+    // modifiedHtml = await importPackages(modifiedHtml);
     log.debug(`Modified HTML generated successfully`);
   } catch (error) {
     log.error(`Error setting up gateway: ${error}`);
