@@ -8,17 +8,15 @@
   },
   "scripts": {
     "build": "tsc && tsc-alias",
-    "build:gateway": "cd ./gateway && yarn install && yarn run build",
     "dev": "watch 'yarn run build' lib",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
-    "prepublishOnly": "yarn run build && yarn run build:gateway"
+    "prepublishOnly": "yarn run build"
   },
   "files": [
     "dist",
     "bin",
-    "gateway/dist/*",
     "templates"
   ],
   "keywords": [],
