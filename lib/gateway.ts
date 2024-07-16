@@ -50,6 +50,7 @@ export function modifyIndexHtml(content: string, opts: DevOptions, dependencies:
 
   // Import wallets and setup selector
   const webcomponentapp = document.createElement('script');
+  // We could configure wallets from bos.config.json
   webcomponentapp.textContent = `
   import { setupWalletSelector } from "@near-wallet-selector/core";
   import { setupMyNearWallet } from "@near-wallet-selector/my-near-wallet";
