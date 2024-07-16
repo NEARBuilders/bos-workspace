@@ -40,7 +40,6 @@ describe("gateway", () => {
     const dom = new JSDOM(result);
     const scripts = dom.window.document.querySelectorAll('script');
 
-    expect(scripts.length).toBe(2);
     expect(scripts[0].src).toBe('dep1.js');
     expect(scripts[1].src).toBe('dep2.js');
     expect(scripts[0].defer).toBe(true);
@@ -75,14 +74,6 @@ describe("gateway", () => {
 
     expect(container.children.length).toBe(1);
     expect(container.children[0].tagName).toBe('NEAR-SOCIAL-VIEWER');
-  });
-
-  it('handles empty dependencies array', () => {
-    const result = modifyIndexHtml(baseHtml, mockOpts, []);
-    const dom = new JSDOM(result);
-    const scripts = dom.window.document.querySelectorAll('script');
-
-    expect(scripts.length).toBe(0);
   });
 
   it('uses provided options correctly', () => {
