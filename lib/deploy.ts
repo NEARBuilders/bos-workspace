@@ -45,7 +45,7 @@ export async function deployAppCode(src: string, dist: string, opts: DeployOptio
 
     const deploying = log.loading(`[${fullSrc}] Deploying app`, LogLevels.BUILD);
 		
-		// build
+		// Build
     await buildApp(src, dist, opts.network);
 
     // Translate for bos cli
@@ -153,8 +153,6 @@ export async function deployAppData(src: string, account: string, opts: DeployOp
   ];
 
 	if (BOS_SIGNER_PUBLIC_KEY && BOS_SIGNER_PRIVATE_KEY) command = command.concat(automaticSignIn)
-
-  // { "data": { "bbface.near": { "widget": { "test": { "": "return <p>hello world</p>;", "metadata": { "name": "test" } } } } } }
 
   const deployProcess = spawn("npx", command, {
     cwd: path.join(src, DEPLOY_DIST_FOLDER),

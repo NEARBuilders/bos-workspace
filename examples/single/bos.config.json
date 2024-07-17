@@ -1,7 +1,7 @@
 {
-  "account": "bbface.near",
+  "account": "quickstart.near",
   "aliases": ["./aliases.mainnet.json"],
-  "index": "bbface.near/widget/home",
+  "index": "quickstart.near/widget/home",
   "overrides": {
     "testnet": {
       "account": "quickstart.testnet",
