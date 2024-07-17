@@ -262,10 +262,10 @@ Commands:
   dev [options] [src] [dest]                     Run the development server
   build [options] [src] [dest]                   Build the project
   workspace|ws [options] [command] [src] [dest]  Work with multiple apps
-  init [options] [path]                          Initialize a new project
+  init [options]                                 Initialize a new project
   clone [account] [dest]                         Clone a SocialDB repository
   deploy [options] [appName]                     Deploy the project
-  upload [string]                                Upload data to SocialDB (not implemented)
+  upload [options] [string] [string]             Upload data to SocialDB
   help [command]                                 display help for command
 ```
 
