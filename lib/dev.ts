@@ -25,7 +25,6 @@ export type DevOptions = {
   network?: Network; // network to use
   gateway?: string | boolean; // path to custom gateway dist, or false to disable
   index?: string; // widget to use as index
-  output?: string; // output directory
 };
 
 /**
@@ -55,7 +54,6 @@ export async function dev(src: string, dest: string, opts: DevOptions) {
   appDevJsons = [devJson];
   appDevJsonPath = devJsonPath;
   appDevOptions = opts;
-  opts.output = "public";
   const server = startDevServer(appSrcs, appDists, appDevJsonPath, appDevOptions);
 
   // Start the socket server if hot reload is enabled
@@ -110,7 +108,6 @@ export async function devMulti(root: string, srcs: string[], dest: string, opts:
   // Start the dev server
   appDevJsonPath = devJsonPath;
   appDevOptions = opts;
-  opts.output = "public";
   const server = startDevServer(appSrcs, appDists, appDevJsonPath, appDevOptions);
 
   // Start the socket server if hot reload is enabled
