@@ -2,7 +2,6 @@ import { buildApp } from "@/lib/build";
 import { initProject } from "@/lib/init";
 import { LogLevel, Logger } from "@/lib/logger";
 import { Command } from "commander";
-import path from "path";
 import { dev } from "./dev";
 import { cloneRepository } from "./repository";
 import { buildWorkspace, devWorkspace } from "./workspace";
