@@ -333,17 +333,17 @@ async function setupGateway(gatewayUrl: string, isLocalPath: boolean, opts: DevO
     // log.debug(`Importing packages...`); <-- this used jpsm to create import map for wallet selector
     // modifiedHtml = await importPackages(modifiedHtml); // but didn't want it to run each time dev server started, so commented out
 
-    // Write the modified HTML to the output path
-    const outputDir = path.join(opts.output);
-    const outputPath = path.join(outputDir, 'index.html');
+    // // Write the modified HTML to the output path
+    // const outputDir = path.join(opts.output);
+    // const outputPath = path.join(outputDir, 'index.html');
 
-    // Make sure the directory exists
-    await fs.promises.mkdir(outputDir, { recursive: true });
+    // // Make sure the directory exists
+    // await fs.promises.mkdir(outputDir, { recursive: true });
 
-    // Write modified html
-    await fs.promises.writeFile(outputPath, modifiedHtml);
+    // // Write modified html
+    // await fs.promises.writeFile(outputPath, modifiedHtml);
     
-    log.debug(`Modified HTML written to: ${outputPath}`);
+    // log.debug(`Modified HTML written to: ${outputPath}`);
   } catch (error) {
     log.error(`Error setting up gateway: ${error}`);
     throw error;
