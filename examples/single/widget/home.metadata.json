@@ -1,0 +1,15 @@
+{
+  "name": "GuestBook",
+  "description": "Shows data stored on your social-db",
+  "linktree": {
+    "website": ""
+  },
+  "image": {
+    "ipfs_cid": "bafkreiaruxhw4y6wafy2khiqsjnteh6gtwuhg3op4isbtuwtg3d55y6pty"
+  },
+  "tags": {
+    "app": "",
+    "explorer": "",
+    "everything": ""
+  }
+}

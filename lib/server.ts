@@ -35,7 +35,7 @@ export const RPC_URL = {
   testnet: "https://rpc.testnet.near.org",
 };
 
-const SOCIAL_CONTRACT = {
+export const SOCIAL_CONTRACT = {
   mainnet: "social.near",
   testnet: "v1.social08.testnet",
 }
