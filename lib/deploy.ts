@@ -7,6 +7,7 @@ import { readConfig } from "@/lib/config";
 import { Network } from "@/lib/types";
 import { move, pathExists, readdir, remove } from "@/lib/utils/fs";
 import { readWorkspace } from "@/lib/workspace";
+import { SOCIAL_CONTRACT } from './server';
 
 const DEPLOY_DIST_FOLDER = "build";
 
@@ -138,7 +139,7 @@ export async function deployAppData(src: string, account: string, opts: DeployOp
     "contract",
     "call-function",
     "as-transaction",
-    "social.near",
+		opts.network === "mainnet" ? SOCIAL_CONTRACT.mainnet : SOCIAL_CONTRACT.testnet,
     "set",
     "base64-args",
     `${argsBase64}`,
@@ -149,7 +150,7 @@ export async function deployAppData(src: string, account: string, opts: DeployOp
     "sign-as",
     account,
     "network-config",
-    "mainnet",
+		opts.network,
   ];
 
 	if (BOS_SIGNER_PUBLIC_KEY && BOS_SIGNER_PRIVATE_KEY) command = command.concat(automaticSignIn)
