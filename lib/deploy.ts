@@ -108,17 +108,17 @@ export async function deployAppCode(src: string, dist: string, opts: DeployOptio
     });
 }
 
-export async function deployAppData(src: string, opts: DeployOptions) {
-	const config = await readConfig(path.join(src, "bos.config.json"), opts.network);
-  const BOS_DEPLOY_ACCOUNT_ID = config.accounts.deploy || opts.deployAccountId || config.account;
+export async function deployAppData(appName: string, opts: DeployOptions) {
+	const config = await readConfig(path.join(appName, "bos.config.json"), opts.network);
+	const BOS_SIGNER_ACCOUNT_ID = config.accounts.signer || opts.signerAccountId || config.account;
 
-  if (!BOS_DEPLOY_ACCOUNT_ID) {
-    console.log(`App account is not defined for ${src}. Skipping data upload`);
+  if (!BOS_SIGNER_ACCOUNT_ID) {
+    console.log(`App account is not defined for ${appName}. Skipping data upload`);
     return;
   }
 
   const dataJSON = fs.readFileSync(
-    path.join(src, DEPLOY_DIST_FOLDER, "data.json"),
+    path.join(appName, DEPLOY_DIST_FOLDER, "data.json"),
     "utf8"
   );
 
@@ -151,7 +151,7 @@ export async function deployAppData(src: string, opts: DeployOptions) {
     "attached-deposit",
     "0.15 NEAR", // deposit
     "sign-as",
-    BOS_DEPLOY_ACCOUNT_ID,
+    BOS_SIGNER_ACCOUNT_ID,
     "network-config",
 		opts.network,
   ];
@@ -159,20 +159,20 @@ export async function deployAppData(src: string, opts: DeployOptions) {
 	if (BOS_SIGNER_PUBLIC_KEY && BOS_SIGNER_PRIVATE_KEY) command = command.concat(automaticSignIn)
 
   const deployProcess = spawn("npx", command, {
-    cwd: path.join(src, DEPLOY_DIST_FOLDER),
+    cwd: path.join(appName, DEPLOY_DIST_FOLDER),
     stdio: "inherit",
   });
 
   deployProcess.on("close", (code) => {
     if (code === 0) {
-      console.log(`Uploaded data for ${src}`);
+      console.log(`Uploaded data for ${appName}`);
     } else {
       console.error(`Data upload failed with code ${code}`);
     }
   });
 
   deployProcess.on("error", (err) => {
-    console.error(`Error uploading data for ${src}:\n${err.message}`);
+    console.error(`Error uploading data for ${appName}:\n${err.message}`);
   });
 }
 
