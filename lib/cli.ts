@@ -126,18 +126,19 @@ async function run() {
     .command("upload")
     .description("Upload data to SocialDB")
     .argument("[string]", "app path")
-    .argument("[string]", "account")
     .option("-n, --network <network>", "network to deploy to", "mainnet")
 		.option("--signerPublicKey <string>", "Signer public key")
   	.option("--signerPrivateKey <string>", "Signer private key")
+  	.option("--deployAccountId <string>", "Deploy account id")
     .action(async (src, account, options) => {
 			const deployOptions: DeployOptions = {
 				signerPublicKey: options.signerPublicKey,
 				signerPrivateKey: options.signerPrivateKey,
 				network: options.network,
+				deployAccountId: options.deployAccountId,
 			};
 
-			await deployAppData(src, account, deployOptions ).catch((e: Error) => {
+			await deployAppData(src, deployOptions ).catch((e: Error) => {
 				log.error(e.stack || e.message);
 			})
     });

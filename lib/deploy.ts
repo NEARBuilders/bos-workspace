@@ -108,8 +108,11 @@ export async function deployAppCode(src: string, dist: string, opts: DeployOptio
     });
 }
 
-export async function deployAppData(src: string, account: string, opts: DeployOptions) {
-  if (!account) {
+export async function deployAppData(src: string, opts: DeployOptions) {
+	const config = await readConfig(path.join(src, "bos.config.json"), opts.network);
+  const BOS_DEPLOY_ACCOUNT_ID = config.accounts.deploy || opts.deployAccountId || config.account;
+
+  if (!BOS_DEPLOY_ACCOUNT_ID) {
     console.log(`App account is not defined for ${src}. Skipping data upload`);
     return;
   }
@@ -148,7 +151,7 @@ export async function deployAppData(src: string, account: string, opts: DeployOp
     "attached-deposit",
     "0.15 NEAR", // deposit
     "sign-as",
-    account,
+    BOS_DEPLOY_ACCOUNT_ID,
     "network-config",
 		opts.network,
   ];
@@ -209,4 +212,5 @@ export async function deploy(appName: string, opts: DeployOptions) {
   findingApp.finish(`Found ${appName} in the workspace`);
 
   await deployAppCode(appSrc, path.join(DEPLOY_DIST_FOLDER, appSrc), opts);
+	await deployAppData(appSrc, opts);
 }
