@@ -6,7 +6,7 @@ import path from "path";
 import { dev } from "./dev";
 import { cloneRepository } from "./repository";
 import { buildWorkspace, devWorkspace } from "./workspace";
-import { deploy } from "./deploy";
+import { deploy, deployAppData, DeployOptions } from "./deploy";
 
 const program = new Command();
 
@@ -125,10 +125,20 @@ async function run() {
 
   program
     .command("upload")
-    .description("Upload data to SocialDB (not implemented)")
-    .argument("[string]", "app name")
-    .action((appName) => {
-      console.log("not yet supported");
+    .description("Upload data to SocialDB")
+    .argument("[string]", "app path")
+    .argument("[string]", "account")
+		.option("--signerPublicKey <string>", "Signer public key")
+  	.option("--signerPrivateKey <string>", "Signer private key")
+    .action(async (src, account, options) => {
+			const deployOptions: DeployOptions = {
+				signerPublicKey: options.signerPublicKey,
+				signerPrivateKey: options.signerPrivateKey,
+			};
+
+			await deployAppData(src, account, deployOptions ).catch((e: Error) => {
+				log.error(e.stack || e.message);
+			})
     });
 
   program.parse();

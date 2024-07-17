@@ -1,8 +1,9 @@
 import { spawn } from 'child_process';
 import path from "path";
+import fs from "fs";
 
 import { buildApp } from "@/lib/build";
-import { BaseConfig, readConfig } from "@/lib/config";
+import { readConfig } from "@/lib/config";
 import { Network } from "@/lib/types";
 import { move, pathExists, readdir, remove } from "@/lib/utils/fs";
 import { readWorkspace } from "@/lib/workspace";
@@ -43,8 +44,8 @@ export async function deployAppCode(src: string, dist: string, opts: DeployOptio
     const fullDist = path.resolve(dist);
 
     const deploying = log.loading(`[${fullSrc}] Deploying app`, LogLevels.BUILD);
-
-    // Build
+		
+		// build
     await buildApp(src, dist, opts.network);
 
     // Translate for bos cli
@@ -106,52 +107,57 @@ export async function deployAppCode(src: string, dist: string, opts: DeployOptio
     });
 }
 
-// publish data.json to SocialDB
-export async function deployAppData(src: string, config: BaseConfig) {
-}
-
-// publish data.json to SocialDB
-export async function deployAppData(src: string, config: BaseConfig) {
-  if (!config.account) {
+export async function deployAppData(src: string, account: string, opts: DeployOptions) {
+  if (!account) {
     console.log(`App account is not defined for ${src}. Skipping data upload`);
     return;
   }
 
-  const exampleJSON = {
-    metadata: "this is test metadata",
-  };
+  const dataJSON = fs.readFileSync(
+    path.join(src, DEPLOY_DIST_FOLDER, "data.json"),
+    "utf8"
+  );
 
-  const dataJSON = JSON.stringify(exampleJSON);
-
-  // const dataJSON = fs.readFileSync(
-  //   path.join(distFolder, appFolder, "data.json"),
-  //   "utf8"
-  // );
-
-  const args = { data: { [config.account]: JSON.parse(dataJSON) } };
-
+  const args = { data: JSON.parse(dataJSON) };
   const argsBase64 = Buffer.from(JSON.stringify(args)).toString("base64");
+  
+  const BOS_SIGNER_PUBLIC_KEY = opts?.signerPublicKey;
+  const BOS_SIGNER_PRIVATE_KEY = opts?.signerPrivateKey;
 
-  const command = [
+	const automaticSignIn = [
+		"sign-with-plaintext-private-key",
+		"--signer-public-key", 
+		BOS_SIGNER_PUBLIC_KEY,
+		"--signer-private-key",
+		BOS_SIGNER_PRIVATE_KEY,
+		"send"
+	]
+
+  let command = [
+    "near-cli-rs",
     "contract",
     "call-function",
     "as-transaction",
     "social.near",
     "set",
     "base64-args",
-    `'${argsBase64}'`,
+    `${argsBase64}`,
     "prepaid-gas",
-    "'300.000 TeraGas'",
+    "300 TeraGas",
     "attached-deposit",
-    "'0.001 NEAR'",
+    "0.15 NEAR", // deposit
     "sign-as",
-    config.account,
+    account,
     "network-config",
     "mainnet",
   ];
 
+	if (BOS_SIGNER_PUBLIC_KEY && BOS_SIGNER_PRIVATE_KEY) command = command.concat(automaticSignIn)
+
+  // { "data": { "bbface.near": { "widget": { "test": { "": "return <p>hello world</p>;", "metadata": { "name": "test" } } } } } }
+
   const deployProcess = spawn("npx", command, {
-    cwd: path.join(DEPLOY_DIST_FOLDER, src),
+    cwd: path.join(src, DEPLOY_DIST_FOLDER),
     stdio: "inherit",
   });
 
@@ -169,34 +175,39 @@ export async function deployAppData(src: string, config: BaseConfig) {
 }
 
 export async function deploy(appName: string, opts: DeployOptions) {
-    const src = '.';
+  const src = ".";
 
-    // Deploy single project
-    if (!appName) {
-        if (await pathExists(path.join(src, "bos.config.json"))) {  // Check if the directory has bos.config.json file
-            await deployAppCode(src, path.join(src, DEPLOY_DIST_FOLDER), opts);
-            return;
-        } else {    // Check if the directory has bos.workspace.json file
-            if (await pathExists(path.join(src, "bos.workspace.json"))) {
-                log.error(`Please provide app name`);
-                return;
-            }
-        }
-
-        log.error(`[${src}] bos.config.json file is not existing in the project`);
+  // Deploy single project
+  if (!appName) {
+    if (await pathExists(path.join(src, "bos.config.json"))) {
+      // Check if the directory has bos.config.json file
+      await deployAppCode(src, path.join(src, DEPLOY_DIST_FOLDER), opts);
+      return;
+    } else {
+      // Check if the directory has bos.workspace.json file
+      if (await pathExists(path.join(src, "bos.workspace.json"))) {
+        log.error(`Please provide app name`);
         return;
+      }
     }
 
-    // Deploy workspace app
-    const { apps } = await readWorkspace(src);
+    log.error(`[${src}] bos.config.json file is not existing in the project`);
+    return;
+  }
 
-    const findingApp = log.loading(`Finding ${appName} in the workspace`, LogLevels.BUILD);
-    const appSrc = apps.find((app) => app.includes(appName));
-    if (!appSrc) {
-        findingApp.error(`Not found ${appName} in the workspace`);
-        return;
-    }
-    findingApp.finish(`Found ${appName} in the workspace`);
+  // Deploy workspace app
+  const { apps } = await readWorkspace(src);
 
-    await deployAppCode(appSrc, path.join(DEPLOY_DIST_FOLDER, appSrc), opts);
+  const findingApp = log.loading(
+    `Finding ${appName} in the workspace`,
+    LogLevels.BUILD
+  );
+  const appSrc = apps.find((app) => app.includes(appName));
+  if (!appSrc) {
+    findingApp.error(`Not found ${appName} in the workspace`);
+    return;
+  }
+  findingApp.finish(`Found ${appName} in the workspace`);
+
+  await deployAppCode(appSrc, path.join(DEPLOY_DIST_FOLDER, appSrc), opts);
 }
