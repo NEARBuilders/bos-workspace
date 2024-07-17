@@ -291,7 +291,7 @@ bw deploy [app name] --deploy-account-id [deployAccountId] --signer-account-id [
 
 * `--signer-public-key <signerPublicKey>` (Optional): Public key for signing transactions in the format: `ed25519:<public_key>`. Will default to interactive [near-cli-rs](https://github.com/near/near-cli-rs) if not provided.
 
-* `--signer-private-key <signerPrivateKey>` (Optional): Private key for signing transactions in the format: `ed25519:<private_key>`. Will default to interactive [near-cli-rs](https://github.com/near/near-cli-rs) if not provided.
+* `--signer-private-key <signerPrivateKey>` (Optional): Private key in `ed25519:<private_key>` format for signing transactions. Will default to interactive [near-cli-rs](https://github.com/near/near-cli-rs) if not provided.
 
 * `-n, --network <network>` (Optional): Network to deploy for (default: "mainnet").
 

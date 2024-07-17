@@ -1,20 +1,9 @@
-import { JSDOM } from 'jsdom';
 import { DevOptions } from '@/lib/dev';
-import { modifyIndexHtml } from '@/lib/gateway';
+import { handleReplacements, modifyIndexHtml } from '@/lib/gateway';
 import { Logger, LogLevel } from "@/lib/logger";
 import { Network } from '@/lib/types';
 
 const unmockedLog = global.log;
-
-const baseHtml = `
-    <!DOCTYPE html>
-    <html>
-      <head></head>
-      <body>
-        <div id="bw-root"></div>
-      </body>
-    </html>
-  `;
 
 describe("gateway", () => {
 
@@ -34,64 +23,43 @@ describe("gateway", () => {
     index: "test/widget/index"
   };
 
-  it('adds script tags for dependencies', () => {
-    const dependencies = ['dep1.js', 'dep2.js'];
-    const result = modifyIndexHtml(baseHtml, mockOpts, dependencies);
-    const dom = new JSDOM(result);
-    const scripts = dom.window.document.querySelectorAll('script');
+  // Test replacement of environment configuration
+  it("should replace the ENV_CONFIG placeholder with correct JSON configuration", () => {
+    const htmlInput = "<html><head>%ENV_CONFIG%</head><body></body></html>";
+    const expectedConfig = JSON.stringify({
+      enableHotReload: mockOpts.hot,
+      network: mockOpts.network,
+    });
+    const expectedHtmlOutput = `<html><head>${expectedConfig}</head><body></body></html>`;
 
-    expect(scripts[0].src).toBe('dep1.js');
-    expect(scripts[1].src).toBe('dep2.js');
-    expect(scripts[0].defer).toBe(true);
-    expect(scripts[1].defer).toBe(true);
+    const result = handleReplacements(htmlInput, mockOpts);
+    expect(result).toBe(expectedHtmlOutput);
   });
 
-  it('creates and configures near-social-viewer element', () => {
-    const result = modifyIndexHtml(baseHtml, mockOpts, []);
-    const dom = new JSDOM(result);
-    const viewer = dom.window.document.querySelector('near-social-viewer');
+  // Test replacement of the near-social-viewer component with an RPC attribute
+  it("should replace <near-social-viewer></near-social-viewer> with near-social-viewer having an RPC attribute", () => {
+    const htmlInput = "<html><head></head><body><near-social-viewer></near-social-viewer></body></html>";
+    const expectedHtmlOutput = `<html><head></head><body><near-social-viewer src="${mockOpts.index}" rpc="http://127.0.0.1:${mockOpts.port}/api/proxy-rpc" network="${mockOpts.network}"></near-social-viewer></body></html>`;
 
-    expect(viewer).not.toBeNull();
-    expect(viewer.getAttribute('src')).toBe(mockOpts.index);
-    expect(viewer.getAttribute('rpc')).toBe(`http://127.0.0.1:${mockOpts.port}/api/proxy-rpc`);
-    expect(viewer.getAttribute('network')).toBe(mockOpts.network);
+    const result = modifyIndexHtml(htmlInput, mockOpts);
+    expect(result).toBe(expectedHtmlOutput);
   });
 
-  it('sets correct config attribute on near-social-viewer', () => {
-    const result = modifyIndexHtml(baseHtml, mockOpts, []);
-    const dom = new JSDOM(result);
-    const viewer = dom.window.document.querySelector('near-social-viewer');
+  it("should replace <near-social-viewer></near-social-viewer> with hotreload attribute if enabled", () => {
+    mockOpts.hot = true;
+    const htmlInput = "<html><head></head><body><near-social-viewer></near-social-viewer></body></html>";
+    const expectedHtmlOutput = `<html><head></head><body><near-social-viewer src="${mockOpts.index}" rpc="http://127.0.0.1:${mockOpts.port}/api/proxy-rpc" network="${mockOpts.network}" enablehotreload=""></near-social-viewer></body></html>`;
 
-    const config = JSON.parse(viewer.getAttribute('config'));
-    expect(config.dev.hotreload.enabled).toBe(false);
-    expect(config.vm.features.enableComponentSrcDataKey).toBe(true);
+    const result = modifyIndexHtml(htmlInput, mockOpts);
+    expect(result).toBe(expectedHtmlOutput);
   });
 
-  it('appends near-social-viewer to the container', () => {
-    const result = modifyIndexHtml(baseHtml, mockOpts, []);
-    const dom = new JSDOM(result);
-    const container = dom.window.document.getElementById('bw-root');
+  it("should not replace <near-social-viewer></near-social-viewer> with hotreload attribute if disabled", () => {
+    mockOpts.hot = false;
+    const htmlInput = "<html><head></head><body><near-social-viewer></near-social-viewer></body></html>";
+    const expectedHtmlOutput = `<html><head></head><body><near-social-viewer src="${mockOpts.index}" rpc="http://127.0.0.1:${mockOpts.port}/api/proxy-rpc" network="${mockOpts.network}"></near-social-viewer></body></html>`;
 
-    expect(container.children.length).toBe(1);
-    expect(container.children[0].tagName).toBe('NEAR-SOCIAL-VIEWER');
-  });
-
-  it('uses provided options correctly', () => {
-    const customOpts = {
-      index: 'test.near/widget/index',
-      port: 4000,
-      network: 'mainnet' as Network,
-      hot: false
-    };
-    const result = modifyIndexHtml(baseHtml, customOpts, []);
-    const dom = new JSDOM(result);
-    const viewer = dom.window.document.querySelector('near-social-viewer');
-
-    expect(viewer.getAttribute('src')).toBe(customOpts.index);
-    expect(viewer.getAttribute('rpc')).toBe(`http://127.0.0.1:${customOpts.port}/api/proxy-rpc`);
-    expect(viewer.getAttribute('network')).toBe(customOpts.network);
-
-    const config = JSON.parse(viewer.getAttribute('config'));
-    expect(config.dev.hotreload.enabled).toBe(false);
+    const result = modifyIndexHtml(htmlInput, mockOpts);
+    expect(result).toBe(expectedHtmlOutput);
   });
 });

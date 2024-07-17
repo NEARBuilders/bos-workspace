@@ -1,11 +1,11 @@
 import { buildApp } from "@/lib/build";
 import { initProject } from "@/lib/init";
-import { LogLevel, Logger } from "@/lib/logger";
+import { Logger, LogLevel } from "@/lib/logger";
 import { Command } from "commander";
+import { deploy, deployAppData, DeployOptions } from "./deploy";
 import { dev } from "./dev";
 import { cloneRepository } from "./repository";
 import { buildWorkspace, devWorkspace } from "./workspace";
-import { deploy, deployAppData, DeployOptions } from "./deploy";
 
 const program = new Command();
 
@@ -127,20 +127,20 @@ async function run() {
     .description("Upload data to SocialDB")
     .argument("[appName]", "Workspace app name to deploy")
     .option("-n, --network <network>", "network to deploy to", "mainnet")
-		.option("--signerPublicKey <string>", "Signer public key")
-  	.option("--signerPrivateKey <string>", "Signer private key")
-  	.option("--deployAccountId <string>", "Deploy account id")
+    .option("--signerPublicKey <string>", "Signer public key")
+    .option("--signerPrivateKey <string>", "Signer private key")
+    .option("--deployAccountId <string>", "Deploy account id")
     .action(async (appName, options) => {
-			const deployOptions: DeployOptions = {
-				signerPublicKey: options.signerPublicKey,
-				signerPrivateKey: options.signerPrivateKey,
-				network: options.network,
-				deployAccountId: options.deployAccountId,
-			};
+      const deployOptions: DeployOptions = {
+        signerPublicKey: options.signerPublicKey,
+        signerPrivateKey: options.signerPrivateKey,
+        network: options.network,
+        deployAccountId: options.deployAccountId,
+      };
 
-			await deployAppData(appName, deployOptions ).catch((e: Error) => {
-				log.error(e.stack || e.message);
-			})
+      await deployAppData(appName, deployOptions).catch((e: Error) => {
+        log.error(e.stack || e.message);
+      })
     });
 
   program.parse();
