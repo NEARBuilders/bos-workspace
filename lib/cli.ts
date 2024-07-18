@@ -5,7 +5,6 @@ import { Command } from "commander";
 import { deploy, deployAppData, DeployOptions } from "./deploy";
 import { dev } from "./dev";
 import { cloneRepository } from "./repository";
-import { buildWorkspace, devWorkspace } from "./workspace";
 
 const program = new Command();
 
@@ -20,8 +19,8 @@ async function run() {
 
   program
     .command("dev")
-    .description("Run the development server")
-    .argument("[src]", "path to the app source code", ".")
+    .description("Run the development server for a single app or workspace")
+    .argument("[src]", "path to the app source code or workspace root", ".")
     .argument("[dest]", "destination path", "build")
     .option("-n, --network <network>", "network to build for", "mainnet")
     .option("-l, --loglevel <loglevel>", "log level (ERROR, WARN, INFO, DEV, BUILD, DEBUG)", "DEV")
@@ -34,7 +33,7 @@ async function run() {
       global.log = new Logger(LogLevel[opts.loglevel.toUpperCase() as keyof typeof LogLevel]);
       dev(src, dest, opts).catch((e: Error) => {
         log.error(e.stack || e.message);
-      })
+      });
     });
 
 
@@ -50,36 +49,6 @@ async function run() {
       await buildApp(src, dest, opts.network).catch((e: Error) => {
         log.error(e.stack || e.message);
       })
-    });
-
-  program
-    .command("workspace")
-    .alias("ws")
-    .description("Work with multiple apps")
-    .argument("[command]", "command to run")
-    .argument("[src]", "path to the workspace", ".")
-    .argument("[dest]", "destination path", "build")
-    .option("-n, --network <network>", "network to build for", "mainnet")
-    .option("-l, --loglevel <loglevel>", "log level (ERROR, WARN, INFO, DEV, BUILD, DEBUG)")
-    .option("-p, --port <port>", "Port to run the server on", "8080")
-    .option("-g, --gateway <gateway>", "Path to custom gateway dist", true)
-    .option("--no-gateway", "Disable the gateway")
-    .option("--no-hot", "Disable hot reloading")
-    .option("--no-open", "Disable opening the browser")
-    .action(async (command, src, dest, opts) => {
-      if (command === "build") {
-        global.log = new Logger(LogLevel?.[opts?.loglevel?.toUpperCase() as keyof typeof LogLevel] || LogLevel.BUILD);
-        await buildWorkspace(src, dest, opts.network).catch((e: Error) => {
-          log.error(e.stack || e.message);
-        });
-      } else if (command === "dev") {
-        global.log = new Logger(LogLevel?.[opts?.loglevel?.toUpperCase() as keyof typeof LogLevel] || LogLevel.DEV);
-        await devWorkspace(src, dest, opts).catch((e: Error) => {
-          log.error(e.stack || e.message);
-        });
-      } else {
-        log.error(`Unknown command: workspace ${command}`);
-      }
     });
 
   program

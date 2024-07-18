@@ -1,4 +1,4 @@
-import { DevJson, DevOptions, addApps } from '@/lib/dev';
+import { DevJson, DevOptions, generateApp } from '@/lib/dev';
 import { fetchJson } from "@near-js/providers";
 import bodyParser from "body-parser";
 import { exec } from "child_process";
@@ -8,9 +8,15 @@ import http from 'http';
 import path from "path";
 import { fetchAndCacheContent, handleReplacements, modifyIndexHtml } from './gateway';
 import { readFile } from "./utils/fs";
+import { startSocket } from './socket';
+import { Server as IoServer } from "socket.io";
+import { loadConfig } from './config';
+import { mergeDeep } from './utils/objects';
+import { addWatchPaths } from './watcher';
 
 // the gateway dist path in node_modules
 const GATEWAY_PATH = path.join(__dirname, "../..", "gateway", "dist");
+let runningServer: http.Server | null = null;
 
 export const RPC_URL = {
   mainnet: "https://free.rpc.fastnear.com",
@@ -22,51 +28,49 @@ export const SOCIAL_CONTRACT = {
   testnet: "v1.social08.testnet",
 }
 
-/**
- * Starts the dev server
- * @param devJsonPath path to json redirect map
- * @param opts DevOptions
- * @returns http server
- */
+export let io: null | IoServer = null;
+
 export function startDevServer(srcs: string[], dists: string[], devJsonPath: string, opts: DevOptions): http.Server {
+  if (runningServer) {
+    // If a server is already running, add the new sources and return the existing server
+    addSourcesToRunningServer(srcs, dists, devJsonPath, opts);
+    return runningServer;
+  }
+
   const app = createApp(devJsonPath, opts);
   const server = http.createServer(app);
-  startServer(server, opts, () => {
-    const postData = JSON.stringify({ srcs: srcs.map((src) => path.resolve(src)), dists: dists.map((dist) => path.resolve(dist)) });
-    const options = {
-      hostname: '127.0.0.1',
-      port: opts.port,
-      path: `/api/apps`,
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Content-Length': Buffer.byteLength(postData),
-      },
-    };
 
-    log.info(`Adding workspace to already existing dev server...`);
-    const req = http.request(options, (res) => {
-      res.setEncoding('utf8');
-      let data = '';
-
-      res.on('data', (chunk) => {
-        data += chunk;
-      });
-
-      res.on('end', () => {
-        log.info(`${data}`);
-      });
+  if (opts.hot) {
+    io = startSocket(server, (io: IoServer) => {
+      readJson(devJsonPath).then((devJson: DevJson) => {
+        io?.emit("fileChange", devJson);
+      })
+        .catch((err: Error) => {
+          log.error(err.stack || err.message);
+        })
     });
+  }
 
-    req.on('error', (e) => {
-      log.error(`problem with request: ${e.message}`);
-    });
-
-    // Write data to request body
-    req.write(postData);
-    req.end();
-  });
+  startServer(server, opts);
+  runningServer = server;
   return server;
+}
+
+function addSourcesToRunningServer(newSrcs: string[], newDists: string[], devJsonPath: string, opts: DevOptions) {
+  readJson(devJsonPath).then(async (devJson: DevJson) => {
+    for (let i = 0; i < newSrcs.length; i++) {
+      const newDevJson = await generateApp(newSrcs[i], newDists[i], await loadConfig(newSrcs[i], opts.network), opts);
+      devJson = mergeDeep(devJson, newDevJson) as DevJson;
+    }
+    await writeJson(devJsonPath, devJson);
+    if (io) {
+      io.emit("fileChange", devJson);
+    }
+    addWatchPaths(newSrcs);
+    log.info(`Added ${newSrcs.length} new source(s) to the running server.`);
+  }).catch((err: Error) => {
+    log.error(`Failed to add new sources: ${err.stack || err.message}`);
+  });
 }
 
 /**
@@ -114,27 +118,6 @@ export function createApp(devJsonPath: string, opts: DevOptions): Express.Applic
         log.error(err.stack || err.message);
         return res.status(500).send("Error reading redirect map.");
       })
-  });
-
-  /**
-   * Adds the loader json
-   */
-  app.post("/api/apps", (req, res) => {
-    const srcs = req.body.srcs;
-    const dists = req.body.dists;
-    if (srcs.length != dists.length) {
-      log.info("Number of apps don't match. Aborting.");
-      return res.status(500).send("Error adding apps to dev server.");
-    }
-
-    log.info(`adding ${srcs} to watch list...`);
-    addApps(srcs, dists).then(() => {
-      log.info("New apps added successfully.");
-      res.status(200).send("New apps added successfully.");
-    }).catch((err: Error) => {
-      log.error(err.stack || err.message);
-      return res.status(500).send("Error adding apps to dev server.");
-    });
   });
 
   function proxyMiddleware(proxyUrl: string) {
@@ -274,7 +257,7 @@ export function createApp(devJsonPath: string, opts: DevOptions): Express.Applic
  * @param server http server
  * @param opts DevOptions
  */
-export function startServer(server, opts, sendAddApps) {
+export function startServer(server, opts) {
   server.listen(opts.port, "127.0.0.1", () => {
     if (opts.gateway && opts.open) {
       // open gateway in browser
@@ -316,7 +299,6 @@ export function startServer(server, opts, sendAddApps) {
     .on("error", async (err: any) => {
       if (err.code === "EADDRINUSE") {
         log.warn(err.message);
-        sendAddApps();
       } else {
         log.error(err.message);
         process.exit(1);
