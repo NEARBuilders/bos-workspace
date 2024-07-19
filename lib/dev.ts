@@ -1,13 +1,13 @@
-import { writeJson } from "fs-extra";
 import path from "path";
-import { buildApp } from "./build";
-import { BaseConfig, loadConfig } from "./config";
-import { io, startDevServer } from "./server";
-import { Network } from "./types";
-import { loopThroughFiles, readFile } from "./utils/fs";
-import { mergeDeep, substractDeep } from "./utils/objects";
-import { getWatchPaths, startFileWatcher } from "./watcher";
-import { isWorkspaceProject, readWorkspace } from "./workspace";
+import { buildApp } from "@/lib/build";
+import { BaseConfig, loadConfig } from "@/lib/config";
+import { io, startDevServer } from "@/lib/server";
+import { Network } from "@/lib/types";
+import { loopThroughFiles, readFile, writeJson } from "@/lib/utils/fs";
+import { mergeDeep, substractDeep } from "@/lib/utils/objects";
+import { getWatchPaths, startFileWatcher } from "@/lib/watcher";
+import { isWorkspaceProject, readWorkspace } from "@/lib/workspace";
+import { notifyClientsOfChange } from "@/lib/socket";
 
 export type DevOptions = {
   port?: number; // port to run dev server
@@ -23,14 +23,14 @@ export async function dev(src: string, dest: string, opts: DevOptions) {
 
   if (isWorkspace) {
     log.debug("Running dev for workspace");
-    return devWorkspace(src, dest, opts);
+    devWorkspace(src, dest, opts);
   } else {
     log.debug("Running dev for app");
-    return devApp(src, dest, opts);
+    devApp(src, dest, opts);
   }
 }
 
-async function devApp(src: string, dest: string, opts: DevOptions) {
+export async function devApp(src: string, dest: string, opts: DevOptions) {
   src = path.resolve(src);
   const dist = path.join(src, dest);
   const devJsonPath = path.join(dist, "bos-loader.json");
@@ -41,7 +41,7 @@ async function devApp(src: string, dest: string, opts: DevOptions) {
   await writeJson(devJsonPath, devJson);
 
   // Start the dev server
-  const server = startDevServer([src], [dist], devJsonPath, opts);
+  startDevServer([src], [dist], devJsonPath, opts);
 
   // Watch for changes and rebuild
   const watchPaths = getWatchPaths(src);
@@ -63,11 +63,9 @@ async function devApp(src: string, dest: string, opts: DevOptions) {
     // Notify clients of the change
     notifyClientsOfChange(io, devJson);
   });
-
-  return server;
 }
 
-async function devWorkspace(root: string, dest: string, opts: DevOptions) {
+export async function devWorkspace(root: string, dest: string, opts: DevOptions) {
   const { apps } = await readWorkspace(root);
   const srcs = apps.map(app => path.resolve(root, app));
   const dists = apps.map(app => path.join(dest, path.relative(root, app)));
@@ -85,8 +83,7 @@ async function devWorkspace(root: string, dest: string, opts: DevOptions) {
   await writeJson(devJsonPath, devJson);
 
   // Start the dev server
-  const server = startDevServer(srcs, dists, devJsonPath, opts);
-  log.debug(`Srcs: ${srcs}`);
+  startDevServer(srcs, dists, devJsonPath, opts);
 
   // Watch for changes in all apps
   const watchPaths = srcs.flatMap(app => getWatchPaths(path.relative(root, app)));
@@ -117,17 +114,10 @@ async function devWorkspace(root: string, dest: string, opts: DevOptions) {
     await writeJson(devJsonPath, devJson);
 
     // Notify clients of the change
-    notifyClientsOfChange(io, devJson);
+    notifyClientsOfChange(io, devJson as DevJson);
   });
-
-  return server;
 }
 
-function notifyClientsOfChange(io, devJson) {
-  if (io) {
-    io.emit("fileChange", devJson);
-  }
-}
 
 export async function generateApp(src: string, appDist: string, config: BaseConfig, opts: DevOptions): Promise<DevJson> {
   await buildApp(src, appDist, opts.network);
@@ -147,9 +137,9 @@ export interface DevJson {
  * @param config bos.config.json
  * @returns 
  */
-async function generateDevJson(src: string, config: BaseConfig): Promise<DevJson> {
+export async function generateDevJson(src: string, config: BaseConfig): Promise<DevJson> {
   let devJson: DevJson = { components: {}, data: {} };
-  let devAccount = config.accounts?.dev || config.account || "dev-1234";
+  let devAccount: string = config.accounts?.dev || config.account;
 
   // for each js and jsx in src/widget
   await loopThroughFiles(path.join(src, "src", "widget"), async (file: string) => {

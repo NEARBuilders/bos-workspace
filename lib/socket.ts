@@ -1,5 +1,6 @@
 import http from "http";
 import { Server as IoServer } from "socket.io";
+import { DevJson } from "./dev";
 
 /**
  * Starts web socket server
@@ -28,4 +29,10 @@ export function startSocket(server: http.Server, callback: (io: IoServer) => voi
   });
 
   return io;
+}
+
+export function notifyClientsOfChange(io: IoServer, devJson: DevJson) {
+  if (io) {
+    io.emit("fileChange", devJson);
+  }
 }

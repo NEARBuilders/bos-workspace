@@ -31,7 +31,7 @@ interface AppConfig extends BaseConfig {
   overrides?: NetworkConfig;
 }
 
-export const DEFAULT_CONFIG = {
+export const DEFAULT_CONFIG: BaseConfig = {
   account: "bos.workspace",
   format: true,
   ipfs: {
