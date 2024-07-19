@@ -245,6 +245,19 @@ It is easy to build and distribute a custom gateway using the [near-bos-webcompo
 
 The bos-workspace dev server is specially configured with the near-bos-webcomponent to automatically set the `rpc` attribute with the [proxy-rpc](#proxy-rpc).
 
+## Deploying to Web4
+
+If you specify an `index` in your bos.config.json, then bos-workspace will display your widgets through the latest version of [near-bos-webcomponent](https://github.com/nearbuilders/near-bos-webcomponent), or the gateway provided via the `-g` flag.
+
+This involves some html manipulation in order to set the web component's attributes. The html that is created can be found in the designated destination (defaults to `/build`). This html can be used to easily deploy your site with widgets to [web4](https://github.com/vgrichina/web4).
+
+1. Be sure to have deployed a web4 smart contract, such as the [web4-min-contract](https://github.com/vgrichina/web4-min-contract)
+2. Move the output index.html to your `/public` or `/dist` if not using a bundler.
+3. [TEMP] Remove the rpc and config attributes from `near-social-viewer` element.
+4. Run [web4 deploy](https://github.com/vgrichina/web4-deploy) with src being the directory that holds this index.html and the account you have a contract deployed to.
+
+**This is a rough first draft of the implementation and will be improved upon.**
+
 ## Commands
 
 You can run `bw` or `bos-workspace` to see the list of commands.

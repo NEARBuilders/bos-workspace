@@ -1,15 +1,14 @@
-import { readJson, writeJson } from "fs-extra";
 import { Gaze } from "gaze";
 import path from "path";
 import { Server as IoServer } from "socket.io";
-import { buildApp } from "./build";
-import { BaseConfig, loadConfig } from "./config";
-import { startDevServer } from "./server";
-import { startSocket } from "./socket";
-import { Network } from "./types";
-import { loopThroughFiles, readFile } from "./utils/fs";
-import { mergeDeep, substractDeep } from "./utils/objects";
-import { startFileWatcher } from "./watcher";
+import { buildApp } from "@/lib/build";
+import { BaseConfig, loadConfig } from "@/lib/config";
+import { startDevServer } from "@/lib/server";
+import { startSocket } from "@/lib/socket";
+import { Network } from "@/lib/types";
+import { loopThroughFiles, readFile, readJson, writeJson } from "@/lib/utils/fs";
+import { mergeDeep, substractDeep } from "@/lib/utils/objects";
+import { startFileWatcher } from "@/lib/watcher";
 
 var appSrcs = [], appDists = [];
 var appDevJsons = [];
@@ -25,6 +24,7 @@ export type DevOptions = {
   network?: Network; // network to use
   gateway?: string | boolean; // path to custom gateway dist, or false to disable
   index?: string; // widget to use as index
+  output?: string; // output directory
 };
 
 /**
@@ -53,6 +53,7 @@ export async function dev(src: string, dest: string, opts: DevOptions) {
   appDists = [dist];
   appDevJsons = [devJson];
   appDevJsonPath = devJsonPath;
+  opts.output = dist;
   appDevOptions = opts;
   const server = startDevServer(appSrcs, appDists, appDevJsonPath, appDevOptions);
 
