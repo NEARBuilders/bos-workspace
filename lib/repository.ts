@@ -1,5 +1,5 @@
 import { AccountID, Log } from "@/lib/types";
-import { DEFAULT_CONFIG, readConfig } from "./config";
+import { DEFAULT_CONFIG, readConfig } from "@/lib/config";
 import fs, { existsSync, outputFile, writeFile } from "fs-extra";
 import path from "path";
 import { SHA256 } from "crypto-js";
