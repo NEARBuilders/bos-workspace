@@ -24,6 +24,7 @@ export type DevOptions = {
   network?: Network; // network to use
   gateway?: string | boolean; // path to custom gateway dist, or false to disable
   index?: string; // widget to use as index
+  output?: string; // output directory
 };
 
 /**
@@ -52,6 +53,7 @@ export async function dev(src: string, dest: string, opts: DevOptions) {
   appDists = [dist];
   appDevJsons = [devJson];
   appDevJsonPath = devJsonPath;
+  opts.output = dist;
   appDevOptions = opts;
   const server = startDevServer(appSrcs, appDists, appDevJsonPath, appDevOptions);
 
