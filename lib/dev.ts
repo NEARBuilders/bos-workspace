@@ -1,3 +1,4 @@
+import { FSWatcher } from "chokidar";
 import path from "path";
 import { Server as IoServer } from "socket.io";
 import { buildApp } from "@/lib/build";
@@ -8,7 +9,6 @@ import { Network } from "@/lib/types";
 import { loopThroughFiles, readFile, readJson, writeJson } from "@/lib/utils/fs";
 import { mergeDeep, substractDeep } from "@/lib/utils/objects";
 import { startFileWatcher } from "@/lib/watcher";
-import { FSWatcher } from "chokidar";
 
 var appSrcs = [], appDists = [];
 var appDevJsons = [];

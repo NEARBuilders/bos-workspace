@@ -78,16 +78,13 @@ describe("dev", () => {
   it("should call startFileWatcher with correct watch paths", async () => {
     await dev(mockSrc, "build", mockOpts);
     const expectedWatchPaths = [
-      path.join(mockSrc, "widget", "**", "*"),
-      path.join(mockSrc, "module", "**", "*"),
-      path.join(mockSrc, "ipfs", "**", "*"),
-      path.join(mockSrc, "bos.config.json"),
-      path.join(mockSrc, "aliases.json"),
+      path.join(mockSrc, 'widget', '**', '*'),
+      path.join(mockSrc, 'module', '**', '*'),
+      path.join(mockSrc, 'ipfs', '**', '*'),
+      path.join(mockSrc, 'bos.config.json'),
+      path.join(mockSrc, 'aliases.json'),
     ];
-    expect(startFileWatcher).toHaveBeenCalledWith(
-      expectedWatchPaths,
-      expect.any(Function)
-    );
+    expect(startFileWatcher).toHaveBeenCalledWith(expectedWatchPaths, expect.any(Function));
   });
 
   it("should add correct watch paths after adding apps", async () => {
@@ -106,15 +103,15 @@ describe("dev", () => {
 
     const mockSrc2 = "/app_example_2";
     vol.fromJSON(app_example_2, mockSrc2);
-    const mockDist2 = path.join(mockSrc2, "build");
+    const mockDist2 = path.join(mockSrc2, 'build');
     await addApps([mockSrc2], [mockDist2]);
 
     const expectedWatchPaths = [
-      path.join(mockSrc2, "widget", "**", "*"),
-      path.join(mockSrc2, "module", "**", "*"),
-      path.join(mockSrc2, "ipfs", "**", "*"),
-      path.join(mockSrc2, "bos.config.json"),
-      path.join(mockSrc2, "aliases.json"),
+      path.join(mockSrc2, 'widget', '**', '*'),
+      path.join(mockSrc2, 'module', '**', '*'),
+      path.join(mockSrc2, 'ipfs', '**', '*'),
+      path.join(mockSrc2, 'bos.config.json'),
+      path.join(mockSrc2, 'aliases.json'),
     ];
     expect(mockAdd).toHaveBeenCalledWith(expectedWatchPaths);
   });
