@@ -8,7 +8,7 @@ import { startFileWatcher } from "@/lib/watcher";
 import http from "http";
 import path from "path";
 import { Server as IoServer } from "socket.io";
-import { Gaze } from "gaze";
+import chokidar from "chokidar";
 
 import { vol } from 'memfs';
 jest.mock('fs', () => require('memfs').fs);
@@ -43,7 +43,6 @@ describe("dev", () => {
     (loadConfig as jest.MockedFunction<typeof loadConfig>).mockResolvedValue(mockConfig);
     (startDevServer as jest.MockedFunction<typeof startDevServer>).mockReturnValue({} as http.Server);
     (startSocket as jest.MockedFunction<typeof startSocket>).mockReturnValue(new IoServer());
-    (startFileWatcher as jest.MockedFunction<typeof startFileWatcher>).mockReturnValue(new Gaze(mockSrc));
     (buildApp as jest.MockedFunction<typeof buildApp>).mockReturnValue({} as Promise<any>);
   });
 
@@ -79,33 +78,44 @@ describe("dev", () => {
   it("should call startFileWatcher with correct watch paths", async () => {
     await dev(mockSrc, "build", mockOpts);
     const expectedWatchPaths = [
-      path.join(mockSrc, 'widget', '**', '*'),
-      path.join(mockSrc, 'module', '**', '*'),
-      path.join(mockSrc, 'ipfs', '**', '*'),
-      path.join(mockSrc, 'bos.config.json'),
-      path.join(mockSrc, 'aliases.json'),
+      path.join(mockSrc, "widget", "**", "*"),
+      path.join(mockSrc, "module", "**", "*"),
+      path.join(mockSrc, "ipfs", "**", "*"),
+      path.join(mockSrc, "bos.config.json"),
+      path.join(mockSrc, "aliases.json"),
     ];
-    expect(startFileWatcher).toHaveBeenCalledWith(expectedWatchPaths, expect.any(Function));
+    expect(startFileWatcher).toHaveBeenCalledWith(
+      expectedWatchPaths,
+      expect.any(Function)
+    );
   });
 
   it("should add correct watch paths after adding apps", async () => {
-    const mockedGazeAdd = jest.spyOn(Gaze.prototype, 'add');
-    
+		const mockAdd = jest.fn();
+		const mockWatch = jest.fn().mockReturnValue({
+			add: mockAdd,
+		});
+		(chokidar.watch as jest.Mock) = mockWatch;
+
+		(startFileWatcher as jest.MockedFunction<typeof startFileWatcher>).mockReturnValue(
+			mockWatch([], {}) as chokidar.FSWatcher
+		);
+
     const mockOpts: DevOptions = { hot: false };
     await dev(mockSrc, "build", mockOpts);
 
     const mockSrc2 = "/app_example_2";
     vol.fromJSON(app_example_2, mockSrc2);
-    const mockDist2 = path.join(mockSrc2, 'build');
+    const mockDist2 = path.join(mockSrc2, "build");
     await addApps([mockSrc2], [mockDist2]);
 
     const expectedWatchPaths = [
-      path.join(mockSrc2, 'widget', '**', '*'),
-      path.join(mockSrc2, 'module', '**', '*'),
-      path.join(mockSrc2, 'ipfs', '**', '*'),
-      path.join(mockSrc2, 'bos.config.json'),
-      path.join(mockSrc2, 'aliases.json'),
+      path.join(mockSrc2, "widget", "**", "*"),
+      path.join(mockSrc2, "module", "**", "*"),
+      path.join(mockSrc2, "ipfs", "**", "*"),
+      path.join(mockSrc2, "bos.config.json"),
+      path.join(mockSrc2, "aliases.json"),
     ];
-    expect(mockedGazeAdd).toHaveBeenCalledWith(expectedWatchPaths);
+    expect(mockAdd).toHaveBeenCalledWith(expectedWatchPaths);
   });
 });

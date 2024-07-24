@@ -1,4 +1,3 @@
-import { Gaze } from "gaze";
 import path from "path";
 import { Server as IoServer } from "socket.io";
 import { buildApp } from "@/lib/build";
@@ -9,13 +8,14 @@ import { Network } from "@/lib/types";
 import { loopThroughFiles, readFile, readJson, writeJson } from "@/lib/utils/fs";
 import { mergeDeep, substractDeep } from "@/lib/utils/objects";
 import { startFileWatcher } from "@/lib/watcher";
+import { FSWatcher } from "chokidar";
 
 var appSrcs = [], appDists = [];
 var appDevJsons = [];
 var appDevJsonPath = "bos-loader.json";
 var appDevOptions: null | DevOptions = null;
 let io: null | IoServer = null;
-let fileWatcher: null | Gaze = null;
+let fileWatcher: null | FSWatcher = null;
 
 export type DevOptions = {
   port?: number; // port to run dev server

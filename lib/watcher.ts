@@ -1,10 +1,16 @@
-import { Gaze } from "gaze";
+import chokidar, { FSWatcher } from "chokidar";
 
-export function startFileWatcher(watchPaths: string[], callback: Function): Gaze {
-  const gaze = new Gaze(watchPaths, { debounceDelay: 100 });
+export function startFileWatcher(watchPaths: string[], callback: Function): FSWatcher {
+  const watcher = chokidar.watch(watchPaths, {
+    ignoreInitial: true,
+    awaitWriteFinish: {
+      stabilityThreshold: 100,
+      pollInterval: 100
+    }
+  });
 
-  // @ts-ignore
-  gaze.on("all", callback);
-
-  return gaze;
+  watcher.on('all', (event, path) => {
+		callback();
+	});
+  return watcher;
 }
