@@ -1,3 +1,4 @@
+import path from "path"
 import chokidar, { FSWatcher } from "chokidar";
 
 export function startFileWatcher(watchPaths: string[], callback: Function): FSWatcher {
@@ -9,8 +10,9 @@ export function startFileWatcher(watchPaths: string[], callback: Function): FSWa
     }
   });
 
-  watcher.on('all', (event, path) => {
-		callback();
+  watcher.on('all', (event, relativePath) => {
+		const absolutePath = path.resolve(relativePath)
+		callback(event, absolutePath);
 	});
   return watcher;
 }
