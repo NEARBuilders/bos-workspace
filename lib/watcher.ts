@@ -14,5 +14,6 @@ export function startFileWatcher(watchPaths: string[], callback: Function): FSWa
 		const absolutePath = path.resolve(relativePath)
 		callback(event, absolutePath);
 	});
+
   return watcher;
 }
