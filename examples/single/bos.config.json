@@ -8,5 +8,6 @@
       "aliases": ["./aliases.testnet.json"],
       "index": "quickstart.testnet/widget/home"
     }
-  }
+  },
+	"gateway": "http://"
 }

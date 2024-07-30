@@ -20,6 +20,7 @@ export interface BaseConfig {
   index?: string; // widget to use as index
   aliasPrefix?: string; // prefix to use for aliases, default is "alias"
   aliasesContainsPrefix?: boolean; // aliases keys contains prefix (default is false)
+	gateway?: string // gateway url
 }
 
 interface NetworkConfig {
@@ -62,6 +63,7 @@ const baseConfigSchema = Joi.object({
   aliasPrefix: Joi.string().allow(null),
   aliasesContainsPrefix: Joi.boolean().allow(null),
   index: Joi.string().allow(null),
+	gateway: Joi.string().allow(null),
 });
 
 const networkConfigSchema = Joi.object({

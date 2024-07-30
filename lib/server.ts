@@ -224,6 +224,13 @@ export function createApp(devJsonPath: string, opts: DevOptions): Express.Applic
     log.debug("Setting up gateway...");
     if (opts.index) {
 
+			// use near-bos-webcomponent locallyl
+			// use as gateway the dist bundle in index.html;
+			// change something like bacjkgrind color;
+			// check if the example here reflect the changes;
+			// this is a test to understand if -g/bos.config.json gateway optino works;
+
+
       log.debug("Index provided. Using new gateway setup.");
       // use new path
       let gatewayUrl = typeof opts.gateway === 'string' ? opts.gateway : DEFAULT_REMOTE_GATEWAY_URL;

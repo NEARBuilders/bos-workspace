@@ -22,6 +22,8 @@ export type DevOptions = {
   hot?: boolean; // enable hot reloading
   open?: boolean; // open browser
   network?: Network; // network to use
+
+	// TODO: maybe let it be only string?
   gateway?: string | boolean; // path to custom gateway dist, or false to disable
   index?: string; // widget to use as index
   output?: string; // output directory
@@ -38,8 +40,11 @@ export async function dev(src: string, dest: string, opts: DevOptions) {
   const dist = path.join(src, dest);
   const devJsonPath = path.join(dist, "bos-loader.json");
 
-  // Build the app for the first time
+  // Build the app for the first timo
+
+	// TODO: config contains bos.config.json
   const config = await loadConfig(src, opts.network);
+
   let devJson = await generateApp(src, dist, config, opts);
   await writeJson(devJsonPath, devJson);
 
@@ -55,6 +60,11 @@ export async function dev(src: string, dest: string, opts: DevOptions) {
   appDevJsonPath = devJsonPath;
   opts.output = dist;
   appDevOptions = opts;
+
+	console.log('-- just before startDevServer')
+	console.log(config)
+	console.log(appDevOptions)
+
   const server = startDevServer(appSrcs, appDists, appDevJsonPath, appDevOptions);
 
   // Start the socket server if hot reload is enabled
