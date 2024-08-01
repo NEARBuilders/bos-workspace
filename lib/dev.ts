@@ -17,6 +17,12 @@ var appDevOptions: null | DevOptions = null;
 let io: null | IoServer = null;
 let fileWatcher: null | Gaze = null;
 
+export const DEFAULT_GATEWAY = {
+	enabled: true,
+	bundleUrl: "",
+	tagName: "near-social-viewer"
+};
+
 export type DevOptions = {
   port?: number; // port to run dev server
   hot?: boolean; // enable hot reloading
@@ -27,6 +33,12 @@ export type DevOptions = {
   gateway?: string | boolean; // path to custom gateway dist, or false to disable
   index?: string; // widget to use as index
   output?: string; // output directory
+};
+
+export type GatewayConfigObject = {
+	enabled: boolean;
+	tagName: string;
+	bundleUrl: string;
 };
 
 /**
@@ -61,9 +73,9 @@ export async function dev(src: string, dest: string, opts: DevOptions) {
   opts.output = dist;
   appDevOptions = opts;
 
-	const gateway = checkGatewayPrecedence(opts.gateway, config.gateway)
+	const gatewayObject: GatewayConfigObject = buildGatewayObject(opts.gateway, config.gateway)
 
-  const server = startDevServer(appSrcs, appDists, appDevJsonPath, appDevOptions, gateway);
+  const server = startDevServer(appSrcs, appDists, appDevJsonPath, appDevOptions, gatewayObject);
 
   // Start the socket server if hot reload is enabled
   if (opts.hot) {
@@ -117,7 +129,7 @@ export async function devMulti(root: string, srcs: string[], dest: string, opts:
   // Start the dev server
   appDevJsonPath = devJsonPath;
   appDevOptions = opts;
-  const server = startDevServer(appSrcs, appDists, appDevJsonPath, appDevOptions, "");
+  const server = startDevServer(appSrcs, appDists, appDevJsonPath, appDevOptions, DEFAULT_GATEWAY);
 
   // Start the socket server if hot reload is enabled
   if (opts.hot) {
@@ -245,20 +257,29 @@ async function generateDevJson(src: string, config: BaseConfig): Promise<DevJson
   return devJson;
 }
 
-function checkGatewayPrecedence(commandGateway, configGateway) {
+function buildGatewayObject(commandGateway, configGateway) {
 	// Gateway logic:
 	// if --no-gateway is provided (commandGateway = false), gateway should be disabled ("");
 	// if -g is provided, the value takes precedence over the gateway configuration in `bos.config.json`;
 	// if there's no --no-gateway and no -g option, the gateway should be specified in `bos.config.json`;
 	// if noone of the above option are specified, gateway should be the default url;
 
+	const gatewayObject = DEFAULT_GATEWAY;
+
+	if (typeof commandGateway === 'boolean' && !commandGateway) {
+		gatewayObject.enabled = false;
+	}
+
   if (typeof commandGateway === 'boolean' && commandGateway) {
-    return configGateway || DEFAULT_REMOTE_GATEWAY_URL;
-  }
+		gatewayObject.bundleUrl = configGateway.bundleUrl || DEFAULT_REMOTE_GATEWAY_URL;
+		gatewayObject.tagName = configGateway.tagName;
+	}
 
 	if (typeof commandGateway === 'string' && commandGateway.length > 0) {
-  	return commandGateway
+  	gatewayObject.bundleUrl = commandGateway;
   } 
 
-	return "";
+	gatewayObject.bundleUrl = gatewayObject.bundleUrl.replace(/\/$/, ''); // remove trailing slash
+
+	return gatewayObject
 }

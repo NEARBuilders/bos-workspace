@@ -1,4 +1,4 @@
-import { DevOptions } from '@/lib/dev';
+import { DEFAULT_GATEWAY, DevOptions } from '@/lib/dev';
 import { handleReplacements, modifyIndexHtml } from '@/lib/gateway';
 import { Logger, LogLevel } from "@/lib/logger";
 import { Network } from '@/lib/types';
@@ -50,7 +50,7 @@ describe("gateway", () => {
 
   it('adds script tags for dependencies', () => {
     const dependencies = ['dep1.js', 'dep2.js'];
-    const result = modifyIndexHtml(baseHtml, mockOpts, dependencies);
+    const result = modifyIndexHtml(baseHtml, mockOpts, dependencies, DEFAULT_GATEWAY);
     const dom = new JSDOM(result);
     const scripts = dom.window.document.querySelectorAll('script');
 
@@ -61,7 +61,7 @@ describe("gateway", () => {
   });
 
   it('creates and configures near-social-viewer element', () => {
-    const result = modifyIndexHtml(baseHtml, mockOpts, []);
+    const result = modifyIndexHtml(baseHtml, mockOpts, [], DEFAULT_GATEWAY);
     const dom = new JSDOM(result);
     const viewer = dom.window.document.querySelector('near-social-viewer');
 
@@ -72,7 +72,7 @@ describe("gateway", () => {
   });
 
   it('sets correct config attribute on near-social-viewer', () => {
-    const result = modifyIndexHtml(baseHtml, mockOpts, []);
+    const result = modifyIndexHtml(baseHtml, mockOpts, [], DEFAULT_GATEWAY);
     const dom = new JSDOM(result);
     const viewer = dom.window.document.querySelector('near-social-viewer');
 
@@ -82,7 +82,7 @@ describe("gateway", () => {
   });
 
   it('appends near-social-viewer to the container', () => {
-    const result = modifyIndexHtml(baseHtml, mockOpts, []);
+    const result = modifyIndexHtml(baseHtml, mockOpts, [], DEFAULT_GATEWAY);
     const dom = new JSDOM(result);
     const container = dom.window.document.getElementById('bw-root');
 
@@ -97,7 +97,7 @@ describe("gateway", () => {
       network: 'mainnet' as Network,
       hot: false
     };
-    const result = modifyIndexHtml(baseHtml, customOpts, []);
+    const result = modifyIndexHtml(baseHtml, customOpts, [], DEFAULT_GATEWAY);
     const dom = new JSDOM(result);
     const viewer = dom.window.document.querySelector('near-social-viewer');
 

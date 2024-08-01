@@ -1,4 +1,4 @@
-import { DevJson, DevOptions, addApps } from '@/lib/dev';
+import { DEFAULT_GATEWAY, DevJson, DevOptions, GatewayConfigObject, addApps } from '@/lib/dev';
 import { fetchJson } from "@near-js/providers";
 import axios from 'axios';
 import bodyParser from "body-parser";
@@ -51,7 +51,7 @@ export const SOCIAL_CONTRACT = {
  * @param gateway gateway
  * @returns http server
  */
-export function startDevServer(srcs: string[], dists: string[], devJsonPath: string, opts: DevOptions, gateway: string): http.Server {
+export function startDevServer(srcs: string[], dists: string[], devJsonPath: string, opts: DevOptions, gateway: GatewayConfigObject = DEFAULT_GATEWAY): http.Server {
   const app = createApp(devJsonPath, opts, gateway);
   const server = http.createServer(app);
   startServer(server, opts, () => {
@@ -99,7 +99,7 @@ export function startDevServer(srcs: string[], dists: string[], devJsonPath: str
  * @param devJsonPath 
  * @param gateway
  */
-export function createApp(devJsonPath: string, opts: DevOptions, gateway: string = ""): Express.Application {
+export function createApp(devJsonPath: string, opts: DevOptions, gateway: GatewayConfigObject = DEFAULT_GATEWAY): Express.Application {
   const app = express();
 
   log.success("HTTP server setup successfully.");
@@ -222,7 +222,7 @@ export function createApp(devJsonPath: string, opts: DevOptions, gateway: string
    */
   app.all('/api/proxy-rpc', proxyMiddleware(RPC_URL[opts.network]));
 
-  if (gateway) {
+  if (gateway.enabled) {
     log.debug("Setting up gateway...");
     if (opts.index) {
 
@@ -239,9 +239,7 @@ export function createApp(devJsonPath: string, opts: DevOptions, gateway: string
       //let gatewayUrl = typeof opts.gateway === 'string' ? opts.gateway : DEFAULT_REMOTE_GATEWAY_URL;
 			// let gatewayUrl = gateway;
 
-      const isLocalPath = !gateway.startsWith('http');
-      gateway = gateway.replace(/\/$/, ''); // remove trailing slash
-      // opts.gateway = gatewayUrl; // standardize to url string
+      const isLocalPath = !gateway.bundleUrl.startsWith('http');
 
       const gatewayInitPromise = initializeGateway(gateway, isLocalPath, opts, devJsonPath);
 
@@ -267,7 +265,7 @@ export function createApp(devJsonPath: string, opts: DevOptions, gateway: string
             log.debug(`Request for: ${req.path}`);
 
             if (isLocalPath) {
-              const fullUrl = path.join(__dirname, gateway, req.path);
+              const fullUrl = path.join(__dirname, gateway.bundleUrl, req.path);
 
               try {
                 log.debug(`Attempting to serve file from local path: ${fullUrl}`);
@@ -347,8 +345,8 @@ export function createApp(devJsonPath: string, opts: DevOptions, gateway: string
   return app;
 }
 
-function initializeGateway(gatewayUrl: string, isLocalPath: boolean, opts: DevOptions, devJsonPath: string) {
-  return setupGateway(gatewayUrl, isLocalPath, opts, devJsonPath)
+function initializeGateway(gateway: GatewayConfigObject, isLocalPath: boolean, opts: DevOptions, devJsonPath: string) {
+  return setupGateway(gateway, isLocalPath, opts, devJsonPath)
     .then(() => {
       log.success("Gateway initialized successfully.");
     })
@@ -358,12 +356,12 @@ function initializeGateway(gatewayUrl: string, isLocalPath: boolean, opts: DevOp
     });
 }
 
-async function setupGateway(gatewayUrl: string, isLocalPath: boolean, opts: DevOptions, devJsonPath: string) {
-  log.debug(`Setting up ${isLocalPath ? "local " : ""}gateway: ${gatewayUrl}`);
+async function setupGateway(gateway: GatewayConfigObject, isLocalPath: boolean, opts: DevOptions, devJsonPath: string) {
+  log.debug(`Setting up ${isLocalPath ? "local " : ""}gateway: ${gateway.bundleUrl}`);
 
   const manifestUrl = isLocalPath
-    ? path.join(gatewayUrl, "/asset-manifest.json")
-    : `${gatewayUrl}/asset-manifest.json`;
+    ? path.join(gateway.bundleUrl, "/asset-manifest.json")
+    : `${gateway.bundleUrl}/asset-manifest.json`;
 
   try {
     log.debug(`Fetching manifest from: ${manifestUrl}`);
@@ -372,8 +370,8 @@ async function setupGateway(gatewayUrl: string, isLocalPath: boolean, opts: DevO
     log.debug(`Received manifest. Modifying HTML...`);
     const htmlContent = await readFile(path.join(__dirname, '../../public/index.html'), 'utf8');
 
-    const dependencies = manifest.entrypoints.map((entrypoint: string) => isLocalPath ? `${entrypoint}` : `${gatewayUrl}/${entrypoint}`);
-    modifiedHtml = modifyIndexHtml(htmlContent, opts, dependencies);
+    const dependencies = manifest.entrypoints.map((entrypoint: string) => isLocalPath ? `${entrypoint}` : `${gateway.bundleUrl}/${entrypoint}`);
+    modifiedHtml = modifyIndexHtml(htmlContent, opts, dependencies, gateway);
 
     // log.debug(`Importing packages...`); <-- this used jpsm to create import map for wallet selector
     // modifiedHtml = await importPackages(modifiedHtml); // but didn't want it to run each time dev server started, so commented out
@@ -397,6 +395,9 @@ async function setupGateway(gatewayUrl: string, isLocalPath: boolean, opts: DevO
 
 
 async function fetchManifest(url: string): Promise<any> {
+	console.log('-- url')
+	console.log(url)
+
   try {
     if (url.startsWith('http')) {
       const response = await axios.get(url);
