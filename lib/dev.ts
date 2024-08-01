@@ -3,7 +3,7 @@ import path from "path";
 import { Server as IoServer } from "socket.io";
 import { buildApp } from "@/lib/build";
 import { BaseConfig, loadConfig } from "@/lib/config";
-import { startDevServer } from "@/lib/server";
+import { DEFAULT_REMOTE_GATEWAY_URL, startDevServer } from "@/lib/server";
 import { startSocket } from "@/lib/socket";
 import { Network } from "@/lib/types";
 import { loopThroughFiles, readFile, readJson, writeJson } from "@/lib/utils/fs";
@@ -61,11 +61,9 @@ export async function dev(src: string, dest: string, opts: DevOptions) {
   opts.output = dist;
   appDevOptions = opts;
 
-	console.log('-- just before startDevServer')
-	console.log(config)
-	console.log(appDevOptions)
+	const gateway = checkGatewayPrecedence(opts.gateway, config.gateway)
 
-  const server = startDevServer(appSrcs, appDists, appDevJsonPath, appDevOptions);
+  const server = startDevServer(appSrcs, appDists, appDevJsonPath, appDevOptions, gateway);
 
   // Start the socket server if hot reload is enabled
   if (opts.hot) {
@@ -119,7 +117,7 @@ export async function devMulti(root: string, srcs: string[], dest: string, opts:
   // Start the dev server
   appDevJsonPath = devJsonPath;
   appDevOptions = opts;
-  const server = startDevServer(appSrcs, appDists, appDevJsonPath, appDevOptions);
+  const server = startDevServer(appSrcs, appDists, appDevJsonPath, appDevOptions, "");
 
   // Start the socket server if hot reload is enabled
   if (opts.hot) {
@@ -245,4 +243,22 @@ async function generateDevJson(src: string, config: BaseConfig): Promise<DevJson
   })
 
   return devJson;
+}
+
+function checkGatewayPrecedence(commandGateway, configGateway) {
+	// Gateway logic:
+	// if --no-gateway is provided (commandGateway = false), gateway should be disabled ("");
+	// if -g is provided, the value takes precedence over the gateway configuration in `bos.config.json`;
+	// if there's no --no-gateway and no -g option, the gateway should be specified in `bos.config.json`;
+	// if noone of the above option are specified, gateway should be the default url;
+
+  if (typeof commandGateway === 'boolean' && commandGateway) {
+    return configGateway || DEFAULT_REMOTE_GATEWAY_URL;
+  }
+
+	if (typeof commandGateway === 'string' && commandGateway.length > 0) {
+  	return commandGateway
+  } 
+
+	return "";
 }

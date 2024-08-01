@@ -48,10 +48,11 @@ export const SOCIAL_CONTRACT = {
  * Starts the dev server
  * @param devJsonPath path to json redirect map
  * @param opts DevOptions
+ * @param gateway gateway
  * @returns http server
  */
-export function startDevServer(srcs: string[], dists: string[], devJsonPath: string, opts: DevOptions): http.Server {
-  const app = createApp(devJsonPath, opts);
+export function startDevServer(srcs: string[], dists: string[], devJsonPath: string, opts: DevOptions, gateway: string): http.Server {
+  const app = createApp(devJsonPath, opts, gateway);
   const server = http.createServer(app);
   startServer(server, opts, () => {
     const postData = JSON.stringify({ srcs: srcs.map((src) => path.resolve(src)), dists: dists.map((dist) => path.resolve(dist)) });
@@ -96,8 +97,9 @@ export function startDevServer(srcs: string[], dists: string[], devJsonPath: str
  * (separated out to enable endpoint testing)
  * @param opts 
  * @param devJsonPath 
+ * @param gateway
  */
-export function createApp(devJsonPath: string, opts: DevOptions): Express.Application {
+export function createApp(devJsonPath: string, opts: DevOptions, gateway: string = ""): Express.Application {
   const app = express();
 
   log.success("HTTP server setup successfully.");
@@ -220,7 +222,7 @@ export function createApp(devJsonPath: string, opts: DevOptions): Express.Applic
    */
   app.all('/api/proxy-rpc', proxyMiddleware(RPC_URL[opts.network]));
 
-  if (opts.gateway) {
+  if (gateway) {
     log.debug("Setting up gateway...");
     if (opts.index) {
 
@@ -233,12 +235,15 @@ export function createApp(devJsonPath: string, opts: DevOptions): Express.Applic
 
       log.debug("Index provided. Using new gateway setup.");
       // use new path
-      let gatewayUrl = typeof opts.gateway === 'string' ? opts.gateway : DEFAULT_REMOTE_GATEWAY_URL;
-      const isLocalPath = !gatewayUrl.startsWith('http');
-      gatewayUrl = gatewayUrl.replace(/\/$/, ''); // remove trailing slash
-      opts.gateway = gatewayUrl; // standardize to url string
 
-      initializeGateway(gatewayUrl, isLocalPath, opts, devJsonPath);
+      //let gatewayUrl = typeof opts.gateway === 'string' ? opts.gateway : DEFAULT_REMOTE_GATEWAY_URL;
+			// let gatewayUrl = gateway;
+
+      const isLocalPath = !gateway.startsWith('http');
+      gateway = gateway.replace(/\/$/, ''); // remove trailing slash
+      // opts.gateway = gatewayUrl; // standardize to url string
+
+      const gatewayInitPromise = initializeGateway(gateway, isLocalPath, opts, devJsonPath);
 
       // Middleware to ensure gateway is initialized before handling requests
       app.use(async (req, res, next) => {
@@ -262,7 +267,7 @@ export function createApp(devJsonPath: string, opts: DevOptions): Express.Applic
             log.debug(`Request for: ${req.path}`);
 
             if (isLocalPath) {
-              const fullUrl = path.join(__dirname, gatewayUrl, req.path);
+              const fullUrl = path.join(__dirname, gateway, req.path);
 
               try {
                 log.debug(`Attempting to serve file from local path: ${fullUrl}`);
@@ -280,9 +285,9 @@ export function createApp(devJsonPath: string, opts: DevOptions): Express.Applic
                 }
               }
             } else {
-              log.debug(`Proxying request to: ${gatewayUrl}${req.path}`);
+              log.debug(`Proxying request to: ${gateway}${req.path}`);
               // Proxy the request to the remote gateway
-              proxy.web(req, res, { target: `${gatewayUrl}${req.path}`, agent: httpsAgent });
+              proxy.web(req, res, { target: `${gateway}${req.path}`, agent: httpsAgent });
             }
           } else {
             // what about images?
@@ -343,7 +348,7 @@ export function createApp(devJsonPath: string, opts: DevOptions): Express.Applic
 }
 
 function initializeGateway(gatewayUrl: string, isLocalPath: boolean, opts: DevOptions, devJsonPath: string) {
-  gatewayInitPromise = setupGateway(gatewayUrl, isLocalPath, opts, devJsonPath)
+  return setupGateway(gatewayUrl, isLocalPath, opts, devJsonPath)
     .then(() => {
       log.success("Gateway initialized successfully.");
     })
