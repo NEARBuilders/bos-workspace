@@ -20,7 +20,7 @@ let fileWatcher: null | Gaze = null;
 export const DEFAULT_GATEWAY = {
 	enabled: true,
 	bundleUrl: "",
-	tagName: "",
+	tagName: DEFAULT_TAG_NAME,
 };
 
 export type DevOptions = {

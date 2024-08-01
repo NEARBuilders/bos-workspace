@@ -55,7 +55,7 @@ export const SOCIAL_CONTRACT = {
 export function startDevServer(srcs: string[], dists: string[], devJsonPath: string, opts: DevOptions, gateway: GatewayConfigObject = DEFAULT_GATEWAY): http.Server {
   const app = createApp(devJsonPath, opts, gateway);
   const server = http.createServer(app);
-  startServer(server, opts, () => {
+  startServer(server, opts, gateway, () => {
     const postData = JSON.stringify({ srcs: srcs.map((src) => path.resolve(src)), dists: dists.map((dist) => path.resolve(dist)) });
     const options = {
       hostname: '127.0.0.1',
@@ -413,10 +413,11 @@ async function fetchManifest(url: string): Promise<any> {
  * Starts BosLoader Server and optionally opens gateway in browser
  * @param server http server
  * @param opts DevOptions
+ * @param gateway gateway object
  */
-export function startServer(server, opts, sendAddApps) {
+export function startServer(server, opts, gateway, sendAddApps) {
   server.listen(opts.port, "127.0.0.1", () => {
-    if (opts.gateway && opts.open) {
+    if (gateway.enabled && opts.open) {
       // open gateway in browser
       let start =
         process.platform == "darwin"
@@ -430,7 +431,7 @@ export function startServer(server, opts, sendAddApps) {
     log.log(`
   ┌─────────────────────────────────────────────────────────────┐
   │ BosLoader Server is Up and Running                          │
-  │                                                             │${opts.gateway
+  │                                                             │${gateway.bundleUrl
         ? `
   │ ➜ Local Gateway: \u001b[32mhttp://127.0.0.1:${opts.port}\u001b[0m                      │`
         : ""
