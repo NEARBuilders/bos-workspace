@@ -8,9 +8,5 @@
       "aliases": ["./aliases.testnet.json"],
       "index": "quickstart.testnet/widget/home"
     }
-  },
-	"gateway": {
-		"bundleUrl": "https://ipfs.web4.near.page/ipfs/bafybeibe63hqugbqr4writdxgezgl5swgujay6t5uptw2px7q63r7crk2q/",
-		"tagName": "near-social-viewer"
-	}
+  }
 }

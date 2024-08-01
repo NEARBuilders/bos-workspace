@@ -3,7 +3,7 @@ import path from "path";
 import { Server as IoServer } from "socket.io";
 import { buildApp } from "@/lib/build";
 import { BaseConfig, loadConfig } from "@/lib/config";
-import { DEFAULT_REMOTE_GATEWAY_URL, startDevServer } from "@/lib/server";
+import { DEFAULT_REMOTE_GATEWAY_URL, DEFAULT_TAG_NAME, startDevServer } from "@/lib/server";
 import { startSocket } from "@/lib/socket";
 import { Network } from "@/lib/types";
 import { loopThroughFiles, readFile, readJson, writeJson } from "@/lib/utils/fs";
@@ -20,7 +20,7 @@ let fileWatcher: null | Gaze = null;
 export const DEFAULT_GATEWAY = {
 	enabled: true,
 	bundleUrl: "",
-	tagName: "near-social-viewer"
+	tagName: "",
 };
 
 export type DevOptions = {
@@ -263,7 +263,6 @@ function buildGatewayObject(commandGateway, configGateway) {
 	// if -g is provided, the value takes precedence over the gateway configuration in `bos.config.json`;
 	// if there's no --no-gateway and no -g option, the gateway should be specified in `bos.config.json`;
 	// if noone of the above option are specified, gateway should be the default url;
-
 	const gatewayObject = DEFAULT_GATEWAY;
 
 	if (typeof commandGateway === 'boolean' && !commandGateway) {
@@ -271,8 +270,8 @@ function buildGatewayObject(commandGateway, configGateway) {
 	}
 
   if (typeof commandGateway === 'boolean' && commandGateway) {
-		gatewayObject.bundleUrl = configGateway.bundleUrl || DEFAULT_REMOTE_GATEWAY_URL;
-		gatewayObject.tagName = configGateway.tagName;
+		gatewayObject.bundleUrl = configGateway?.bundleUrl || DEFAULT_REMOTE_GATEWAY_URL;
+		gatewayObject.tagName = configGateway?.tagName || DEFAULT_TAG_NAME
 	}
 
 	if (typeof commandGateway === 'string' && commandGateway.length > 0) {

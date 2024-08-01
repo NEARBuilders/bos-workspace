@@ -15,6 +15,7 @@ import { readFile, readJson, promises } from "./utils/fs";
 export const DEFAULT_LOCAL_GATEWAY_PATH = path.join(__dirname, "../..", "gateway", "dist");
 
 export const DEFAULT_REMOTE_GATEWAY_URL = "https://ipfs.web4.near.page/ipfs/bafybeibe63hqugbqr4writdxgezgl5swgujay6t5uptw2px7q63r7crk2q/";
+export const DEFAULT_TAG_NAME = 'near-social-viewer';
 
 const httpsAgent = new https.Agent({
   secureProtocol: 'TLSv1_2_method'
@@ -395,9 +396,6 @@ async function setupGateway(gateway: GatewayConfigObject, isLocalPath: boolean, 
 
 
 async function fetchManifest(url: string): Promise<any> {
-	console.log('-- url')
-	console.log(url)
-
   try {
     if (url.startsWith('http')) {
       const response = await axios.get(url);
