@@ -111,6 +111,10 @@ A fully featured config may look like this:
     "uploadApi": "https://ipfs.near.social/add",
     "uploadApiHeaders": {},
   },
+  "gateway": {
+    "bundleUrl": "https://ipfs.web4.near.page/ipfs/bafybeibe63hqugbqr4writdxgezgl5swgujay6t5uptw2px7q63r7crk2q/",
+    "tagName": "near-social-viewer"
+  }
 }
 ```
 
@@ -131,6 +135,9 @@ The `bos.config.json` file consists of a base configuration that defines default
 * `format`: (Optional) Indicates whether to format code on build. Default value is `true`.
 * `aliases`: (Optional) Provides a list of alias files to use for replacing network-specific values with correct overrides.
 * `index`: (Optional) Default widget src to use when using a custom gateway dist.  
+* `gateway`: (Optional) Configures gateway object.
+	* `bundleUrl`: gateway url.
+	* `tagName`: element tag name.
 
 ---
 
@@ -229,14 +236,10 @@ Running the bos-workspace dev server will start a local gateway with a standard 
 bw dev --no-gateway
 ```
 
-However, there is an option to override this default gateway with a custom `/dist`. This is helpful when building widgets that utilize [custom VM elements](https://github.com/NEARBuilders/near-bos-webcomponent?tab=readme-ov-file#configuring-vm-custom-elements). To use this feature, use the `-g` flag with a path to the local custom distribution or link to package published on [nearfs](https://github.com/vgrichina/nearfs) or via cdn:
+However, there is an option to override this default gateway with a custom `/dist`. This is helpful when building widgets that utilize [custom VM elements](https://github.com/NEARBuilders/near-bos-webcomponent?tab=readme-ov-file#configuring-vm-custom-elements). To use this feature, use the `-g` flag and specify the gateway url and the tag name in the `bos.config.json` file.
 
 ```cmd
-bw dev -g path/to/dist
-```
-
-```cmd
-bw dev -g https://ipfs.web4.near.page/ipfs/bafybeiancp5im5nfkdki3cfvo7ownl2knjovqh7bseegk4zvzsl4buryoi
+bw dev -g
 ```
 
 This will automatically start the local gateway serving your widgets through the provided dist.

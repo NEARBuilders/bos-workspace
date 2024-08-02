@@ -3,7 +3,7 @@ import path from "path";
 import { Server as IoServer } from "socket.io";
 import { buildApp } from "@/lib/build";
 import { BaseConfig, loadConfig } from "@/lib/config";
-import { DEFAULT_REMOTE_GATEWAY_URL, DEFAULT_TAG_NAME, startDevServer } from "@/lib/server";
+import { startDevServer } from "@/lib/server";
 import { startSocket } from "@/lib/socket";
 import { Network } from "@/lib/types";
 import { loopThroughFiles, readFile, readJson, writeJson } from "@/lib/utils/fs";
@@ -19,8 +19,8 @@ let fileWatcher: null | Gaze = null;
 
 export const DEFAULT_GATEWAY = {
 	enabled: true,
-	bundleUrl: "",
-	tagName: DEFAULT_TAG_NAME,
+	bundleUrl: "https://ipfs.web4.near.page/ipfs/bafybeibe63hqugbqr4writdxgezgl5swgujay6t5uptw2px7q63r7crk2q/",
+	tagName: "near-social-viewer"
 };
 
 export type DevOptions = {
@@ -28,9 +28,7 @@ export type DevOptions = {
   hot?: boolean; // enable hot reloading
   open?: boolean; // open browser
   network?: Network; // network to use
-
-	// TODO: maybe let it be only string?
-  gateway?: string | boolean; // path to custom gateway dist, or false to disable
+  gateway?: boolean; // path to custom gateway dist, or false to disable
   index?: string; // widget to use as index
   output?: string; // output directory
 };
@@ -54,7 +52,6 @@ export async function dev(src: string, dest: string, opts: DevOptions) {
 
   // Build the app for the first timo
 
-	// TODO: config contains bos.config.json
   const config = await loadConfig(src, opts.network);
 
   let devJson = await generateApp(src, dist, config, opts);
@@ -126,12 +123,10 @@ export async function devMulti(root: string, srcs: string[], dest: string, opts:
     appDevJsons.push(devJson);
   }
 
-	const gatewayObject: GatewayConfigObject = buildGatewayObject(opts.gateway, {})
-
   // Start the dev server
   appDevJsonPath = devJsonPath;
   appDevOptions = opts;
-  const server = startDevServer(appSrcs, appDists, appDevJsonPath, appDevOptions, gatewayObject);
+  const server = startDevServer(appSrcs, appDists, appDevJsonPath, appDevOptions);
 
   // Start the socket server if hot reload is enabled
   if (opts.hot) {
@@ -259,26 +254,18 @@ async function generateDevJson(src: string, config: BaseConfig): Promise<DevJson
   return devJson;
 }
 
-function buildGatewayObject(commandGateway, configGateway) {
+export function buildGatewayObject(commandGateway, configGateway) {
 	// Gateway logic:
-	// if --no-gateway is provided (commandGateway = false), gateway should be disabled ("");
-	// if -g is provided, the value takes precedence over the gateway configuration in `bos.config.json`;
-	// if there's no --no-gateway and no -g option, the gateway should be specified in `bos.config.json`;
-	// if noone of the above option are specified, gateway should be the default url;
+	// if --no-gateway is provided (or commandGateway = false), gateway should be disabled ("");
+	// if -g is true, gateway is enabled, takes bundleUrl and tagName from `bos.config.json`
+	// if noone of the above option are specified, gateway should be the default gateway object;
 	const gatewayObject = DEFAULT_GATEWAY;
 
-	if (typeof commandGateway === 'boolean' && !commandGateway) {
-		gatewayObject.enabled = false;
-	}
+	gatewayObject.enabled = commandGateway;
 
-  if (typeof commandGateway === 'boolean' && commandGateway) {
-		gatewayObject.bundleUrl = configGateway?.bundleUrl || DEFAULT_REMOTE_GATEWAY_URL;
-		gatewayObject.tagName = configGateway?.tagName || DEFAULT_TAG_NAME
-	}
-
-	if (typeof commandGateway === 'string' && commandGateway.length > 0) {
-  	gatewayObject.bundleUrl = commandGateway;
-  } 
+  if (configGateway?.bundleUrl)
+    gatewayObject.bundleUrl = configGateway.bundleUrl;
+  if (configGateway?.tagName) gatewayObject.tagName = configGateway.tagName;
 
 	gatewayObject.bundleUrl = gatewayObject.bundleUrl.replace(/\/$/, ''); // remove trailing slash
 
