@@ -67,7 +67,7 @@ const baseConfigSchema = Joi.object({
 	gateway: Joi.object({
 		tagName: Joi.string(),
 		bundleUrl: Joi.string(),
-	}).allow(null),
+	}).and('tagName', 'bundleUrl').allow(null),
 });
 
 const networkConfigSchema = Joi.object({
