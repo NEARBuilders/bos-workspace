@@ -126,10 +126,12 @@ export async function devMulti(root: string, srcs: string[], dest: string, opts:
     appDevJsons.push(devJson);
   }
 
+	const gatewayObject: GatewayConfigObject = buildGatewayObject(opts.gateway, {})
+
   // Start the dev server
   appDevJsonPath = devJsonPath;
   appDevOptions = opts;
-  const server = startDevServer(appSrcs, appDists, appDevJsonPath, appDevOptions, DEFAULT_GATEWAY);
+  const server = startDevServer(appSrcs, appDists, appDevJsonPath, appDevOptions, gatewayObject);
 
   // Start the socket server if hot reload is enabled
   if (opts.hot) {
