@@ -8,5 +8,8 @@
       "aliases": ["./aliases.testnet.json"],
       "index": "quickstart.testnet/widget/home"
     }
+  },
+  "data": {
+    "include": ["test", "test1"]
   }
 }

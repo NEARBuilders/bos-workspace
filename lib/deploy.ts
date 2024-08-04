@@ -5,7 +5,7 @@ import fs from "fs";
 import { buildApp } from "@/lib/build";
 import { readConfig } from "@/lib/config";
 import { Network } from "@/lib/types";
-import { move, pathExists, readdir, remove } from "@/lib/utils/fs";
+import { move, pathExists, processDirectory, readdir, remove } from "@/lib/utils/fs";
 import { readWorkspace } from "@/lib/workspace";
 import { SOCIAL_CONTRACT } from './server';
 
@@ -191,16 +191,7 @@ export async function deployAppDataFolders(appName: string, opts: DeployOptions)
 
   for (const folder of config.data.include) {
     try {
-      const files = await fs.readdirSync(folder);
-
-      for (const file of files) {
-        const filePath = path.join(folder, file);
-        const fileContent = await fs.readFileSync(filePath, 'utf8');
-        const jsonContent = JSON.parse(fileContent);
-
-        const key = path.basename(file, '.json');
-        result[key] = jsonContent;
-      }
+      await processDirectory(folder, result);
     } catch (error) {
       console.error(`Error processing folder ${folder}:`, error);
     }
