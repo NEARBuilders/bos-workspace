@@ -1,5 +1,5 @@
 
-import { DevOptions, GatewayConfigObject } from "./dev";
+import { DevOptions, GatewayConfig } from "./dev";
 
 import { JSDOM } from "jsdom";
 
@@ -29,7 +29,7 @@ function normalizeHtml(html) {
   return html.replace(/\s+/g, ' ').trim();
 }
 
-export function modifyIndexHtml(content: string, opts: DevOptions, dependencies: string[], gateway: GatewayConfigObject) {
+export function modifyIndexHtml(content: string, opts: DevOptions, dependencies: string[], gateway: GatewayConfig) {
   const dom = new JSDOM(content);
   const document = dom.window.document;
 

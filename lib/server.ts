@@ -1,4 +1,4 @@
-import { DEFAULT_GATEWAY, DevJson, DevOptions, GatewayConfigObject, addApps } from '@/lib/dev';
+import { DEFAULT_GATEWAY, DevJson, DevOptions, GatewayConfig, addApps } from '@/lib/dev';
 import { fetchJson } from "@near-js/providers";
 import axios from 'axios';
 import bodyParser from "body-parser";
@@ -49,7 +49,7 @@ export const SOCIAL_CONTRACT = {
  * @param gateway gateway
  * @returns http server
  */
-export function startDevServer(srcs: string[], dists: string[], devJsonPath: string, opts: DevOptions, gateway: GatewayConfigObject = DEFAULT_GATEWAY): http.Server {
+export function startDevServer(srcs: string[], dists: string[], devJsonPath: string, opts: DevOptions, gateway: GatewayConfig = DEFAULT_GATEWAY): http.Server {
   const app = createApp(devJsonPath, opts, gateway);
   const server = http.createServer(app);
   startServer(server, opts, gateway, () => {
@@ -97,7 +97,7 @@ export function startDevServer(srcs: string[], dists: string[], devJsonPath: str
  * @param devJsonPath 
  * @param gateway
  */
-export function createApp(devJsonPath: string, opts: DevOptions, gateway: GatewayConfigObject = DEFAULT_GATEWAY): Express.Application {
+export function createApp(devJsonPath: string, opts: DevOptions, gateway: GatewayConfig = DEFAULT_GATEWAY): Express.Application {
   const app = express();
 
   log.success("HTTP server setup successfully.");
@@ -340,7 +340,7 @@ export function createApp(devJsonPath: string, opts: DevOptions, gateway: Gatewa
   return app;
 }
 
-function initializeGateway(gateway: GatewayConfigObject, isLocalPath: boolean, opts: DevOptions, devJsonPath: string) {
+function initializeGateway(gateway: GatewayConfig, isLocalPath: boolean, opts: DevOptions, devJsonPath: string) {
   return setupGateway(gateway, isLocalPath, opts, devJsonPath)
     .then(() => {
       log.success("Gateway initialized successfully.");
@@ -351,7 +351,7 @@ function initializeGateway(gateway: GatewayConfigObject, isLocalPath: boolean, o
     });
 }
 
-async function setupGateway(gateway: GatewayConfigObject, isLocalPath: boolean, opts: DevOptions, devJsonPath: string) {
+async function setupGateway(gateway: GatewayConfig, isLocalPath: boolean, opts: DevOptions, devJsonPath: string) {
   log.debug(`Setting up ${isLocalPath ? "local " : ""}gateway: ${gateway.bundleUrl}`);
 
   const manifestUrl = isLocalPath

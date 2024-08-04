@@ -33,7 +33,7 @@ export type DevOptions = {
   output?: string; // output directory
 };
 
-export type GatewayConfigObject = {
+export type GatewayConfig = {
 	enabled: boolean;
 	tagName: string;
 	bundleUrl: string;
@@ -70,7 +70,7 @@ export async function dev(src: string, dest: string, opts: DevOptions) {
   opts.output = dist;
   appDevOptions = opts;
 
-	const gatewayObject: GatewayConfigObject = buildGatewayObject(opts.gateway, config.gateway)
+	const gatewayObject: GatewayConfig = buildGatewayObject(opts.gateway, config.gateway)
 
   const server = startDevServer(appSrcs, appDists, appDevJsonPath, appDevOptions, gatewayObject);
 
