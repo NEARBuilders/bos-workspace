@@ -278,9 +278,9 @@ export function createApp(devJsonPath: string, opts: DevOptions, gateway: Gatewa
                 }
               }
             } else {
-              log.debug(`Proxying request to: ${gateway}${req.path}`);
+              log.debug(`Proxying request to: ${gateway.bundleUrl}${req.path}`);
               // Proxy the request to the remote gateway
-              proxy.web(req, res, { target: `${gateway}${req.path}`, agent: httpsAgent });
+              proxy.web(req, res, { target: `${gateway.bundleUrl}${req.path}`, agent: httpsAgent });
             }
           } else {
             // what about images?
@@ -425,7 +425,7 @@ export function startServer(server, opts, gateway, sendAddApps) {
     log.log(`
   ┌─────────────────────────────────────────────────────────────┐
   │ BosLoader Server is Up and Running                          │
-  │                                                             │${gateway.bundleUrl
+  │                                                             │${gateway.enabled
         ? `
   │ ➜ Local Gateway: \u001b[32mhttp://127.0.0.1:${opts.port}\u001b[0m                      │`
         : ""
