@@ -46,9 +46,9 @@ describe('createApp', () => {
 
     global.log = new Logger(LogLevel.DEV);
 
-    app = createApp(devJsonPath, opts);
+    app = createApp(devJsonPath, opts, DEFAULT_GATEWAY);
 
-    app = createApp(devJsonPath, opts);
+    app = createApp(devJsonPath, opts, DEFAULT_GATEWAY);
   });
 
   afterEach(() => {

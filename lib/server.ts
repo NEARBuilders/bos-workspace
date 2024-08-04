@@ -97,7 +97,7 @@ export function startDevServer(srcs: string[], dists: string[], devJsonPath: str
  * @param devJsonPath 
  * @param gateway
  */
-export function createApp(devJsonPath: string, opts: DevOptions, gateway: GatewayConfig = DEFAULT_GATEWAY): Express.Application {
+export function createApp(devJsonPath: string, opts: DevOptions, gateway: GatewayConfig): Express.Application {
   const app = express();
 
   log.success("HTTP server setup successfully.");
