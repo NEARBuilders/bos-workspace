@@ -108,4 +108,16 @@ describe("gateway", () => {
     const config = JSON.parse(viewer.getAttribute('config'));
     expect(config.dev.hotreload.enabled).toBe(false);
   });
+
+  it('uses the tag name from the gateway config', () => {
+    const tagName = "test-element"
+    const gatewayConfig = DEFAULT_GATEWAY;
+    gatewayConfig.tagName = tagName
+
+    const result = modifyIndexHtml(baseHtml, mockOpts, [], gatewayConfig);
+    const dom = new JSDOM(result);
+    const container = dom.window.document.querySelector(tagName);
+
+    expect(container.getAttribute('src')).toBe(mockOpts.index);
+  });
 });
