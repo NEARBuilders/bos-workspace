@@ -236,7 +236,7 @@ export function createApp(devJsonPath: string, opts: DevOptions, gateway: Gatewa
 
       const isLocalPath = !gateway.bundleUrl.startsWith('http');
 
-      const gatewayInitPromise = initializeGateway(gateway, isLocalPath, opts, devJsonPath);
+      initializeGateway(gateway, isLocalPath, opts, devJsonPath);
 
       // Middleware to ensure gateway is initialized before handling requests
       app.use(async (req, res, next) => {
@@ -341,7 +341,7 @@ export function createApp(devJsonPath: string, opts: DevOptions, gateway: Gatewa
 }
 
 function initializeGateway(gateway: GatewayConfig, isLocalPath: boolean, opts: DevOptions, devJsonPath: string) {
-  return setupGateway(gateway, isLocalPath, opts, devJsonPath)
+  gatewayInitPromise = setupGateway(gateway, isLocalPath, opts, devJsonPath)
     .then(() => {
       log.success("Gateway initialized successfully.");
     })

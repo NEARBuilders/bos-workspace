@@ -1,9 +1,9 @@
-import { buildGatewayObject, DEFAULT_GATEWAY, DevOptions } from './../../lib/dev';
+import { buildGatewayObject, DEFAULT_GATEWAY, DevOptions } from '@/lib/dev';
 import { Logger, LogLevel } from "@/lib/logger";
 import { createApp, RPC_URL } from '@/lib/server';
 import supertest from 'supertest';
 import { TextEncoder } from 'util';
-import { Network } from './../../lib/types';
+import { Network } from '@/lib/types';
 import { fetchJson } from "@near-js/providers";
 import * as gateway from '@/lib/gateway';
 
