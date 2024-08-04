@@ -256,16 +256,17 @@ async function generateDevJson(src: string, config: BaseConfig): Promise<DevJson
 
 export function buildGatewayObject(commandGateway, configGateway) {
 	// Gateway logic:
-	// if --no-gateway is provided (or commandGateway = false), gateway should be disabled ("");
-	// if -g is true, gateway is enabled, takes bundleUrl and tagName from `bos.config.json`
-	// if noone of the above option are specified, gateway should be the default gateway object;
+	// if --no-gateway is provided (== commandGateway = false), gateway should be disabled ("");
+	// if --no-gateway is not provided, gateway is enabled, takes bundleUrl and tagName from `bos.config.json`
+	// if --no-gateway is not provided but there's no gateway configuration in `bos.config.json`, gateway should be the default gateway object;
 	const gatewayObject = DEFAULT_GATEWAY;
 
 	gatewayObject.enabled = commandGateway;
 
-  if (configGateway?.bundleUrl)
+  if (configGateway?.bundleUrl && configGateway?.tagName) {
     gatewayObject.bundleUrl = configGateway.bundleUrl;
-  if (configGateway?.tagName) gatewayObject.tagName = configGateway.tagName;
+    gatewayObject.tagName = configGateway.tagName;
+  }
 
 	gatewayObject.bundleUrl = gatewayObject.bundleUrl.replace(/\/$/, ''); // remove trailing slash
 
