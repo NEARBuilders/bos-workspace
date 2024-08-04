@@ -176,6 +176,100 @@ export async function deployAppData(appName: string, opts: DeployOptions) {
   });
 }
 
+export async function deployAppDataFolders(appName: string, opts: DeployOptions) {
+	const config = await readConfig(path.join(appName, "bos.config.json"), opts.network);
+	const BOS_SIGNER_ACCOUNT_ID = config.accounts.signer || opts.signerAccountId || config.account;
+
+  if (!BOS_SIGNER_ACCOUNT_ID) {
+    console.log(`App account is not defined for ${appName}. Skipping data upload`);
+    return;
+  }
+
+  if (!config.data || !Array.isArray(config.data.include) || config.data.include.length === 0) throw new Error('Config must contain a data.include array with at least one folder');
+
+  const result = {};
+
+  for (const folder of config.data.include) {
+    try {
+      const files = await fs.readdirSync(folder);
+
+      for (const file of files) {
+        const filePath = path.join(folder, file);
+        const fileContent = await fs.readFileSync(filePath, 'utf8');
+        const jsonContent = JSON.parse(fileContent);
+
+        const key = path.basename(file, '.json');
+        result[key] = jsonContent;
+      }
+    } catch (error) {
+      console.error(`Error processing folder ${folder}:`, error);
+    }
+  }
+
+  const outputPath = path.join(process.cwd(), 'combined_output.json');
+  await fs.writeFileSync(outputPath, JSON.stringify(result, null, 2));
+
+  console.log(`Combined JSON written to ${outputPath}`);
+
+  // const dataJSON = fs.readFileSync(
+  //   path.join(appName, DEPLOY_DIST_FOLDER, "data.json"),
+  //   "utf8"
+  // );
+
+  // const args = { data: JSON.parse(dataJSON) };
+  // const argsBase64 = Buffer.from(JSON.stringify(args)).toString("base64");
+  
+  // const BOS_SIGNER_PUBLIC_KEY = opts?.signerPublicKey;
+  // const BOS_SIGNER_PRIVATE_KEY = opts?.signerPrivateKey;
+
+	// const automaticSignIn = [
+		// "sign-with-plaintext-private-key",
+		// "--signer-public-key", 
+		// BOS_SIGNER_PUBLIC_KEY,
+		// "--signer-private-key",
+		// BOS_SIGNER_PRIVATE_KEY,
+		// "send"
+	// ]
+
+  // let command = [
+  //   "near-cli-rs",
+  //   "contract",
+  //   "call-function",
+  //   "as-transaction",
+		// opts.network === "mainnet" ? SOCIAL_CONTRACT.mainnet : SOCIAL_CONTRACT.testnet,
+  //   "set",
+  //   "base64-args",
+  //   `${argsBase64}`,
+  //   "prepaid-gas",
+  //   "300 TeraGas",
+  //   "attached-deposit",
+  //   "0.15 NEAR", // deposit
+  //   "sign-as",
+  //   BOS_SIGNER_ACCOUNT_ID,
+  //   "network-config",
+		// opts.network,
+  // ];
+
+	// if (BOS_SIGNER_PUBLIC_KEY && BOS_SIGNER_PRIVATE_KEY) command = command.concat(automaticSignIn)
+
+  // const deployProcess = spawn("npx", command, {
+  //   cwd: path.join(appName, DEPLOY_DIST_FOLDER),
+  //   stdio: "inherit",
+  // });
+
+  // deployProcess.on("close", (code) => {
+  //   if (code === 0) {
+  //     console.log(`Uploaded data for ${appName}`);
+  //   } else {
+  //     console.error(`Data upload failed with code ${code}`);
+  //   }
+  // });
+
+  // deployProcess.on("error", (err) => {
+  //   console.error(`Error uploading data for ${appName}:\n${err.message}`);
+  // });
+}
+
 export async function deploy(appName: string, opts: DeployOptions) {
   const src = ".";
 
