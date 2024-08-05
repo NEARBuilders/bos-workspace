@@ -148,6 +148,8 @@ async function run() {
     .description("Upload data to SocialDB from bos.config.json configuration")
     .argument("[appName]", "Workspace app name to deploy")
     .option("-n, --network <network>", "network to deploy to", "mainnet")
+    .option("--signerPublicKey <string>", "Signer public key")
+    .option("--signerPrivateKey <string>", "Signer private key")
     .action(async (appName, options) => {
       const deployOptions: DeployOptions = {
         signerPublicKey: options.signerPublicKey,
