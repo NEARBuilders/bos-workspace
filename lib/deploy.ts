@@ -206,11 +206,9 @@ export async function deployAppDataFolders(
   const result = {};
 
   for (const folder of config.data.include) {
-    try {
-      await processDirectory(folder, result);
-    } catch (error) {
-      console.error(`Error processing folder ${folder}:`, error);
-    }
+    const folderName = path.basename(folder);
+    result[folderName] = {};
+    await processDirectory(folder, '', result[folderName]);
   }
 
   const args = {

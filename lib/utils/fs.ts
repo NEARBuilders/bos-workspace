@@ -17,21 +17,27 @@ async function loopThroughFiles(pwd: string, callback: (file: string) => Promise
   }
 }
 
-async function processDirectory(dir, result) {
-  const files = await readdirSync(dir, { withFileTypes: true });
+async function processDirectory(baseDir, currentDir, result) {
+  const files = await readdirSync(path.join(baseDir, currentDir), { withFileTypes: true });
   for (const file of files) {
-    const filePath = path.join(dir, file.name);
+    const relativePath = path.join(currentDir, file.name);
+    const fullPath = path.join(baseDir, relativePath);
+    
     if (file.isDirectory()) {
-      await processDirectory(filePath, result);
+      await processDirectory(baseDir, relativePath, result);
     } else if (path.extname(file.name).toLowerCase() === '.json') {
       try {
-        const fileContent = await readFileSync(filePath, 'utf8');
+        const fileContent = await readFileSync(fullPath, 'utf8');
         const jsonContent = JSON.parse(fileContent);
-        const relativePath = path.relative(process.cwd(), filePath);
-        const key = path.dirname(relativePath) + '/' + path.basename(file.name, '.json');
-        result[key] = jsonContent;
+        let key;
+        if (currentDir === '') {
+          key = path.basename(file.name, '.json');
+        } else {
+          key = path.join(currentDir, path.basename(file.name, '.json')).replace(/[\\/]/g, '.');
+        }
+        result[key] = { "": JSON.stringify(jsonContent) };
       } catch (error) {
-        console.error(`Error processing file ${filePath}:`, error);
+        console.error(`Error processing file ${fullPath}:`, error);
       }
     }
   }
