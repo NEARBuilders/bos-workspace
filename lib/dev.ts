@@ -17,14 +17,26 @@ var appDevOptions: null | DevOptions = null;
 let io: null | IoServer = null;
 let fileWatcher: null | FSWatcher = null;
 
+export const DEFAULT_GATEWAY = {
+	enabled: true,
+	bundleUrl: "https://ipfs.web4.near.page/ipfs/bafybeibe63hqugbqr4writdxgezgl5swgujay6t5uptw2px7q63r7crk2q/",
+	tagName: "near-social-viewer"
+};
+
 export type DevOptions = {
   port?: number; // port to run dev server
   hot?: boolean; // enable hot reloading
   open?: boolean; // open browser
   network?: Network; // network to use
-  gateway?: string | boolean; // path to custom gateway dist, or false to disable
+  gateway?: boolean; // path to custom gateway dist, or false to disable
   index?: string; // widget to use as index
   output?: string; // output directory
+};
+
+export type GatewayConfig = {
+	enabled: boolean;
+	tagName: string;
+	bundleUrl: string;
 };
 
 /**
@@ -38,8 +50,10 @@ export async function dev(src: string, dest: string, opts: DevOptions) {
   const dist = path.join(src, dest);
   const devJsonPath = path.join(dist, "bos-loader.json");
 
-  // Build the app for the first time
+  // Build the app for the first timo
+
   const config = await loadConfig(src, opts.network);
+
   let devJson = await generateApp(src, dist, config, opts);
   await writeJson(devJsonPath, devJson);
 
@@ -55,7 +69,10 @@ export async function dev(src: string, dest: string, opts: DevOptions) {
   appDevJsonPath = devJsonPath;
   opts.output = dist;
   appDevOptions = opts;
-  const server = startDevServer(appSrcs, appDists, appDevJsonPath, appDevOptions);
+
+	const gatewayObject: GatewayConfig = buildGatewayObject(opts.gateway, config.gateway)
+
+  const server = startDevServer(appSrcs, appDists, appDevJsonPath, appDevOptions, gatewayObject);
 
   // Start the socket server if hot reload is enabled
   if (opts.hot) {
@@ -235,4 +252,23 @@ async function generateDevJson(src: string, config: BaseConfig): Promise<DevJson
   })
 
   return devJson;
+}
+
+export function buildGatewayObject(commandGateway, configGateway) {
+	// Gateway logic:
+	// if --no-gateway is provided (== commandGateway = false), gateway should be disabled ("");
+	// if --no-gateway is not provided, gateway is enabled, takes bundleUrl and tagName from `bos.config.json`
+	// if --no-gateway is not provided but there's no gateway configuration in `bos.config.json`, gateway should be the default gateway object;
+	const gatewayObject = DEFAULT_GATEWAY;
+
+	gatewayObject.enabled = commandGateway;
+
+  if (configGateway?.bundleUrl && configGateway?.tagName) {
+    gatewayObject.bundleUrl = configGateway.bundleUrl;
+    gatewayObject.tagName = configGateway.tagName;
+  }
+
+	gatewayObject.bundleUrl = gatewayObject.bundleUrl.replace(/\/$/, ''); // remove trailing slash
+
+	return gatewayObject
 }

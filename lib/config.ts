@@ -2,6 +2,7 @@ import Joi from 'joi';
 import { readJson } from '@/lib/utils/fs';
 import { Network } from './types';
 import path from 'path';
+import { GatewayConfig } from './dev';
 
 export interface BaseConfig {
   account?: string; // default account to serve widgets from
@@ -20,6 +21,7 @@ export interface BaseConfig {
   index?: string; // widget to use as index
   aliasPrefix?: string; // prefix to use for aliases, default is "alias"
   aliasesContainsPrefix?: boolean; // aliases keys contains prefix (default is false)
+	gateway?: GatewayConfig // gateway config object
 }
 
 interface NetworkConfig {
@@ -62,6 +64,10 @@ const baseConfigSchema = Joi.object({
   aliasPrefix: Joi.string().allow(null),
   aliasesContainsPrefix: Joi.boolean().allow(null),
   index: Joi.string().allow(null),
+	gateway: Joi.object({
+		tagName: Joi.string(),
+		bundleUrl: Joi.string(),
+	}).and('tagName', 'bundleUrl').allow(null),
 });
 
 const networkConfigSchema = Joi.object({

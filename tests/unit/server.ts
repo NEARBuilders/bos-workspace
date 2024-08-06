@@ -1,14 +1,15 @@
-import { DevOptions } from './../../lib/dev';
+import { buildGatewayObject, DEFAULT_GATEWAY, DevOptions } from '@/lib/dev';
 import { Logger, LogLevel } from "@/lib/logger";
 import { createApp, RPC_URL } from '@/lib/server';
 import supertest from 'supertest';
 import { TextEncoder } from 'util';
-import { Network } from './../../lib/types';
+import { Network } from '@/lib/types';
 import { fetchJson } from "@near-js/providers";
 import * as gateway from '@/lib/gateway';
 
 import { vol } from 'memfs';
 import path from 'path';
+
 jest.mock('fs', () => require('memfs').fs);
 jest.mock('fs/promises', () => require('memfs').fs.promises);
 jest.mock("@near-js/providers");
@@ -45,9 +46,9 @@ describe('createApp', () => {
 
     global.log = new Logger(LogLevel.DEV);
 
-    app = createApp(devJsonPath, opts);
+    app = createApp(devJsonPath, opts, DEFAULT_GATEWAY);
 
-    app = createApp(devJsonPath, opts);
+    app = createApp(devJsonPath, opts, DEFAULT_GATEWAY);
   });
 
   afterEach(() => {
@@ -57,14 +58,15 @@ describe('createApp', () => {
   });
 
   it.skip('should set up the app correctly when opts.gateway is a valid local path', () => {
-    const mockGatewayPath = "/mock_gateway_1";
-    opts.gateway = `${mockGatewayPath}/dist`;
-    vol.mkdirSync(path.join(mockGatewayPath, 'dist'), { recursive: true });
-    vol.writeFileSync(path.join(mockGatewayPath, 'dist', 'index.html'), '<html></html>');
+		const gatewayObject = DEFAULT_GATEWAY
+		gatewayObject.bundleUrl = '/mock_gateway_1/dist'
+		
+    vol.mkdirSync(path.join(gatewayObject.bundleUrl, 'dist'), { recursive: true });
+    vol.writeFileSync(path.join(gatewayObject.bundleUrl, 'dist', 'index.html'), '<html></html>');
     
     jest.spyOn(gateway, 'modifyIndexHtml').mockReturnValue('<html>modified</html>');
     
-    app = createApp(devJsonPath, opts);
+    app = createApp(devJsonPath, opts, gatewayObject);
     expect(app).toBeDefined();
     
     return supertest(app)
@@ -75,12 +77,14 @@ describe('createApp', () => {
   });
 
   it.skip('should log an error when opts.gateway is an invalid local path', () => {
-    const mockGatewayPath = '/invalid/gateway/path';
-    opts.gateway = mockGatewayPath;
+		const gatewayObject = DEFAULT_GATEWAY
+		gatewayObject.bundleUrl = '/invalid/gateway/path';
+
+		buildGatewayObject(true, gatewayObject)
     
     const logSpy = jest.spyOn(global.log, 'error');
     
-    app = createApp(devJsonPath, opts);
+    app = createApp(devJsonPath, opts, gatewayObject);
     expect(app).toBeDefined();
     expect(logSpy).toHaveBeenCalledWith("Gateway not found. Skipping...");
   });
