@@ -1,4 +1,4 @@
-import { Gaze } from "gaze";
+import { FSWatcher } from "chokidar";
 import path from "path";
 import { Server as IoServer } from "socket.io";
 import { buildApp } from "@/lib/build";
@@ -15,7 +15,7 @@ var appDevJsons = [];
 var appDevJsonPath = "bos-loader.json";
 var appDevOptions: null | DevOptions = null;
 let io: null | IoServer = null;
-let fileWatcher: null | Gaze = null;
+let fileWatcher: null | FSWatcher = null;
 
 export const DEFAULT_GATEWAY = {
 	enabled: true,
