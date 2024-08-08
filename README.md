@@ -291,7 +291,15 @@ Commands:
 
 **Command:** `deploy`
 
-Deploys an app in the workspace via a convenient wrapper to [bos-cli-rs](https://github.com/bos-cli-rs/bos-cli-rs).
+Deploys an app in the workspace via a convenient wrapper to [bos-cli-rs](https://github.com/bos-cli-rs/bos-cli-rs). It's also possible to add an optional string array in the `bos.config.json` to specify the data to upload:
+
+```
+  "data": {
+    "include": ["folder"]
+  }
+```
+
+The upload script will bundle all the json files inside the specified folder and upload the data with the app.
 
 ```cmd
 bw deploy [app name] --deploy-account-id [deployAccountId] --signer-account-id [signerAccountId] --signer-public-key [signerPublicKey] --signer-private-key [signerPrivateKey]
