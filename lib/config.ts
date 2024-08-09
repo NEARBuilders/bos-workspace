@@ -21,6 +21,9 @@ export interface BaseConfig {
   index?: string; // widget to use as index
   aliasPrefix?: string; // prefix to use for aliases, default is "alias"
   aliasesContainsPrefix?: boolean; // aliases keys contains prefix (default is false)
+  data?: {
+    include: string[]; // specify folder's array to upload along with widget
+  }
 	gateway?: GatewayConfig // gateway config object
 }
 
@@ -64,6 +67,9 @@ const baseConfigSchema = Joi.object({
   aliasPrefix: Joi.string().allow(null),
   aliasesContainsPrefix: Joi.boolean().allow(null),
   index: Joi.string().allow(null),
+  data: Joi.object({
+    include: Joi.array().items(Joi.string()).min(1).required()
+  }).optional(),
 	gateway: Joi.object({
 		tagName: Joi.string(),
 		bundleUrl: Joi.string(),
