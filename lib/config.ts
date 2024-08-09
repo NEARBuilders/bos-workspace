@@ -2,6 +2,7 @@ import Joi from 'joi';
 import { readJson } from '@/lib/utils/fs';
 import { Network } from './types';
 import path from 'path';
+import { GatewayConfig } from './dev';
 
 export interface BaseConfig {
   account?: string; // default account to serve widgets from
@@ -23,6 +24,7 @@ export interface BaseConfig {
   data?: {
     include: string[]; // specify folder's array to upload along with widget
   }
+	gateway?: GatewayConfig // gateway config object
 }
 
 interface NetworkConfig {
@@ -67,7 +69,11 @@ const baseConfigSchema = Joi.object({
   index: Joi.string().allow(null),
   data: Joi.object({
     include: Joi.array().items(Joi.string()).min(1).required()
-  }).optional()
+  }).optional(),
+	gateway: Joi.object({
+		tagName: Joi.string(),
+		bundleUrl: Joi.string(),
+	}).and('tagName', 'bundleUrl').allow(null),
 });
 
 const networkConfigSchema = Joi.object({

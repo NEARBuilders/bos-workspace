@@ -1,6 +1,6 @@
 import { buildApp } from "@/lib/build";
 import { DEFAULT_CONFIG, loadConfig } from "@/lib/config";
-import { dev, DevOptions, addApps } from "@/lib/dev";
+import { dev, DevOptions, addApps, DEFAULT_GATEWAY } from "@/lib/dev";
 import { Logger, LogLevel } from "@/lib/logger";
 import { startDevServer } from "@/lib/server";
 import { startSocket } from "@/lib/socket";
@@ -56,11 +56,13 @@ describe("dev", () => {
     expect(loadConfig).toHaveBeenCalledWith(mockSrc, mockOpts.network);
   });
 
-  it("should call generateApp with src, dist, config, opts, and devJsonPath", async () => {
+  it("should call generateApp with src, dist, config, opts, gateway, and devJsonPath", async () => {
     await dev(mockSrc, "build", mockOpts);
     const mockDist = path.join(mockSrc, 'build');
     const mockDevJsonPath = path.join(mockSrc, 'build', 'bos-loader.json');
-    expect(startDevServer).toHaveBeenCalledWith([mockSrc], [mockDist], mockDevJsonPath, mockOpts);
+		const mockGateway = DEFAULT_GATEWAY;
+
+    expect(startDevServer).toHaveBeenCalledWith([mockSrc], [mockDist], mockDevJsonPath, mockOpts, mockGateway);
   });
 
   it("should start the socket server if hot reload is enabled", async () => {

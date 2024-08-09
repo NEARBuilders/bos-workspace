@@ -1,5 +1,5 @@
 
-import { DevOptions } from "./dev";
+import { DevOptions, GatewayConfig } from "./dev";
 
 import { JSDOM } from "jsdom";
 
@@ -29,7 +29,7 @@ function normalizeHtml(html) {
   return html.replace(/\s+/g, ' ').trim();
 }
 
-export function modifyIndexHtml(content: string, opts: DevOptions, dependencies: string[]) {
+export function modifyIndexHtml(content: string, opts: DevOptions, dependencies: string[], gateway: GatewayConfig) {
   const dom = new JSDOM(content);
   const document = dom.window.document;
 
@@ -41,7 +41,7 @@ export function modifyIndexHtml(content: string, opts: DevOptions, dependencies:
     document.head.appendChild(script);
   });
 
-  const elementTag = "near-social-viewer";
+  const elementTag = gateway.tagName;
 
   // Create and configure the near-social-viewer element
   const container = document.getElementById("bw-root");
