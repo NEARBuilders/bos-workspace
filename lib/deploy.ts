@@ -5,7 +5,7 @@ import fs from "fs";
 import { buildApp } from "@/lib/build";
 import { readConfig } from "@/lib/config";
 import { Network } from "@/lib/types";
-import { move, pathExists, readdir, remove } from "@/lib/utils/fs";
+import { move, pathExists, processDirectory, readdir, remove } from "@/lib/utils/fs";
 import { readWorkspace } from "@/lib/workspace";
 import { SOCIAL_CONTRACT } from './server';
 
@@ -108,12 +108,22 @@ export async function deployAppCode(src: string, dist: string, opts: DeployOptio
     });
 }
 
-export async function deployAppData(appName: string, opts: DeployOptions) {
-	const config = await readConfig(path.join(appName, "bos.config.json"), opts.network);
-	const BOS_SIGNER_ACCOUNT_ID = config.accounts.signer || opts.signerAccountId || config.account;
+export async function deployAppData(
+  appName: string,
+  opts: DeployOptions
+) {
+  const config = await readConfig(
+    path.join(appName, "bos.config.json"),
+    opts.network
+  );
+
+  const BOS_SIGNER_ACCOUNT_ID =
+    config.accounts.signer || opts.signerAccountId || config.account;
 
   if (!BOS_SIGNER_ACCOUNT_ID) {
-    console.log(`App account is not defined for ${appName}. Skipping data upload`);
+    console.log(
+      `App account is not defined for ${appName}. Skipping data upload`
+    );
     return;
   }
 
@@ -123,26 +133,34 @@ export async function deployAppData(appName: string, opts: DeployOptions) {
   );
 
   const args = { data: JSON.parse(dataJSON) };
-  const argsBase64 = Buffer.from(JSON.stringify(args)).toString("base64");
-  
-  const BOS_SIGNER_PUBLIC_KEY = opts?.signerPublicKey;
-  const BOS_SIGNER_PRIVATE_KEY = opts?.signerPrivateKey;
 
-	const automaticSignIn = [
-		"sign-with-plaintext-private-key",
-		"--signer-public-key", 
-		BOS_SIGNER_PUBLIC_KEY,
-		"--signer-private-key",
-		BOS_SIGNER_PRIVATE_KEY,
-		"send"
-	]
+  if (config.data?.include) {
+    if (!Array.isArray(config.data.include) || config.data.include.length === 0)
+    throw new Error(
+      "Config must contain a data.include array with at least one folder"
+    );
+
+    const result = {};
+
+    for (const folder of config.data.include) {
+      const folderName = path.basename(folder);
+      result[folderName] = {};
+      await processDirectory(folder, "", result[folderName]);
+    }
+
+    Object.assign(args.data[config.account], result);
+  }
+
+  const argsBase64 = Buffer.from(JSON.stringify(args)).toString("base64");
 
   let command = [
     "near-cli-rs",
     "contract",
     "call-function",
     "as-transaction",
-		opts.network === "mainnet" ? SOCIAL_CONTRACT.mainnet : SOCIAL_CONTRACT.testnet,
+    opts.network === "mainnet"
+      ? SOCIAL_CONTRACT.mainnet
+      : SOCIAL_CONTRACT.testnet,
     "set",
     "base64-args",
     `${argsBase64}`,
@@ -153,10 +171,23 @@ export async function deployAppData(appName: string, opts: DeployOptions) {
     "sign-as",
     BOS_SIGNER_ACCOUNT_ID,
     "network-config",
-		opts.network,
+    opts.network,
   ];
 
-	if (BOS_SIGNER_PUBLIC_KEY && BOS_SIGNER_PRIVATE_KEY) command = command.concat(automaticSignIn)
+  const BOS_SIGNER_PUBLIC_KEY = opts?.signerPublicKey;
+  const BOS_SIGNER_PRIVATE_KEY = opts?.signerPrivateKey;
+
+  const automaticSignIn = [
+    "sign-with-plaintext-private-key",
+    "--signer-public-key",
+    BOS_SIGNER_PUBLIC_KEY,
+    "--signer-private-key",
+    BOS_SIGNER_PRIVATE_KEY,
+    "send",
+  ];
+
+  if (BOS_SIGNER_PUBLIC_KEY && BOS_SIGNER_PRIVATE_KEY)
+    command = command.concat(automaticSignIn);
 
   const deployProcess = spawn("npx", command, {
     cwd: path.join(appName, DEPLOY_DIST_FOLDER),
