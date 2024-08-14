@@ -1,35 +1,73 @@
+<!-- markdownlint-disable MD014 -->
+<!-- markdownlint-disable MD033 -->
+<!-- markdownlint-disable MD041 -->
+<!-- markdownlint-disable MD029 -->
+
 <div align="center">
 
-# bos-workspace
+<h1 style="font-size: 2.5rem; font-weight: bold;">bos-workspace</h1>
 
-🚧 **Warning: This library has recently undergone a major refactor.** 🚧
-
-**If this is not your first time using bos-workspace, read the [migration guide](./MIGRATION_GUIDE.md). The legacy documentation for v0.0.1-alpha.6 can be found [here](https://github.com/NEARBuilders/bos-workspace/tree/version/0.0.1-alpha.6).**
+  <p>
+    <strong>Local workspace for <a href="https://near.org/blog/near-announces-the-blockchain-operating-system" target="_blank">NEAR BOS</a> development</strong>
+  </p>
 
 </div>
 
 `bos-workspace` is a comprehensive toolset designed to simplify the development and deployment of [NEAR components](https://docs.near.org/bos/tutorial/quickstart) and applications. With support for hot reload, TypeScript, and multi-app management, it caters to developers looking for an efficient and scalable developer environment.
 
+> [!WARNING]  
+> 🚧 **Notice: This library has recently undergone a major refactor.** 🚧
+>
+> **If this is not your first time using bos-workspace, read the [migration guide](./MIGRATION_GUIDE.md). The legacy documentation for v0.0.1-alpha.6 can be found [here](https://github.com/NEARBuilders/bos-workspace/tree/version/0.0.1-alpha.6).**
+
+<details>
+  <summary>Table of Contents</summary>
+
+- [Quickstart](#quickstart)
+- [Usage](#usage)
+- [Configuration](#configuration)
+  - [Base Configuration](#base-configuration)
+  - [Network Overrides](#network-overrides)
+  - [Aliases](#aliases)
+    - [Custom alias prefix](#custom-alias-prefix)
+- [Customizing the Gateway](#customizing-the-gateway)
+- [Deploying to Web4](#deploying-to-web4)
+- [Commands](#commands)
+- [Deployment](#deployment)
+  - [Usage (CLI)](#usage-cli)
+  - [Usage (Git Workflow)](#usage-git-workflow)
+    - [Prerequisites](#prerequisites)
+    - [Mainnet](#mainnet)
+    - [Testnet](#testnet)
+- [API Endpoints](#api-endpoints)
+  - [Gateway Frontend](#gateway-frontend)
+  - [Loader API](#loader-api)
+  - [WebSocket](#websocket)
+  - [Proxy RPC](#proxy-rpc)
+- [Contributing](#contributing)
+
+</details>
+
 ## Quickstart
 
 To begin, either:
 
-* [Use the template repository](https://github.com/new?template_name=quickstart&template_owner=NEARBuilders) with quickstart app, preconfigured git workflows, and playwright test suite
+- [Use the template repository](https://github.com/new?template_name=quickstart&template_owner=NEARBuilders) with quickstart app, preconfigured git workflows, and playwright test suite
 
-* Use the init command for an empty workspace:
+- Use the init command for an empty workspace:
 
 ```cmd
 npx bos-workspace init
 ```
 
-* Clone widgets from an existing [account](https://near.social/mob.near/widget/Everyone):
+- Clone widgets from an existing [account](https://near.social/mob.near/widget/Everyone):
 
 ```cmd
 npx bos-workspace clone [accountId] [dest]
 npx bos-workspace dev [dest | accountId]
 ```
 
-* Or install `bos-workspace` within an existing project:
+- Or install `bos-workspace` within an existing project:
 
 ```cmd
 yarn add -D bos-workspace
@@ -41,7 +79,7 @@ and ensure the proper workspace [structure and usage](#usage).
 
 `bos-workspace` supports both multi and single app development because of `Apps` and `Workspaces`:
   
-* **App**: which belong to an Account, described by a `bos.config.json`. A structure may look like this:
+- **App**: which belong to an Account, described by a `bos.config.json`. A structure may look like this:
 
 ```txt
 app.near/
@@ -58,7 +96,7 @@ where the content of `bos.config.json` is (at least):
 }
 ```
 
-* **Workspace**: may hold multiple apps, described by a `bos.workspace.json`
+- **Workspace**: may hold multiple apps, described by a `bos.workspace.json`
 
 ```txt
 apps/
@@ -124,20 +162,20 @@ A fully featured config may look like this:
 
 The `bos.config.json` file consists of a base configuration that defines default values and settings for the BOS environment.
 
-* `account`: (Optional) Specifies the default account to serve widgets from. If not provided, the default value is set to `"bos.workspace"`.
-* `accounts`: (Optional) Defines account configuration options for the `deploy` command.
-  * `deploy`: Specifies the account to deploy widgets to.
-  * `signer`: Specifies the account to sign the transaction.
-* `ipfs`: (Optional) Configures IPFS settings for uploading and using local assets.
-  * `gateway`: IPFS gateway to use for accessing files. Default value is `"https://ipfs.near.social/ipfs"`.
-  * `uploadApi`: IPFS API endpoint to upload to. Default value is `"https://ipfs.near.social/add"`.
-  * `uploadApiHeaders`: Any additional headers to send with IPFS upload API requests.
-* `format`: (Optional) Indicates whether to format code on build. Default value is `true`.
-* `aliases`: (Optional) Provides a list of alias files to use for replacing network-specific values with correct overrides.
-* `index`: (Optional) Default widget src to use when using a custom gateway dist.  
-* `gateway`: (Optional) Configures gateway object.
-	* `bundleUrl`: gateway url.
-	* `tagName`: element tag name.
+- `account`: (Optional) Specifies the default account to serve widgets from. If not provided, the default value is set to `"bos.workspace"`.
+- `accounts`: (Optional) Defines account configuration options for the `deploy` command.
+  - `deploy`: Specifies the account to deploy widgets to.
+  - `signer`: Specifies the account to sign the transaction.
+- `ipfs`: (Optional) Configures IPFS settings for uploading and using local assets.
+  - `gateway`: IPFS gateway to use for accessing files. Default value is `"https://ipfs.near.social/ipfs"`.
+  - `uploadApi`: IPFS API endpoint to upload to. Default value is `"https://ipfs.near.social/add"`.
+  - `uploadApiHeaders`: Any additional headers to send with IPFS upload API requests.
+- `format`: (Optional) Indicates whether to format code on build. Default value is `true`.
+- `aliases`: (Optional) Provides a list of alias files to use for replacing network-specific values with correct overrides.
+- `index`: (Optional) Default widget src to use when using a custom gateway dist.  
+- `gateway`: (Optional) Configures gateway object.
+  - `bundleUrl`: gateway url.
+  - `tagName`: element tag name.
 
 ---
 
@@ -145,9 +183,9 @@ The `bos.config.json` file consists of a base configuration that defines default
 
 The `bos.config.json` file supports network configuration overrides of this base configuration, allowing developers to specify different settings for specific networks (e.g., mainnet, testnet).
 
-* `overrides`: (Optional) Defines overrides for network-specific configurations. These values are used via the `-n` flag in commands, respectivly:
-  * `mainnet`
-  * `testnet`
+- `overrides`: (Optional) Defines overrides for network-specific configurations. These values are used via the `-n` flag in commands, respectivly:
+  - `mainnet`
+  - `testnet`
 
 ---
 
@@ -155,11 +193,11 @@ The `bos.config.json` file supports network configuration overrides of this base
 
 When working with values that differ accross different networks, developers can define aliases in separate JSON files according to environment. These aliases are replaced during build.
 
-* **Account**: Defines the "owner" of the widgets in the workspace, according to network.
-  * Pattern: `{config_account}`
-* **Aliases**: Defines patterns for replacing other account and contract references. These are particularly useful for widget sources accross environments, such as using mob.near for mainnet, and mike.testnet for testnet.
-  * Pattern: `${alias_key}` ( note that you may also have other prefixes than `alias_` by configuring the `aliasPrefix` property )
-  * Example:
+- **Account**: Defines the "owner" of the widgets in the workspace, according to network.
+  - Pattern: `{config_account}`
+- **Aliases**: Defines patterns for replacing other account and contract references. These are particularly useful for widget sources accross environments, such as using mob.near for mainnet, and mike.testnet for testnet.
+  - Pattern: `${alias_key}` ( note that you may also have other prefixes than `alias_` by configuring the `aliasPrefix` property )
+  - Example:
 
     ```json
     {
@@ -208,7 +246,6 @@ If your aliases are prefixed with another keyword than `alias`, you may configur
 ```
 
 and then with your `aliases.mainnet.json` like this:
-
 
 ```json
 {
@@ -299,7 +336,7 @@ Commands:
 
 Deploys an app in the workspace via a convenient wrapper to [bos-cli-rs](https://github.com/bos-cli-rs/bos-cli-rs). It's also possible to add an optional string array in the `bos.config.json` to specify the data to upload:
 
-```
+```json
   "data": {
     "include": ["folder"]
   }
@@ -311,16 +348,16 @@ The upload script will bundle all the json files inside the specified folder and
 bw deploy [app name] --deploy-account-id [deployAccountId] --signer-account-id [signerAccountId] --signer-public-key [signerPublicKey] --signer-private-key [signerPrivateKey]
 ```
 
-* `[app name]`: Name of the app to be deployed. Assumed to be the current app in App structure (bos.config.json), but is required when using the Workspace structure (bos.workspace.json); this should match the name of the App's directory.
-* `--deploy-account-id <deployAccountId>` (Optional): Account under which component code should be deployed. Defaults to `config.account`, or will use `config.accounts.deploy` if specified.
+- `[app name]`: Name of the app to be deployed. Assumed to be the current app in App structure (bos.config.json), but is required when using the Workspace structure (bos.workspace.json); this should match the name of the App's directory.
+- `--deploy-account-id <deployAccountId>` (Optional): Account under which component code should be deployed. Defaults to `config.account`, or will use `config.accounts.deploy` if specified.
 
-* `--signer-account-id <signerAccountId>` (Optional): Account which will be used for signing deploy transactions, frequently the same as deploy-account-id. Defaults to `config.account`, or will use `config.accounts.deploy` if specified.
+- `--signer-account-id <signerAccountId>` (Optional): Account which will be used for signing deploy transactions, frequently the same as deploy-account-id. Defaults to `config.account`, or will use `config.accounts.deploy` if specified.
 
-* `--signer-public-key <signerPublicKey>` (Optional): Public key for signing transactions in the format: `ed25519:<public_key>`. Will default to interactive [near-cli-rs](https://github.com/near/near-cli-rs) if not provided.
+- `--signer-public-key <signerPublicKey>` (Optional): Public key for signing transactions in the format: `ed25519:<public_key>`. Will default to interactive [near-cli-rs](https://github.com/near/near-cli-rs) if not provided.
 
-* `--signer-private-key <signerPrivateKey>` (Optional): Private key for signing transactions in the format: `ed25519:<private_key>`. Will default to interactive [near-cli-rs](https://github.com/near/near-cli-rs) if not provided.
+- `--signer-private-key <signerPrivateKey>` (Optional): Private key for signing transactions in the format: `ed25519:<private_key>`. Will default to interactive [near-cli-rs](https://github.com/near/near-cli-rs) if not provided.
 
-* `-n, --network <network>` (Optional): Network to deploy for (default: "mainnet").
+- `-n, --network <network>` (Optional): Network to deploy for (default: "mainnet").
 
 ### Usage (Git Workflow)
 
@@ -410,4 +447,16 @@ A running `bos-workspace` server exposes several endpoints for interacting with 
 
 ## Contributing
 
-Read [CONTRIBUTING](./CONTRIBUTING.md)
+Contributions are what make the open source community such an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated**.
+
+If you're interested in contributing to this project, please read the [contribution guide](./CONTRIBUTING).
+
+<div align="right">
+  <a href="https://nearbuilders.org" target="_blank">
+    <img
+      src="https://builders.mypinata.cloud/ipfs/QmWt1Nm47rypXFEamgeuadkvZendaUvAkcgJ3vtYf1rBFj"
+      alt="Near Builders"
+      height="40"
+    />
+  </a>
+</div>
