@@ -1,0 +1,27 @@
+name: Task
+description: File a task
+title: "[Task]: "
+labels: ["enabler"]
+assignees: []
+body:
+  - type: textarea
+    id: overview
+    attributes:
+      label: Overview
+      description: Provide a brief overview of the task to be done, including who will benefit from it.
+    validations:
+      required: true
+  - type: textarea
+    id: details
+    attributes:
+      label: Details
+      description: Describe the task in detail, including any specific requirements and examples from other applications if available.
+    validations:
+      required: false
+  - type: textarea
+    id: acceptance-criteria
+    attributes:
+      label: Acceptance Criteria
+      description: Define the criteria that must be met for the task to be considered complete.
+    validations:
+      required: false
