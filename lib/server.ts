@@ -163,13 +163,9 @@ export function createApp(devJsonPath: string, opts: DevOptions, gateway: Gatewa
     return async (req: Request, res: Response, _) => {
       let json = {};
 
-      log.debug(`RPC Request: ${JSON.stringify(req.body)}`);
-
       try {
         // Make a request to the target rpc
         json = await fetchJson(proxyUrl, JSON.stringify(req.body));
-
-        log.debug(`RPC Response: ${json}`);
       } catch (err) {
         log.error(err.stack || err.message);
         return res.status(500).send('Proxy request failed');
@@ -188,7 +184,7 @@ export function createApp(devJsonPath: string, opts: DevOptions, gateway: Gatewa
       ) {
         const social_get_key = JSON.parse(atob(params.args_base64)).keys[0];
 
-        log.debug(`Replace with local components for key: ${social_get_key}`);
+        log.debug(`Redirecting to local component with key: ${social_get_key}`);
 
         const devComponents = await readJson(devJsonPath).then(
           (devJson: DevJson) => {
@@ -249,13 +245,11 @@ export function createApp(devJsonPath: string, opts: DevOptions, gateway: Gatewa
             res.type('text/html').send(modifiedHtml);
           } else if (path.extname(req.path) === '.js' || path.extname(req.path) === '.css') {
             // Proxy requests for JS and CSS files
-            log.debug(`Request for: ${req.path}`);
-
             if (isLocalPath) {
-              const fullUrl = path.join(__dirname, gateway.bundleUrl, req.path);
+              const fullUrl = path.join(process.cwd(), gateway.bundleUrl, req.path);
 
               try {
-                log.debug(`Attempting to serve file from local path: ${fullUrl}`);
+                log.debug(`Serving file from local path: ${fullUrl}`);
                 // Attempt to serve the file from the local path
                 await promises.access(fullUrl);
                 res.sendFile(fullUrl);
@@ -347,7 +341,7 @@ async function setupGateway(gateway: GatewayConfig, isLocalPath: boolean, opts: 
   log.debug(`Setting up ${isLocalPath ? "local " : ""}gateway: ${gateway.bundleUrl}`);
 
   const manifestUrl = isLocalPath
-    ? path.join(gateway.bundleUrl, "/asset-manifest.json")
+    ? path.join(process.cwd(), gateway.bundleUrl, "/asset-manifest.json")
     : `${gateway.bundleUrl}/asset-manifest.json`;
 
   try {

@@ -19,7 +19,7 @@ let fileWatcher: null | FSWatcher = null;
 
 export const DEFAULT_GATEWAY = {
 	enabled: true,
-	bundleUrl: "https://ipfs.web4.near.page/ipfs/bafybeibe63hqugbqr4writdxgezgl5swgujay6t5uptw2px7q63r7crk2q/",
+	bundleUrl: "https://ipfs.web4.near.page/ipfs/bafybeif7ouv5ehif36r6x3eugd3ylh6xyh24a22bbtoxeedwv5d6z45b64/",
 	tagName: "near-social-viewer"
 };
 
