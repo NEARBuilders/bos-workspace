@@ -1,0 +1,1 @@
+"use strict";(self.webpackChunkbos_workspace_gateway=self.webpackChunkbos_workspace_gateway||[]).push([["3397"],{77707:function(e,t,a){a.d(t,{take:function(){return n.q},takeUntil:function(){return s.R}});var n=a(74727),s=a(83505)}}]);
