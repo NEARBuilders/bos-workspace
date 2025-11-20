@@ -52,7 +52,7 @@
 
 To begin, either:
 
-- [Use the template repository](https://github.com/new?template_name=quickstart&template_owner=NEARBuilders) with quickstart app, preconfigured git workflows, and playwright test suite
+- [Use the template repository](https://github.com/new?template_name=quickstart.near&template_owner=NEARBuilders) with quickstart app, preconfigured git workflows, and playwright test suite
 
 - Use the init command for an empty workspace:
 
