@@ -50,6 +50,7 @@ on:
 
 jobs:
   deploy-widgets:
+    timeout-minutes: 60
     runs-on: ubuntu-latest
     name: Deploy Widgets
     env:

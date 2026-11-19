@@ -4,6 +4,7 @@ on:
     types: [published]
 jobs:
   publish:
+    timeout-minutes: 60
     runs-on: ubuntu-latest
 
     steps:
